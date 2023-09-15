@@ -1,2 +1,2 @@
 code . --no-sandbox
-git submodule update --init
+git submodule update --init --remote
