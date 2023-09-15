@@ -1,0 +1,7 @@
+[submodule "systematic-trading"]
+    path = systematic-trading
+    url = https://github.com/CoCoMilkyWay/systematic-trading.git
+
+[submodule "machine-learning-for-trading"]
+    path = machine-learning-for-trading
+    url = https://github.com/CoCoMilkyWay/machine-learning-for-trading.git
