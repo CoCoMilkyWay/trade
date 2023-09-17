@@ -10,9 +10,12 @@
 
 - virtualenv --no-site-packages prod_env
 - source prod_env/bin/activate
-- pip install -r requirements.txt
+- mamba install -c conda-forge --file env/requirements_windows.txt  # mamba + pip
+- pip install pip_requirements_windows.txt
 
 # trade
 - https://www.kaggle.com/competitions/ubiquant-market-prediction/leaderboard
 - https://www.kaggle.com/competitions/g-research-crypto-forecasting/leaderboardv
 - https://www.kaggle.com/competitions/optiver-realized-volatility-prediction/leaderboard
+- Nasdaq API: 9Q5bVWxqJE-94HKpntUg
+
