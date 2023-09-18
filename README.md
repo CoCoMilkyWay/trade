@@ -17,5 +17,6 @@
 - https://www.kaggle.com/competitions/ubiquant-market-prediction/leaderboard
 - https://www.kaggle.com/competitions/g-research-crypto-forecasting/leaderboardv
 - https://www.kaggle.com/competitions/optiver-realized-volatility-prediction/leaderboard
-- Nasdaq API: 9Q5bVWxqJE-94HKpntUg
+- Nasdaq API(gmail): 9Q5bVWxqJE-94HKpntUg
+- Nasdaq API(qq): 6y7b4GG74vHE4sssJ8Ef
 
