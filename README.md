@@ -20,3 +20,4 @@
 - Nasdaq API(gmail): 9Q5bVWxqJE-94HKpntUg
 - Nasdaq API(qq): 6y7b4GG74vHE4sssJ8Ef
 
+https://cloud.tencent.com/developer/article/1457661
