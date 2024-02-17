@@ -3,3 +3,6 @@ __pycache__/
 *.py[cod]
 
 # huge generate database (auto ignored)
+*.bin
+*.gz
+*.h5
