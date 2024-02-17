@@ -89,6 +89,7 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 import pandas_datareader.data as web
+import random
 from zipline import run_algorithm
 from zipline.api import (
     attach_pipeline,
@@ -127,6 +128,14 @@ start = pd.Timestamp('2015-1-1')
 end = pd.Timestamp('2018-1-1')
 
 # strategy===========================================================
+class Factor_Random(CustomFactor):
+    """random factor as benchmark"""
+    window_length = 1
+    inputs = [DailyReturns()]
+
+    def compute(self, today, assets, out, inputs): # monthly_returns = inputs
+        df = pd.DataFrame(inputs).iloc[-1]
+        out[:] = [random.randint(-1000, 1000) for _ in range(len(df))]
 
 class Factor_MeanReversion(CustomFactor):
     """Compute ratio of latest monthly return to 12m average,
@@ -149,7 +158,13 @@ class Factor_DailyReturns(CustomFactor):
         out[:] = df.iloc[-1]
 
 
-## pipeline 1: compute factors results to context
+def compute_factors0():
+    """benchmark"""
+    results = Factor_Random()
+    return Pipeline(columns={'longs': results.bottom(N_LONGS),
+                             'shorts': results.top(N_SHORTS),
+                             'ranking': results.rank(ascending=False)})
+
 def compute_factors1():
     """Create factor pipeline incl. mean reversion,
         filtered by 30d Dollar Volume; capture factor ranks"""
@@ -160,7 +175,6 @@ def compute_factors1():
                              'ranking': mean_reversion.rank(ascending=False)},
                     screen=dollar_volume.top(VOL_SCREEN))
 
-## pipeline 1: compute factors results to context
 def compute_factors2():
     """Create factor pipeline incl. mean reversion,
         filtered by 30d Dollar Volume; capture factor ranks"""
@@ -202,7 +216,7 @@ def rebalance(context, data):
 def initialize(context):
     """Setup: register pipeline, schedule rebalancing,
         and set trading params"""
-    attach_pipeline(compute_factors1(), 'pipeline_1')
+    attach_pipeline(compute_factors0(), 'pipeline_1')
     schedule_function(rebalance,
                       date_rules.week_start(),
                       time_rules.market_open(),
