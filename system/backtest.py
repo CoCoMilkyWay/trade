@@ -193,19 +193,25 @@ def before_trading_start(context, data):
     context.factor_data = pipeline_output('pipeline_1')
 
 def analyze(context, perf):
-    ''' 1. return analysis:
-            alpha/beta
-            mean period return by top/bottom quantile
-            mean period spread
-        2. information analysis
-            IC mean/std (risk-adjusted IC)
-            t-stat
-            p-value
-            IC skew/Kurtosis
-        3. turnover analysis
-            turnover by quantile
-            mean factor rank autocorrelation
-            '''
+    # 1. return analysis:
+    #     alpha/beta
+    #     mean period return by top/bottom quantile
+    #     mean period spread
+    # 2. information analysis
+    #     IC mean/std (risk-adjusted IC)
+    #     t-stat
+    #     p-value
+    #     IC skew/Kurtosis
+    # 3. turnover analysis
+    #     turnover by quantile
+    #     mean factor rank autocorrelation
+
+    # https://bigquant.com/wiki/home
+    # Survivorship bias:                    we have
+    # Look-ahead bias(future function):     use point-at-time data in regression engine
+    # The sin of storytelling:              all time/universe robust
+    # Data mining and data snooping:        logic-driven strategy
+    # Signal decay, turnover, trans cost:   
 
     # asset to sector dictionary
     asset_sector_mapping = pd.read_csv('../machine-learning-for-trading/data/us_equities_meta_data.csv',
@@ -328,6 +334,12 @@ def analyze(context, perf):
 
 sp500 = web.DataReader('SP500', 'fred', start, end).SP500
 benchmark_returns = sp500.pct_change()
+
+# 由于股票的两种行为，股价不连续
+#       除权（降低股价增加流动性），
+#       除息（不影响公司正常运行的情况下，短期无用，长期降低股东持股成本）
+# 前复权：以除权除息后股价为基准（收益率直观显示买入/持仓成本）
+# 后复权：以除权除息前股价为基准（收益率更接近实际收益率）
 perf_result = run_algorithm(start=start.tz_localize('UTC'),
                        end=end.tz_localize('UTC'),
                        initialize=initialize,
