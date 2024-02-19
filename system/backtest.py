@@ -89,7 +89,7 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 import pandas_datareader.data as web
-import random
+import re # regular expression
 from zipline import run_algorithm
 from zipline.api import (
     attach_pipeline,
@@ -105,7 +105,6 @@ from zipline.api import (
 from zipline.finance import commission, slippage
 from zipline.pipeline import *
 from zipline.pipeline.factors import *
-import re
 from alphalens.utils import get_clean_factor_and_forward_returns
 from alphalens.performance import *
 from alphalens.plotting import *
@@ -115,6 +114,7 @@ sns.set_style('whitegrid')
 
 # in-house library
 import pylib_misc.helper as helper
+import factors
 
 # strategy parameters================================================
 # recent historical_return (normalized by stdev)
@@ -123,65 +123,22 @@ YEAR = 12 * MONTH
 # portfolio management
 N_LONGS = N_SHORTS = 25
 # screened by dollar volume (size+liquidity)
-VOL_SCREEN = 1000 #top 1000
-start = pd.Timestamp('2015-1-1')
+VOL_SCREEN = 10000 #top 1000
+start = pd.Timestamp('2013-1-1')
 end = pd.Timestamp('2018-1-1')
 
 # strategy===========================================================
-class Factor_Random(CustomFactor):
-    """random factor as benchmark"""
-    window_length = 1
-    inputs = [DailyReturns()]
-
-    def compute(self, today, assets, out, inputs): # monthly_returns = inputs
-        df = pd.DataFrame(inputs).iloc[-1]
-        out[:] = [random.randint(-1000, 1000) for _ in range(len(df))]
-
-class Factor_MeanReversion(CustomFactor):
-    """Compute ratio of latest monthly return to 12m average,
-       normalized by std dev of monthly returns"""
-    inputs = [Returns(window_length=MONTH)]
-    window_length = YEAR # number of days factor rule holds
-
-    def compute(self, today, assets, out, monthly_returns): # monthly_returns = inputs
-        df = pd.DataFrame(monthly_returns)
-        out[:] = df.iloc[-1].sub(df.mean()).div(df.std())
-
-class Factor_DailyReturns(CustomFactor):
-    """Compute ratio of latest monthly return to 12m average,
-       normalized by std dev of monthly returns"""
-    inputs = [DailyReturns()]
-    window_length = 1
-
-    def compute(self, today, assets, out, inputs): # monthly_returns = inputs
-        df = pd.DataFrame(inputs)
-        out[:] = df.iloc[-1]
-
 
 def compute_factors0():
-    """benchmark"""
-    results = Factor_Random()
+    """ call factor results
+        rank assets using results
+        further filter assets"""
+    results = factors.Factor_MeanReversion()
+    filter = AverageDollarVolume(window_length=30)
     return Pipeline(columns={'longs': results.bottom(N_LONGS),
                              'shorts': results.top(N_SHORTS),
-                             'ranking': results.rank(ascending=False)})
-
-def compute_factors1():
-    """Create factor pipeline incl. mean reversion,
-        filtered by 30d Dollar Volume; capture factor ranks"""
-    mean_reversion = Factor_MeanReversion()
-    dollar_volume = AverageDollarVolume(window_length=30)
-    return Pipeline(columns={'longs': mean_reversion.bottom(N_LONGS),
-                             'shorts': mean_reversion.top(N_SHORTS),
-                             'ranking': mean_reversion.rank(ascending=False)},
-                    screen=dollar_volume.top(VOL_SCREEN))
-
-def compute_factors2():
-    """Create factor pipeline incl. mean reversion,
-        filtered by 30d Dollar Volume; capture factor ranks"""
-    results = Factor_DailyReturns()
-    return Pipeline(columns={'longs': results.bottom(N_LONGS),
-                             'shorts': results.top(N_SHORTS),
-                             'ranking': results.rank(ascending=False)})
+                             'ranking': results.rank(ascending=False)},
+                    screen=filter.top(VOL_SCREEN))
 
 ## order/rebalance 
 ## (use: 1.daily pipeline results
@@ -250,19 +207,29 @@ def analyze(context, perf):
             mean factor rank autocorrelation
             '''
 
+    # asset to sector dictionary
+    asset_sector_mapping = pd.read_csv('../machine-learning-for-trading/data/us_equities_meta_data.csv',
+                                       header=0,
+                                       usecols=["ticker", "sector"],
+                                       delimiter=','
+                                       ).set_index('ticker')['sector'].to_dict()
+
     # wash zipline dumped data to:======================
     #   dataframe:(date,asset)x(factor1,factor2): factor_values
     #   dataframe:(date)x(asset_names): price_values
     factors = pd.concat([df.to_frame(d) for d, df in perf.factor_data.dropna().items()],axis=1).T
-    # factor_data.columns = [re.findall(r"\[(.+)\]", str(col))[0] for col in factor_data.columns]
-    factors.index = factors.index.normalize()
+    factors.index = factors.index.normalize() # normalize pandas datetime to 00:00
     factors = factors.stack(level=0)
     factors.index.names = ['date', 'asset']
     factors = factors.to_frame(name='factor_1')
+    factors['sector'] = factors.index.get_level_values(1).values
+    factors['sector'] = [re.findall(r"\[(.+)\]", str(equity_string))[0] for equity_string in factors['sector']]
+    factors['sector'] = factors['sector'].map(asset_sector_mapping)
+    
     prices = pd.concat([df.to_frame(d) for d, df in perf.prices.dropna().items()],axis=1).T
-    # prices.columns = [re.findall(r"\[(.+)\]", str(col))[0] for col in prices.columns]
-    prices.index = prices.index.normalize()
+    prices.index = prices.index.normalize() # normalize pandas datetime to 00:00
 
+    # market beta benchmark
     # resample, fill NaN, change timezone, filter to match dates with price info
     sp500 = web.DataReader('SP500', 'fred', start, end).SP500
     sp500 = sp500.resample('D').ffill().tz_localize('utc').filter(prices.index.get_level_values(0))
@@ -275,12 +242,16 @@ def analyze(context, perf):
     factor_data = get_clean_factor_and_forward_returns(  
         factor=factors['factor_1'],
         prices=prices,
+        groupby=factors["sector"],
         quantiles=QUANTILES,
         periods=HOLDING_PERIODS
         )
 
     # analysis:===============================
-    create_full_tear_sheet(factor_data, long_short=True, group_neutral=False, by_group=False)
+    create_full_tear_sheet(factor_data, 
+                           long_short=True, 
+                           group_neutral=False, 
+                           by_group=True)
     # create_summary_tear_sheet(factor_data, long_short=True, group_neutral=False)
     
     '''
