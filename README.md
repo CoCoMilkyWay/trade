@@ -22,6 +22,7 @@ zipline ingest -b quantopian-quandl
 - export QUANDL_API_KEY="9Q5bVWxqJE-94HKpntUg" ("6y7b4GG74vHE4sssJ8Ef")
 
 # trade
+- https://bigquant.com/trading/list
 - https://www.kaggle.com/competitions/ubiquant-market-prediction/leaderboard
 - https://www.kaggle.com/competitions/g-research-crypto-forecasting/leaderboardv
 - https://www.kaggle.com/competitions/optiver-realized-volatility-prediction/leaderboard

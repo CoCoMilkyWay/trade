@@ -125,7 +125,7 @@ N_LONGS = N_SHORTS = 25
 # screened by dollar volume (size+liquidity)
 VOL_SCREEN = 10000 #top 1000
 start = pd.Timestamp('2014-1-1')
-end = pd.Timestamp('2015-1-1')
+end = pd.Timestamp('2018-1-1')
 
 # strategy===========================================================
 
@@ -211,8 +211,10 @@ def analyze(context, perf):
     # Look-ahead bias(future function):     use point-at-time data in regression engine
     # The sin of storytelling:              all time/universe robust
     # Data mining and data snooping:        logic-driven strategy
-    # Signal decay, turnover, trans cost:   
-
+    # Signal decay, turnover, trans cost:   price/volume factors usually have worse decay
+    # Outliers                              winsorization/ cut-off
+    # The asymmetric payoff/shorting        option/future(stock index)
+    
     # asset to sector dictionary
     asset_sector_mapping = pd.read_csv('../machine-learning-for-trading/data/us_equities_meta_data.csv',
                                        header=0,
@@ -250,14 +252,14 @@ def analyze(context, perf):
         factor=factors['factor_1'],
         prices=prices,
         groupby=factors["sector"],
-        # binning_by_group=False, # compute quantile buckets separately for each group (sector specific factor)
+        binning_by_group=False, # compute quantile buckets separately for each group (sector specific factor)
         quantiles=QUANTILES, # Number of equal-sized quantile buckets to use in factor bucketing
-        # bins=None, # Number of equal-width (valuewise) bins to use in factor bucketing
+        bins=None, # Number of equal-width (valuewise) bins to use in factor bucketing
         periods=HOLDING_PERIODS, # periods to compute forward returns on
         # filter_zscore=20, # standard deviation filter(on forward returns)
-        # groupby_labels=None, # A dictionary {group code:name} for display
+        groupby_labels=None, # A dictionary {group code:name} for display
         # max_loss=0.35, # Maximum percentage (0.00 to 1.00) of factor data dropping allowed
-        # zero_aware=False, # your signal is centered and zero is the separation between long and short signals
+        zero_aware=False, # your signal is centered and zero is the separation between long and short signals
         cumulative_returns=True
         )
 
@@ -361,9 +363,12 @@ def analyze(context, perf):
 sp500 = web.DataReader('SP500', 'fred', start, end).SP500
 benchmark_returns = sp500.pct_change()
 
-# 由于股票的两种行为，股价不连续
+# 由于股票的几种行为，股价不连续
 #       除权（降低股价增加流动性），
 #       除息（不影响公司正常运行的情况下，短期无用，长期降低股东持股成本）
+#       盘前盘后交易，集合竞价（higher slippage）：
+#           提高流动性（吸引其他市场投资者）
+#           缓解突发消息带来的交易系统流动性负担
 # 前复权：以除权除息后股价为基准（收益率直观显示买入/持仓成本，和当前股价match）
 # 后复权：以除权除息前股价为基准（收益率更接近实际收益率，量化回测用（无未来信息））
 perf_result = run_algorithm(start=start.tz_localize('UTC'),
