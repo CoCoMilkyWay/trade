@@ -5,7 +5,7 @@
 
 - pip freeze > requirements.txt
 - cat requirements.txt | xargs -n 1 mamba install
-sed 's/==.*//' env/requirements.txt > env/requirements_nameonly.txt
+- sed 's/==.*//' env/requirements.txt > env/requirements_nameonly.txt
 - mamba install -v --file env/requirements_nameonly.txt
 
 # primarily use conda/mamba packages
@@ -13,12 +13,19 @@ sed 's/==.*//' env/requirements.txt > env/requirements_nameonly.txt
 # create old environment for specific packages
 # install left-over pip package in conda/mamba environment(not avaliable in system python(pip) env)
 mamba update --all
-mamba install python=3.11
+mamba install python=3.6
 mamba create -n py_3p6 python=3.6
 mamba env list
 mamba activate py_3p6
-pip install 'few package not avaliable in mamba'
-zipline ingest -b quantopian-quandl
+mamba env remove -n py_3p7
+conda remove --name py_3p7 --all
+
+mamba install numpy pandas seaborn pandas-datareader 
+mamba search PKG --info
+# to show pip/mamba install paths (use pip to install packages not avaliable in mamba)
+pip list -v
+mamba list -v
+zipline ingest -b quandl
 - export QUANDL_API_KEY="9Q5bVWxqJE-94HKpntUg" ("6y7b4GG74vHE4sssJ8Ef")
 
 # trade

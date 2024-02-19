@@ -206,6 +206,10 @@ def analyze(context, perf):
     #     turnover by quantile
     #     mean factor rank autocorrelation
 
+    # "Fundamental Law of Active Management” asserts that the maximum attainable
+    # IR is approximately the product of the Information Coefficient (IC) times the square root of the
+    # breadth (BR) of the strategy
+
     # https://bigquant.com/wiki/home
     # Survivorship bias:                    we have
     # Look-ahead bias(future function):     use point-at-time data in regression engine
