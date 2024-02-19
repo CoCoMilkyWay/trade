@@ -124,8 +124,8 @@ YEAR = 12 * MONTH
 N_LONGS = N_SHORTS = 25
 # screened by dollar volume (size+liquidity)
 VOL_SCREEN = 10000 #top 1000
-start = pd.Timestamp('2013-1-1')
-end = pd.Timestamp('2018-1-1')
+start = pd.Timestamp('2014-1-1')
+end = pd.Timestamp('2015-1-1')
 
 # strategy===========================================================
 
@@ -240,45 +240,71 @@ def analyze(context, perf):
     sp500 = web.DataReader('SP500', 'fred', start, end).SP500
     sp500 = sp500.resample('D').ffill().tz_localize('utc').filter(prices.index.get_level_values(0))
 
-    HOLDING_PERIODS = (2, 5, 10, 21)
+    HOLDING_PERIODS = (1, 5, 10, 21)
     QUANTILES = 5
 
     # feed to alphalens:================================
-    # require: max(periods) > end-start
+    # require: max(periods) < end-start
+    print(factors); print(prices)
     factor_data = get_clean_factor_and_forward_returns(  
         factor=factors['factor_1'],
         prices=prices,
         groupby=factors["sector"],
-        quantiles=QUANTILES,
-        periods=HOLDING_PERIODS
+        # binning_by_group=False, # compute quantile buckets separately for each group (sector specific factor)
+        quantiles=QUANTILES, # Number of equal-sized quantile buckets to use in factor bucketing
+        # bins=None, # Number of equal-width (valuewise) bins to use in factor bucketing
+        periods=HOLDING_PERIODS, # periods to compute forward returns on
+        # filter_zscore=20, # standard deviation filter(on forward returns)
+        # groupby_labels=None, # A dictionary {group code:name} for display
+        # max_loss=0.35, # Maximum percentage (0.00 to 1.00) of factor data dropping allowed
+        # zero_aware=False, # your signal is centered and zero is the separation between long and short signals
+        cumulative_returns=True
         )
 
     # analysis:===============================
+    ''' 1. return analysis:
+            alpha/beta
+            mean period return by top/bottom quantile
+            mean period spread
+        2. information analysis
+            IC mean/std (risk-adjusted IC)
+            t-stat
+            p-value
+            IC skew/Kurtosis
+        3. turnover analysis
+            turnover by quantile
+            mean factor rank autocorrelation
+        4. event analysis
+            average quantile return before/after the trade signal
+            '''
+    # long-short (you want dollar neutral against beta exposure): factor value is relative(not absolute), 
+    #       it only suggest one asset is better, not necessarily related to returns useful for most strategies
+    #       (e.g. Beta hedging, Long-Short Equity strategies), disable in few (e.g. long only strategy)
+    # group-neutral (you want group neutral against sector exposure):
+
+    # risk models: 
+    #       sector exposures to each sector:
+    #       style exposures to size, value, quality, momentum, and volatility (betas)
+
+    # tutorial: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/alphalens_tutorial_on_quantopian.ipynb
+    # factor metrics: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/predictive_vs_non-predictive_factor.ipynb
     create_full_tear_sheet(factor_data, 
-                           long_short=True, 
+                           long_short=False, 
                            group_neutral=False, 
                            by_group=True)
+    create_event_returns_tear_sheet(factor_data, prices, 
+                                    avgretplot=(5, 15), 
+                                    # plot quantile average cumulative returns
+                                    # as x-axis: days before/after factor signal
+                                    long_short=False, # strip beta(de-mean) for dollar neutral strategies
+                                    group_neutral=False, # strip sector (de-mean at sector level)
+                                    std_bar=True, 
+                                    by_group=True)
     # create_summary_tear_sheet(factor_data, long_short=True, group_neutral=False)
-    
-    '''
-    create_returns_tear_sheet(factor_data, 
-                              long_short=True, 
-                              group_neutral=False, 
-                              by_group=False)
-    
-    create_information_tear_sheet(factor_data, 
-                                  group_neutral=False, 
-                                  by_group=False)
+    # create_returns_tear_sheet(factor_data, long_short=True, group_neutral=False, by_group=False)
+    # create_information_tear_sheet(factor_data, group_neutral=False, by_group=False)
+    # create_turnover_tear_sheet(factor_data)
 
-    create_turnover_tear_sheet(factor_data)
-
-    create_event_returns_tear_sheet(factor_data, prices,
-                                    avgretplot=(5, 15),
-                                    long_short=True,
-                                    group_neutral=False,
-                                    std_bar=True,
-                                    by_group=False)
-    '''
     '''
     # factor_data.reset_index().to_csv('factor_data.csv', index=False)
     plot_quantile_returns_bar(mean_return_by_q)
@@ -288,7 +314,7 @@ def analyze(context, perf):
     ic_by_year.plot.bar(figsize=(14, 6))
     create_turnover_tear_sheet(factor_data)
     # create_summary_tear_sheet(factor_data)
-    
+
 
     plt.close('all')
     fig = plt.figure()

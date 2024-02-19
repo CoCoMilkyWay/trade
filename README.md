@@ -12,10 +12,13 @@ sed 's/==.*//' env/requirements.txt > env/requirements_nameonly.txt
 # recommend not to use mamba/conda packages with pip packages
 # create old environment for specific packages
 # install left-over pip package in conda/mamba environment(not avaliable in system python(pip) env)
+mamba update --all
+mamba install python=3.11
 mamba create -n py_3p6 python=3.6
 mamba env list
 mamba activate py_3p6
 pip install 'few package not avaliable in mamba'
+zipline ingest -b quantopian-quandl
 - export QUANDL_API_KEY="9Q5bVWxqJE-94HKpntUg" ("6y7b4GG74vHE4sssJ8Ef")
 
 # trade
