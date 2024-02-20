@@ -6,8 +6,7 @@
 - pip freeze > requirements.txt
 - cat requirements.txt | xargs -n 1 mamba install
 - sed 's/==.*//' env/requirements.txt > env/requirements_nameonly.txt
-- mamba install -v --file env/requirements_nameonly.txt
-
+- mamba install -v --file req.txt
 # primarily use conda/mamba packages
 # recommend not to use mamba/conda packages with pip packages
 # create old environment for specific packages
@@ -20,8 +19,13 @@ mamba activate py_3p6
 mamba env remove -n py_3p7
 conda remove --name py_3p7 --all
 
+# successful flow installing zipline+alphalens+pyfolio
 mamba install numpy pandas seaborn pandas-datareader 
 mamba search PKG --info
+mamba uninstall alembic
+pip install alembic
+pip install iso3166==2.0.2
+mamba install alphalens
 # to show pip/mamba install paths (use pip to install packages not avaliable in mamba)
 pip list -v
 mamba list -v

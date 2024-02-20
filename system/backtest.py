@@ -238,7 +238,7 @@ def analyze(context, perf):
 
     # feed to alphalens:================================
     # require: max(periods) < end-start
-    print(factors); print(prices)
+    # print(factors); print(prices)
     factor_data = get_clean_factor_and_forward_returns(  
         factor=factors['factor_1'],
         prices=prices,
@@ -308,10 +308,14 @@ def analyze(context, perf):
             IC skew (lower, positive->0:  >0 means distribution is asymmetric to the right)
             IC Kurtosis (lower, positive->3:  >3 means distribution has less extreme values comparing to normal distribution)
     3. turnover analysis
-        top/bottom quantile turnover
-            
-        turnover by quantile
-        mean factor rank autocorrelation
+        top/bottom quantile turnover by period
+            1. proportion of new emerging assets in this quantile in this day
+            2. cannot be too high to avoid excessive commission
+        mean factor rank autocorrelation by period
+            1. correlation between current factor value rank to its previous rank
+            2. should be close to 1, otherwise means excessive turnover(commission)
+        *essential indicators:
+            turnover by all quantiles/period
 
     factor analysis options:
         long-short (you want dollar neutral against beta exposure): factor value is relative(not absolute), 
@@ -332,7 +336,7 @@ def analyze(context, perf):
     # tutorial: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/alphalens_tutorial_on_quantopian.ipynb
     # factor metrics: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/predictive_vs_non-predictive_factor.ipynb
     create_full_tear_sheet(factor_data, 
-                           long_short=False, 
+                           long_short=True, 
                            group_neutral=False, 
                            by_group=True)
     create_event_returns_tear_sheet(factor_data, prices, 
