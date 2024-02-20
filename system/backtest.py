@@ -193,19 +193,6 @@ def before_trading_start(context, data):
     context.factor_data = pipeline_output('pipeline_1')
 
 def analyze(context, perf):
-    # 1. return analysis:
-    #     alpha/beta
-    #     mean period return by top/bottom quantile
-    #     mean period spread
-    # 2. information analysis
-    #     IC mean/std (risk-adjusted IC)
-    #     t-stat
-    #     p-value
-    #     IC skew/Kurtosis
-    # 3. turnover analysis
-    #     turnover by quantile
-    #     mean factor rank autocorrelation
-
     # "Fundamental Law of Active Management” asserts that the maximum attainable
     # IR is approximately the product of the Information Coefficient (IC) times the square root of the
     # breadth (BR) of the strategy
@@ -268,25 +255,75 @@ def analyze(context, perf):
         )
 
     # analysis:===============================
-    ''' 1. return analysis:
-            alpha/beta
-            mean period return by top/bottom quantile
-            mean period spread
-        2. information analysis
-            IC mean/std (risk-adjusted IC)
-            t-stat
-            p-value
-            IC skew/Kurtosis
-        3. turnover analysis
-            turnover by quantile
-            mean factor rank autocorrelation
-        4. event analysis
-            average quantile return before/after the trade signal
-            '''
-    # long-short (you want dollar neutral against beta exposure): factor value is relative(not absolute), 
-    #       it only suggest one asset is better, not necessarily related to returns useful for most strategies
-    #       (e.g. Beta hedging, Long-Short Equity strategies), disable in few (e.g. long only strategy)
-    # group-neutral (you want group neutral against sector exposure):
+    '''
+    1. return analysis:
+        Event-Study-Like Return:
+            1. see factor signal impact on return before/after xx days 
+                (e.g. the second day after rebalance has best return gain)
+        Mean-Return-by-quantile/period/sector
+            1. possible that multiple rebalances in one period could have overlapped effects
+            2. cannot see the effect at a particular date (e.g. second day) like event-based plot
+            3. violin plot: see the full distribution (check noise/variance of the factor)
+        Factor-weighted-cumulative-return by period/sector
+            1. not by quantile: long/short every single assets in the universe according to factor value as 
+                weight in a rebalance. If this plot shows good result, it means this factor is consistent across
+                the whole universe (effective among all) (hint that this is a good factor to weight portfolio position)
+        cumulative-return by quantile/period/sector
+            1. in each quantile, assets have equal weights
+            2. see do we have particularly strong top/bottom quantiles
+            3. "Fundamental Law of Active Management":
+                IR = IC * sqrt(BR)
+                even for 5D period, calculation needs to be done daily that:
+                    1. maximize information ratio
+                    2. lower volatility
+                    3. results are independent to start of each epoch(overlapped with each other)
+                    4. increase capacity and thus lower slippage
+        Top-minus-bottom return by period
+            1. clearly show drawdown period (harder to see in cumulative returns)
+            2. also show standard deviation (spread) of +-1 of drawdowns/positive returns
+        *essential indicators:
+            *annual alpha return (higher)
+            *beta (not necessarily higher)
+            *mean period return by top/bottom quantile (higher/lower)
+            *mean period spread (lower)
+    2. information analysis
+        Information-Coefficient = Spearman's rank correlation coefficient between factor value and forward return
+            = for 2 samples A, B: Cov(Rank(A), Rank(B))/std(A)std(B)
+            less sensitive to outliers comparing to Pearson correlation
+            - forward returns = projected annual return from daily return (100bps = 100basis points = 1%)
+        Forward-return-Information-Coefficients by period/sector
+            1. describe how consistent rank of factor value is to rank of forward returns
+        Forward-return-Information-Coefficients (distribution: Histogram and Q-Q plot) by period
+            1. Histogram: see shape of daily IC distribution
+            2. Q-Q plot: compare IC distribution with normal distribution:
+                1. normal distribution: factor not predictive at all
+                2. predictive-factor: S-shaped curve especially at both tails
+        *essential indicators:
+            IC mean (higher: 0.1-0.3)
+            IC std (lower)
+            risk-adjusted IC (higher: factor values vs forward return premium (fr - risk-free return))
+            t-stat(IC) (higher: two groups are t times as different from each other 
+                as they are within each other) (2 groups: IC and normal distribution)
+            p-value(IC) (lower: <0.05, chances that t-stat is only by chance)
+            IC skew (lower, positive->0:  >0 means distribution is asymmetric to the right)
+            IC Kurtosis (lower, positive->3:  >3 means distribution has less extreme values comparing to normal distribution)
+    3. turnover analysis
+        top/bottom quantile turnover
+            
+        turnover by quantile
+        mean factor rank autocorrelation
+
+    factor analysis options:
+        long-short (you want dollar neutral against beta exposure): factor value is relative(not absolute), 
+              it only suggest one asset is better, not necessarily related to returns useful for most strategies
+              (e.g. Beta hedging, Long-Short Equity strategies), disable in few (e.g. long only strategy)
+        group-neutral (you want group neutral against sector exposure):
+    '''
+    
+
+
+
+
 
     # risk models: 
     #       sector exposures to each sector:
