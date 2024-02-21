@@ -89,9 +89,12 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 import pandas_datareader.data as web
-import re # regular expression
-from zipline import run_algorithm
-from zipline.api import (
+# regular expression
+import re
+from zipline.finance import commission, slippage
+from zipline.pipeline import *
+from zipline.pipeline.factors import *
+from zipline.api import(
     attach_pipeline,
     date_rules,
     time_rules,
@@ -102,13 +105,13 @@ from zipline.api import (
     get_open_orders,
     calendars
 )
-from zipline.finance import commission, slippage
-from zipline.pipeline import *
-from zipline.pipeline.factors import *
+import zipline
+import alphalens
+import pyfolio
 from alphalens.utils import get_clean_factor_and_forward_returns
 from alphalens.performance import *
 from alphalens.plotting import *
-from alphalens.tears import *
+
 warnings.filterwarnings('ignore')
 sns.set_style('whitegrid')
 
@@ -233,7 +236,7 @@ def analyze(context, perf):
     sp500 = web.DataReader('SP500', 'fred', start, end).SP500
     sp500 = sp500.resample('D').ffill().tz_localize('utc').filter(prices.index.get_level_values(0))
 
-    HOLDING_PERIODS = (1, 5, 10, 21)
+    HOLDING_PERIODS = (1, 5, 10)
     QUANTILES = 5
 
     # feed to alphalens:================================
@@ -249,14 +252,26 @@ def analyze(context, perf):
         periods=HOLDING_PERIODS, # periods to compute forward returns on
         # filter_zscore=20, # standard deviation filter(on forward returns)
         groupby_labels=None, # A dictionary {group code:name} for display
-        # max_loss=0.35, # Maximum percentage (0.00 to 1.00) of factor data dropping allowed
+        max_loss=0.5, # Maximum percentage (0.00 to 1.00) of factor data dropping allowed
         zero_aware=False, # your signal is centered and zero is the separation between long and short signals
         cumulative_returns=True
         )
-
+    # [(datetime):daily_return, (datetime * assets):holdings(percentage/dollar), (datetime):factor_universe_mean_daily_returns]
+    pf_returns, pf_positions, pf_benchmark = \
+    create_pyfolio_input(
+        factor_data,
+        period='5D', # specify one period in [HOLDING_PERIODS]
+        capital=None, # percentage or dollar
+        long_short=True,
+        group_neutral=False,
+        equal_weight=True, # factor weighted or equal weighted
+        quantiles=[1,QUANTILES],
+        groups=None,
+        benchmark_period='1D'
+    )
     # analysis:===============================
     '''
-    1. return analysis:
+    1. return analysis: (as factor)
         Event-Study-Like Return:
             1. see factor signal impact on return before/after xx days 
                 (e.g. the second day after rebalance has best return gain)
@@ -286,7 +301,7 @@ def analyze(context, perf):
             *beta (not necessarily higher)
             *mean period return by top/bottom quantile (higher/lower)
             *mean period spread (lower)
-    2. information analysis
+    2. information analysis (as factor)
         Information-Coefficient = Spearman's rank correlation coefficient between factor value and forward return
             = for 2 samples A, B: Cov(Rank(A), Rank(B))/std(A)std(B)
             less sensitive to outliers comparing to Pearson correlation
@@ -307,7 +322,7 @@ def analyze(context, perf):
             p-value(IC) (lower: <0.05, chances that t-stat is only by chance)
             IC skew (lower, positive->0:  >0 means distribution is asymmetric to the right)
             IC Kurtosis (lower, positive->3:  >3 means distribution has less extreme values comparing to normal distribution)
-    3. turnover analysis
+    3. turnover analysis (as factor)
         top/bottom quantile turnover by period
             1. proportion of new emerging assets in this quantile in this day
             2. cannot be too high to avoid excessive commission
@@ -315,19 +330,41 @@ def analyze(context, perf):
             1. correlation between current factor value rank to its previous rank
             2. should be close to 1, otherwise means excessive turnover(commission)
         *essential indicators:
-            turnover by all quantiles/period
+            *turnover by all quantiles/period (<1% in a day)
 
     factor analysis options:
         long-short (you want dollar neutral against beta exposure): factor value is relative(not absolute), 
               it only suggest one asset is better, not necessarily related to returns useful for most strategies
               (e.g. Beta hedging, Long-Short Equity strategies), disable in few (e.g. long only strategy)
-        group-neutral (you want group neutral against sector exposure):
+        group-neutral (you want group neutral against sector exposure)
+
+    4. portfolio analysis: (as strategy)
+        1. returns:
+            cumulative return/volatility by portfolio/benchmark
+            block plot of return by month/year
+            daily/weekly/monthly return distributions
+        2. rolling average:
+            rolling volatility
+            rolling sharpe ratio
+            total/long/short holdings (daily/month): capacity of the strategy
+        3. drawdown analysis
+            top 5 drawdown periods
+            underwater plot
+        4. exposure analysis
+            rolling portfolio beta: (risk exposure to benchmark(market/sector/asset) overtime)
+            rolling Fama-French single factor betas (exposure to market, SMB/HML/UMD calculated natively)
+            top 10 assets holding overtime (exposure to assets)
+            long/short max/median position concentration overtime (<5%, exposure to assets)
+            long/short holdings overtime (exposure to holdings)
+        5. leverage analysis
+            gross leverage
+        6. exposure analysis to sector/style overtime
+            sector + (momentum size value short_term_reversal volatility)
+            (quantopian only)
+
+
+
     '''
-    
-
-
-
-
 
     # risk models: 
     #       sector exposures to each sector:
@@ -335,22 +372,33 @@ def analyze(context, perf):
 
     # tutorial: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/alphalens_tutorial_on_quantopian.ipynb
     # factor metrics: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/predictive_vs_non-predictive_factor.ipynb
-    create_full_tear_sheet(factor_data, 
-                           long_short=True, 
-                           group_neutral=False, 
-                           by_group=True)
-    create_event_returns_tear_sheet(factor_data, prices, 
-                                    avgretplot=(5, 15), 
-                                    # plot quantile average cumulative returns
-                                    # as x-axis: days before/after factor signal
-                                    long_short=False, # strip beta(de-mean) for dollar neutral strategies
-                                    group_neutral=False, # strip sector (de-mean at sector level)
-                                    std_bar=True, 
-                                    by_group=True)
+    alphalens.tears.create_full_tear_sheet(
+        factor_data, 
+        long_short=True, 
+        group_neutral=False, 
+        by_group=False
+    )
+    alphalens.tears.create_event_returns_tear_sheet(
+        factor_data, prices, 
+        avgretplot=(5, 15), 
+        # plot quantile average cumulative returns
+        # as x-axis: days before/after factor signal
+        long_short=True, # strip beta(de-mean) for dollar neutral strategies
+        group_neutral=False, # strip sector (de-mean at sector level)
+        std_bar=True, 
+        by_group=False
+        )
+    pyfolio.tears.create_full_tear_sheet(
+        pf_returns,
+        positions=pf_positions,
+        benchmark_rets=pf_benchmark, # factor-universe-mean-daily-return (index benchmark) / daily-return of a particular asset
+        hide_positions=True
+        )
     # create_summary_tear_sheet(factor_data, long_short=True, group_neutral=False)
     # create_returns_tear_sheet(factor_data, long_short=True, group_neutral=False, by_group=False)
     # create_information_tear_sheet(factor_data, group_neutral=False, by_group=False)
     # create_turnover_tear_sheet(factor_data)
+
 
     '''
     # factor_data.reset_index().to_csv('factor_data.csv', index=False)
@@ -416,7 +464,7 @@ benchmark_returns = sp500.pct_change()
 #           缓解突发消息带来的交易系统流动性负担
 # 前复权：以除权除息后股价为基准（收益率直观显示买入/持仓成本，和当前股价match）
 # 后复权：以除权除息前股价为基准（收益率更接近实际收益率，量化回测用（无未来信息））
-perf_result = run_algorithm(start=start.tz_localize('UTC'),
+perf_result = zipline.run_algorithm(start=start.tz_localize('UTC'),
                        end=end.tz_localize('UTC'),
                        initialize=initialize,
                        # handle_data=handle_data,

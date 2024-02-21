@@ -122,6 +122,3 @@ snap_cursor = helper.SnappingCursor(ax1, 0)
 fig.canvas.mpl_connect('motion_notify_event', snap_cursor.on_mouse_move)
 plt.show() # would hang terminal
 '''
-
-
-
