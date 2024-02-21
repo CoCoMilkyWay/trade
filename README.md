@@ -43,7 +43,7 @@ mamba uninstall alembic
 pip install alembic
 pip install iso3166==2.0.2
 zipline ingest -b quandl
-mamba install alphalens pyfolio
+mamba install alphalens pyfolio PyPortfolioOpt
 
 sudo apt-get install sqlitebrowser
 

@@ -91,6 +91,10 @@ import pandas as pd
 import pandas_datareader.data as web
 # regular expression
 import re
+import zipline
+import alphalens
+import pyfolio
+import pypfopt
 from zipline.finance import commission, slippage
 from zipline.pipeline import *
 from zipline.pipeline.factors import *
@@ -106,13 +110,14 @@ from zipline.api import (attach_pipeline,
                          calendars,
                          set_commission, 
                          set_slippage)
-import zipline
-import alphalens
-import pyfolio
 from alphalens.utils import get_clean_factor_and_forward_returns
 from alphalens.performance import *
 from alphalens.plotting import *
 from pyfolio.utils import extract_rets_pos_txn_from_zipline
+from pypfopt.efficient_frontier import EfficientFrontier
+from pypfopt import risk_models, objective_functions
+from pypfopt import expected_returns
+from pypfopt.exceptions import OptimizationError
 import sys
 from logbook import (NestedSetup, NullHandler, Logger, StreamHandler, StderrHandler, 
                      INFO, WARNING, DEBUG, ERROR)
@@ -130,6 +135,8 @@ MONTH = 21 # number of market opening days in a month
 YEAR = 12 * MONTH
 # portfolio management
 N_LONGS = N_SHORTS = 25
+# 
+MIN_POS = 5
 # screened by dollar volume (size+liquidity)
 VOL_SCREEN = 10000 #top 1000
 start = pd.Timestamp('2014-1-1')
@@ -139,8 +146,13 @@ capital_base = 1e7
 analysis_factor = True; analysis_portfolio = True
 long_short_neutral=True; group_neutral=False
 strategy_type = 'eq_weight'
-# strategy_type = ['eq_weight', ]
-
+#   'eq_weight':        1/N in long/short
+#   'optimize_weight':  if sufficient long/short choices, 
+#                       given historic price, optimize weight
+optimize_type = 'max_sharpe'
+#   'None':             None
+#   'max_sharpe':       use historic price, get return/risk model, 
+#                       find max dynamic sharpe through M.V.F (covariance)
 # python script argument parse (pick the right factor)===============
 import importlib
 module_factor = importlib.import_module('factors')
@@ -155,7 +167,7 @@ simulation_time = pd.DataFrame(
 print("factor analysis begin: ", sys.argv[1])
 print("analysis factor/portfolio: ", f'{analysis_factor}/{analysis_portfolio}')
 print("long-short/group neutral: ", f'{long_short_neutral}/{group_neutral}')
-print("strategy: ", f'{strategy_type}')
+print("strategy: ", f'{strategy_type}', "optimize: ", f'{optimize_type}')
 print("simulation_time: ", simulation_time)
 
 # setup stdout logging===============================================
@@ -180,7 +192,7 @@ def compute_factors0():
                              'ranking': results.rank(ascending=False)},
                     screen=filter.top(VOL_SCREEN))
 
-## order/rebalance 
+## rebalance: order, optimize 
 ## (use: 1.daily pipeline results
 ##       2.content in BarData)
 def exec_trades(data, assets, target_percent):
@@ -189,6 +201,23 @@ def exec_trades(data, assets, target_percent):
         if data.can_trade(asset) and not get_open_orders(asset):
             order_target_percent(asset, target_percent)
             #print(asset, target_percent)
+
+def optimize_weights(prices, short=False):
+
+    returns = expected_returns.mean_historical_return(
+        prices=prices, frequency=252)
+    cov = risk_models.sample_cov(prices=prices, frequency=252)
+
+    # get weights that maximize the Sharpe ratio
+    ef = EfficientFrontier(expected_returns=returns,
+                           cov_matrix=cov,
+                           weight_bounds=(0, 1),
+                           solver='SCS')
+    ef.max_sharpe()
+    if short:
+        return {asset: -weight for asset, weight in ef.clean_weights().items()}
+    else:
+        return ef.clean_weights()
 
 def rebalance(context, data):
     """Compute long, short and obsolete holdings; place trade orders"""
@@ -199,15 +228,32 @@ def rebalance(context, data):
     shorts = assets[factor_data.shorts]
     divest = set(context.portfolio.positions.keys()) - set(longs.union(shorts)) #lower invest, but still hold
 
+    if strategy_type=='eq_weight':
+        exec_trades(data, assets=longs, target_percent=1 / N_LONGS)
+        exec_trades(data, assets=shorts, target_percent=-1 / N_SHORTS)
+    elif strategy_type=='optimize_weight':
+        # get price history
+        prices = data.history(assets, fields='price',
+                              bar_count=252+1, # for 1 year of returns 
+                              frequency='1d')
+
+        # get optimal weights if sufficient candidates
+        if len(longs) > MIN_POS and len(shorts) > MIN_POS:
+            try:
+                long_weights = optimize_weights(prices.loc[:, longs], short=False)
+                short_weights = optimize_weights(prices.loc[:, shorts], short=True)
+                exec_trades(data, assets=longs, target_percent=long_weights)
+                exec_trades(data, assets=shorts, target_percent=short_weights)
+            except Exception as e: # optimize_weights function error
+                log.warn('{} {}'.format(get_datetime().date(), e))
     log.info('{} | Longs: {:2.0f} | Shorts: {:2.0f} | {:,.2f}'.format(
         get_datetime(),
         len(longs), 
         len(shorts),
         context.portfolio.portfolio_value)
     )
+    # exit remaining positions
     exec_trades(data, assets=divest, target_percent=0)
-    exec_trades(data, assets=longs, target_percent=1 / N_LONGS)
-    exec_trades(data, assets=shorts, target_percent=-1 / N_SHORTS)
 
 # strategy wrapper (backtest interface)=============================
 # queue intra-day pipeline to update context in sequence
@@ -415,6 +461,9 @@ def analyze(context, perf):
 
     # tutorial: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/alphalens_tutorial_on_quantopian.ipynb
     # factor metrics: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/predictive_vs_non-predictive_factor.ipynb
+
+    plt.close('all')
+
     if(analysis_factor):
         alphalens.tears.create_full_tear_sheet(
             factor_data, 
