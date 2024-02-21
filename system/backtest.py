@@ -94,30 +94,35 @@ import re
 from zipline.finance import commission, slippage
 from zipline.pipeline import *
 from zipline.pipeline.factors import *
-from zipline.api import(
-    attach_pipeline,
-    date_rules,
-    time_rules,
-    order_target_percent,
-    pipeline_output,
-    record,
-    schedule_function,
-    get_open_orders,
-    calendars
-)
+from zipline.api import (attach_pipeline, 
+                         date_rules, 
+                         time_rules,
+                         get_datetime,
+                         order_target_percent,
+                         pipeline_output, 
+                         record, 
+                         schedule_function, 
+                         get_open_orders, 
+                         calendars,
+                         set_commission, 
+                         set_slippage)
 import zipline
 import alphalens
 import pyfolio
 from alphalens.utils import get_clean_factor_and_forward_returns
 from alphalens.performance import *
 from alphalens.plotting import *
-
+from pyfolio.utils import extract_rets_pos_txn_from_zipline
+import sys
+from logbook import (NestedSetup, NullHandler, Logger, StreamHandler, StderrHandler, 
+                     INFO, WARNING, DEBUG, ERROR)
+from datetime import datetime, timezone
 warnings.filterwarnings('ignore')
 sns.set_style('whitegrid')
 
 # in-house library
 import pylib_misc.helper as helper
-import factors
+#import factors
 
 # strategy parameters================================================
 # recent historical_return (normalized by stdev)
@@ -128,16 +133,48 @@ N_LONGS = N_SHORTS = 25
 # screened by dollar volume (size+liquidity)
 VOL_SCREEN = 10000 #top 1000
 start = pd.Timestamp('2014-1-1')
-end = pd.Timestamp('2018-1-1')
+end = pd.Timestamp('2016-1-1')
+capital_base = 1e7
+
+analysis_factor = True; analysis_portfolio = True
+long_short_neutral=True; group_neutral=False
+strategy_type = 'eq_weight'
+# strategy_type = ['eq_weight', ]
+
+# python script argument parse (pick the right factor)===============
+import importlib
+module_factor = importlib.import_module('factors')
+class_factor = getattr(module_factor, sys.argv[1])
+instance_factor = class_factor()
+
+simulation_time = pd.DataFrame(
+    data=np.array([start.to_datetime64(), 
+                   end.to_datetime64()]),
+    index=['start', 'end'])
+
+print("factor analysis begin: ", sys.argv[1])
+print("analysis factor/portfolio: ", f'{analysis_factor}/{analysis_portfolio}')
+print("long-short/group neutral: ", f'{long_short_neutral}/{group_neutral}')
+print("strategy: ", f'{strategy_type}')
+print("simulation_time: ", simulation_time)
+
+# setup stdout logging===============================================
+format_string = '[{record.time: %H:%M:%S.%f}]: {record.level_name}: {record.message}'
+zipline_logging = NestedSetup([NullHandler(level=DEBUG),
+                               StreamHandler(sys.stdout, format_string=format_string, level=INFO),
+                               StreamHandler(sys.stderr, level=ERROR)])
+zipline_logging.push_application()
+log = Logger('Algorithm')
 
 # strategy===========================================================
-
 def compute_factors0():
     """ call factor results
         rank assets using results
         further filter assets"""
-    results = factors.Factor_MeanReversion()
+    results = instance_factor
     filter = AverageDollarVolume(window_length=30)
+    #eq_weight
+    strategy_type = 'eq_weight' # global
     return Pipeline(columns={'longs': results.bottom(N_LONGS),
                              'shorts': results.top(N_SHORTS),
                              'ranking': results.rank(ascending=False)},
@@ -156,15 +193,18 @@ def exec_trades(data, assets, target_percent):
 def rebalance(context, data):
     """Compute long, short and obsolete holdings; place trade orders"""
     factor_data = context.factor_data
-    record(factor_data=factor_data.ranking)
-
     assets = factor_data.index
-    record(prices=data.current(assets, 'price'))
 
     longs = assets[factor_data.longs]
     shorts = assets[factor_data.shorts]
-    divest = set(context.portfolio.positions.keys()) - set(longs.union(shorts))
+    divest = set(context.portfolio.positions.keys()) - set(longs.union(shorts)) #lower invest, but still hold
 
+    log.info('{} | Longs: {:2.0f} | Shorts: {:2.0f} | {:,.2f}'.format(
+        get_datetime(),
+        len(longs), 
+        len(shorts),
+        context.portfolio.portfolio_value)
+    )
     exec_trades(data, assets=divest, target_percent=0)
     exec_trades(data, assets=longs, target_percent=1 / N_LONGS)
     exec_trades(data, assets=shorts, target_percent=-1 / N_SHORTS)
@@ -181,19 +221,24 @@ def initialize(context):
                       date_rules.week_start(),
                       time_rules.market_open(),
                       calendar=calendars.US_EQUITIES)
-    context.set_commission(commission.PerShare(cost=.01, min_trade_cost=0))
-    context.set_slippage(slippage.VolumeShareSlippage())
+    context.set_commission(us_equities=commission.PerShare(cost=0.00075, 
+                                                           min_trade_cost=.01))
+    context.set_slippage(us_equities=slippage.VolumeShareSlippage(volume_limit=0.0025,
+                                                                  price_impact=0.01))
 
 ## inter-day routine
-def handle_data (context, data):
-    ...
-
-## intra-day routine 
 ## pipeline 1: compute factors (update to context)
 ## pipeline 2: ...
 def before_trading_start(context, data): 
     """Run factor pipeline"""
     context.factor_data = pipeline_output('pipeline_1')
+    record(factor_data=context.factor_data.ranking)
+    assets = context.factor_data.index
+    record(prices=data.current(assets, 'price'))
+
+## intra-day routine 
+def handle_data (context, data):
+    ...
 
 def analyze(context, perf):
     # "Fundamental Law of Active Management” asserts that the maximum attainable
@@ -261,14 +306,15 @@ def analyze(context, perf):
     create_pyfolio_input(
         factor_data,
         period='5D', # specify one period in [HOLDING_PERIODS]
-        capital=None, # percentage or dollar
-        long_short=True,
-        group_neutral=False,
+        capital=capital_base, # percentage or dollar
+        long_short=long_short_neutral,
+        group_neutral=group_neutral,
         equal_weight=True, # factor weighted or equal weighted
         quantiles=[1,QUANTILES],
         groups=None,
         benchmark_period='1D'
     )
+    _, _, pf_transactions = extract_rets_pos_txn_from_zipline(perf)
     # analysis:===============================
     '''
     1. return analysis: (as factor)
@@ -361,9 +407,6 @@ def analyze(context, perf):
         6. exposure analysis to sector/style overtime
             sector + (momentum size value short_term_reversal volatility)
             (quantopian only)
-
-
-
     '''
 
     # risk models: 
@@ -372,45 +415,48 @@ def analyze(context, perf):
 
     # tutorial: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/alphalens_tutorial_on_quantopian.ipynb
     # factor metrics: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/predictive_vs_non-predictive_factor.ipynb
-    alphalens.tears.create_full_tear_sheet(
-        factor_data, 
-        long_short=True, 
-        group_neutral=False, 
-        by_group=False
-    )
-    alphalens.tears.create_event_returns_tear_sheet(
-        factor_data, prices, 
-        avgretplot=(5, 15), 
-        # plot quantile average cumulative returns
-        # as x-axis: days before/after factor signal
-        long_short=True, # strip beta(de-mean) for dollar neutral strategies
-        group_neutral=False, # strip sector (de-mean at sector level)
-        std_bar=True, 
-        by_group=False
+    if(analysis_factor):
+        alphalens.tears.create_full_tear_sheet(
+            factor_data, 
+            long_short=long_short_neutral, 
+            group_neutral=group_neutral, 
+            by_group=False
         )
-    pyfolio.tears.create_full_tear_sheet(
-        pf_returns,
-        positions=pf_positions,
-        benchmark_rets=pf_benchmark, # factor-universe-mean-daily-return (index benchmark) / daily-return of a particular asset
-        hide_positions=True
-        )
-    # create_summary_tear_sheet(factor_data, long_short=True, group_neutral=False)
-    # create_returns_tear_sheet(factor_data, long_short=True, group_neutral=False, by_group=False)
-    # create_information_tear_sheet(factor_data, group_neutral=False, by_group=False)
-    # create_turnover_tear_sheet(factor_data)
+        alphalens.tears.create_event_returns_tear_sheet(
+            factor_data, prices, 
+            avgretplot=(5, 15), 
+            # plot quantile average cumulative returns
+            # as x-axis: days before/after factor signal
+            long_short=long_short_neutral, # strip beta(de-mean) for dollar neutral strategies
+            group_neutral=group_neutral, # strip sector (de-mean at sector level)
+            std_bar=True, 
+            by_group=False
+            )
+            # create_summary_tear_sheet(factor_data, long_short=True, group_neutral=False)
+            # create_returns_tear_sheet(factor_data, long_short=True, group_neutral=False, by_group=False)
+            # create_information_tear_sheet(factor_data, group_neutral=False, by_group=False)
+            # create_turnover_tear_sheet(factor_data)
+    if(analysis_portfolio):
+        pyfolio.tears.create_full_tear_sheet(
+            pf_returns,
+            positions=pf_positions,
+            transactions=pf_transactions,
+            benchmark_rets=pf_benchmark, # factor-universe-mean-daily-return (index benchmark) / daily-return of a particular asset
+            hide_positions=True
+            )
+        fig, ax = plt.subplots(figsize=(15, 8))
+        sns.heatmap(pf_positions.replace(0, np.nan).dropna(how='all', axis=1).T, 
+        cmap=sns.diverging_palette(h_neg=20, h_pos=200), ax=ax, center=0)
 
+    prefix = f'{strategy_type}_{sys.argv[1]}'
+    with pd.HDFStore('results/backtests.h5') as store:
+        store.put(f'datetime/{prefix}', simulation_time) # reuse database
+        store.put(f'backtest_meta/{prefix}', perf) # simulation results
+        store.put(f'returns/{prefix}', pf_returns)
+        store.put(f'positions/{prefix}', pf_positions)
+        store.put(f'transactions_meta/{prefix}', pf_transactions) # sid,symbol,price,order_id,amount,commission,dt,txn_dollar
 
     '''
-    # factor_data.reset_index().to_csv('factor_data.csv', index=False)
-    plot_quantile_returns_bar(mean_return_by_q)
-    plot_cumulative_returns_by_quantile(mean_return_by_q_daily['5D'], period='5D', freq=None)
-    plot_quantile_returns_violin(mean_return_by_q_daily)
-    plot_ic_ts(ic[['5D']])
-    ic_by_year.plot.bar(figsize=(14, 6))
-    create_turnover_tear_sheet(factor_data)
-    # create_summary_tear_sheet(factor_data)
-
-
     plt.close('all')
     fig = plt.figure()
 
@@ -434,15 +480,8 @@ def analyze(context, perf):
 
     ax2 = fig.add_subplot(312)
 
-    # plot 3
-    ax3 = fig.add_subplot(313)
-    perf.sharpe.plot(ax=ax3)
-    ax3.set_ylabel('Sharpe')
-
     # align x axis
     ax1.set_xlim(min(perf.period_open), max(perf.period_close))
-    ax2.set_xlim(min(perf.period_open), max(perf.period_close))
-    ax3.set_xlim(min(perf.period_open), max(perf.period_close))
 
     # plot to remote terminal through SSH
     # sns.despine()
@@ -470,7 +509,7 @@ perf_result = zipline.run_algorithm(start=start.tz_localize('UTC'),
                        # handle_data=handle_data,
                        before_trading_start=before_trading_start,
                        analyze=analyze,
-                       capital_base=100000,
+                       capital_base=capital_base,
                        benchmark_returns=benchmark_returns,
                        bundle='quandl',
                        data_frequency='daily')

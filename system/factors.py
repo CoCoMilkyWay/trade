@@ -46,13 +46,13 @@ class Alphas(object):
         return  (rank((self.open - (sum(self.vwap, 10) / 10))) * (-1 * abs(rank((self.close - self.vwap)))))
 '''
 
-class Factor_Random(CustomFactor):
-    """random factor as benchmark"""
-    window_length = 1
+class Factor0_Random(CustomFactor):
+    """random factor as unpredictive benchmark"""
     inputs = [DailyReturns()]
+    window_length = 1
 
-    def compute(self, today, assets, out, inputs): # monthly_returns = inputs
-        df = pd.DataFrame(inputs).iloc[-1]
+    def compute(self, today, assets, out, inputs):
+        df = pd.DataFrame(inputs)
         out[:] = [random.randint(-1000, 1000) for _ in range(len(df))]
 
 class Factor_MeanReversion(CustomFactor):

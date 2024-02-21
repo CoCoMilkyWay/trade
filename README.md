@@ -47,7 +47,11 @@ mamba install alphalens pyfolio
 
 sudo apt-get install sqlitebrowser
 
+from importlib import metadata as importlib_metadata =>
+import importlib_metadata
+
 in pyfolio's rolling_fama_french function(line 550) in timeseries.py
+~/mambaforge/envs/py_3p6/lib/python3.6/site-packages/pyfolio/timeseries.py
 change to this so that A, B has same dimensions:
     A = factor_returns[beg:end]
     B = returns[beg:end]
