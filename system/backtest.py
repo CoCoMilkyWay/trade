@@ -59,8 +59,10 @@ import pylib_misc.helper as helper
 
 # strategy parameters================================================
 start = pd.Timestamp('2014-1-1')
-end = pd.Timestamp('2015-1-1')
-analyze_factor = False; analyze_portfolio = True
+end = pd.Timestamp('2017-1-1')
+# in/out sample partition
+oos = end - pd.Timedelta('90D') # out-of-sample datetime
+analyze_factor = True; analyze_portfolio = True
 
 # recent historical_return (normalized by stdev)
 MONTH = 21 # number of market opening days in a month
@@ -114,7 +116,7 @@ simulation_time = pd.DataFrame(
 
 analysis_factor = False; analysis_portfolio = False
 
-print("factor analysis begin: ", sys.argv[1])
+print("factor analysis begin: ", sys.argv[1], datetime.now())
 print("analysis factor/portfolio: ", f'{analyze_factor}/{analyze_portfolio}')
 print("long-short/group neutral: ", f'{long_short_neutral}/{group_neutral}')
 print("strategy: ", f'{strategy_type}', "optimize: ", f'{optimize_type}')
@@ -255,14 +257,13 @@ except Exception as e:
 print('use_storage_data: ', use_storage_data)
 if use_storage_data == True:
     analysis_factor = analyze_factor; analysis_portfolio = analyze_portfolio
-
-# perf_result = store[f'backtest_meta/{prefix}'] # simulation results
-factors = pd.read_hdf(HDF_PATH, f'factors/{prefix}').tz_localize('UTC', level=0) # complex data type loss tz info
-prices = pd.read_hdf(HDF_PATH, f'prices/{prefix}')
-pf_returns = pd.read_hdf(HDF_PATH, f'pf_returns/{prefix}')
-pf_positions = pd.read_hdf(HDF_PATH, f'pf_positions/{prefix}')
-pf_transactions = pd.read_hdf(HDF_PATH, f'pf_transactions_meta/{prefix}')
-pf_benchmark = pd.read_hdf(HDF_PATH, f'pf_benchmark/{prefix}')
+    # perf_result = store[f'backtest_meta/{prefix}'] # simulation results
+    factors = pd.read_hdf(HDF_PATH, f'factors/{prefix}').tz_localize('UTC', level=0) # complex data type loss tz info
+    prices = pd.read_hdf(HDF_PATH, f'prices/{prefix}')
+    pf_returns = pd.read_hdf(HDF_PATH, f'pf_returns/{prefix}')
+    pf_positions = pd.read_hdf(HDF_PATH, f'pf_positions/{prefix}')
+    pf_transactions = pd.read_hdf(HDF_PATH, f'pf_transactions_meta/{prefix}')
+    pf_benchmark = pd.read_hdf(HDF_PATH, f'pf_benchmark/{prefix}')
 
 '''
 before use data(e.g. quandl)
@@ -347,7 +348,7 @@ factor_data = get_clean_factor_and_forward_returns(
     )
 if use_storage_data == False:
     # [(datetime):daily_return, (datetime * assets):holdings(percentage/dollar), (datetime):factor_universe_mean_daily_returns]
-    al_returns, al_positions, al_benchmark = \
+    pf_returns, pf_positions, pf_benchmark = \
     create_pyfolio_input(
         factor_data,
         period='5D', # specify one period in [HOLDING_PERIODS]
@@ -501,34 +502,36 @@ if(analysis_factor):
         # create_information_tear_sheet(factor_data, group_neutral=False, by_group=False)
         # create_turnover_tear_sheet(factor_data)
 if(analysis_portfolio):
-    #pyfolio.tears.create_full_tear_sheet(
-    #    pf_returns,
-    #    positions=pf_positions,
-    #    transactions=pf_transactions,
-    #    benchmark_rets=pf_benchmark, # factor-universe-mean-daily-return (index benchmark) / daily-return of a particular asset
-    #    hide_positions=True
-    #    )
-    fig, ax = plt.subplots(figsize=(15, 8))
-    #sns.heatmap(pf_positions.replace(0, np.nan).dropna(how='all', axis=1).T, 
-    #cmap=sns.diverging_palette(h_neg=20, h_pos=200), ax=ax, center=0)
-    # filter common datas for these functions
+    pyfolio.tears.create_full_tear_sheet(
+        pf_returns,
+        positions=pf_positions,
+        transactions=pf_transactions,
+        benchmark_rets=pf_benchmark, # factor-universe-mean-daily-return (index benchmark) / daily-return of a particular asset
+        hide_positions=True
+        )
+    fig, ax_heatmap = plt.subplots(figsize=(15, 8))
+    sns.heatmap(pf_positions.replace(0, np.nan).dropna(how='all', axis=1).T, 
+    cmap=sns.diverging_palette(h_neg=20, h_pos=200), ax=ax_heatmap, center=0)
+
+    # special requirements :(
     data_intersec = pf_returns.index & pf_benchmark.index
-    print(data_intersec)
     pf_returns = pf_returns.loc[data_intersec]
     pf_positions = pf_positions.loc[data_intersec]
-    print(pf_returns.info())
+    fig, ax_perf = plt.subplots(figsize=(15, 8))
     plot_perf_stats(returns=pf_returns, 
                     factor_returns=pf_benchmark,     
-                    ax=ax)
+                    ax=ax_perf)
     show_perf_stats(returns=pf_returns, 
                     factor_returns=pf_benchmark, 
                     positions=pf_positions, 
                     transactions=pf_transactions, 
-                    live_start_date=start)
+                    live_start_date=oos)
+    fig, ax_rolling = plt.subplots(figsize=(15, 8))
     plot_rolling_returns(returns=pf_returns, 
                          factor_returns=pf_benchmark, 
-                         live_start_date=start, 
-                         cone_std=(1.0, 1.5, 2.0))
+                         live_start_date=oos, 
+                         cone_std=(1.0, 1.5, 2.0),
+                         ax=ax_rolling)
     plt.gcf().set_size_inches(14, 8)
 if use_storage_data == False:
     with pd.HDFStore(HDF_PATH) as store: # use UTC because some packages would output UTC data anyways
@@ -540,6 +543,9 @@ if use_storage_data == False:
         store.put(f'pf_transactions_meta/{prefix}', pf_transactions.tz_convert('UTC', level=0)) # sid,symbol,price,order_id,amount,commission,dt,txn_dollar
         store.put(f'pf_positions/{prefix}',         pf_positions.tz_convert('UTC', level=0))
         store.put(f'pf_benchmark/{prefix}',         pf_benchmark.tz_convert('UTC', level=0))
+print('Analysis: done')
+
+
 '''
 plt.close('all')
 fig = plt.figure()
