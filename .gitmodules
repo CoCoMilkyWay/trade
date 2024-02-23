@@ -5,3 +5,7 @@
 [submodule "machine-learning-for-trading"]
     path = machine-learning-for-trading
     url = https://github.com/CoCoMilkyWay/machine-learning-for-trading.git
+
+[submodule "QUANTAXIS"]
+    path = QUANTAXIS
+    url = https://github.com/CoCoMilkyWay/QUANTAXIS.git
