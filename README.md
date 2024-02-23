@@ -109,6 +109,7 @@ mamba upgrade&update --all
 https://cloud.tencent.com/developer/article/1457661
 https://github.com/jiangtiantu/factorhub
 https://qsdoc.readthedocs.io/zh-cn/latest/index.html
+https://www.windquant.com/qntcloud
 
 因子库 WindDB 需要 Wind 金融工程数据库
 因子库 WindDB2 需要 Wind 量化研究数据库
