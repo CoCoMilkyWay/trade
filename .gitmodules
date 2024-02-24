@@ -10,3 +10,6 @@
 [submodule "wondertrader"]
 	path = wondertrader
 	url = https://github.com/CoCoMilkyWay/wondertrader.git
+[submodule "wtpy"]
+	path = wtpy
+	url = https://github.com/CoCoMilkyWay/wtpy.git
