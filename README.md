@@ -1,15 +1,8 @@
 ![frameworks](figure/frameworks.png)
 ![quantaxis](figure/quantaxis.png)
 ![quantaxis_frame](figure/quantaxis_frame.png)
-# env (check email for personal auth token)
-git submodule update --init --remote
-git config --global user.name "CoCoMilkyWay"
-git config --global user.email "wangchuyin980321@gmail.com"
-git config --global http.proxy http://198.18.0.1:7890
-conda config --set proxy_servers.http http://198.18.0.1:7890
-conda config --set proxy_servers.https https://198.18.0.1:7890
-conda config --set ssl_verify false
 
+# use root to create root WSL (not user WSL)
 ~/.bashrc
 export clash_ip="198.18.0.1"
 export http_proxy="http://$clash_ip:7890"
@@ -20,39 +13,47 @@ export httpsProxy="https://$clash_ip:7890"
 export ftpProxy="http://$clash_ip:7890"
 export HTTP_PROXY="http://$clash_ip:7890"
 export HTTPS_PROXY="https://$clash_ip:7890"
-
+alias pip="pip --proxy http://198.18.0.1:7890"
+env | grep -i proxy
 # use WSL IP(dynamic, use ipconfig to check in windows cmd) as display port to external VCXSRV server
+cd /home/work/trade
 export DISPLAY="178.28.240.1:0"
-cd /home/chuyin/work/trade
-code .
+export QUANDL_API_KEY="9Q5bVWxqJE-94HKpntUg"
+("6y7b4GG74vHE4sssJ8Ef")
+# code .
 
 /etc/apt/apt.conf
 Acquire::http::proxy "http://198.18.0.1:7890";
 Acquire::https::proxy "https://198.18.0.1:7890";
 Acquire::ftp::proxy "http://198.18.0.1:7890";
 
-conda config --show
-conda config --remove-key proxy_servers
-conda clean --source-cache
+vim /etc/apt/apt.conf.d/proxy.conf
+- nameserver 8.8.8.8
 
-- pip freeze > requirements.txt
-- cat requirements.txt | xargs -n 1 mamba install
-- sed 's/==.*//' env/requirements.txt > env/requirements_nameonly.txt
-- export QUANDL_API_KEY="9Q5bVWxqJE-94HKpntUg" ("6y7b4GG74vHE4sssJ8Ef")
+# you must update (otherwise proxy not work)
+apt upgrade
+apt update
+# c-libraries / apt system packages
+sudo apt install python-dev-is-python3 gfortran pkg-config libfreetype6-dev libatlas-base-dev hdf5-tools python3-pip
 
 # primarily use conda/mamba packages
 # recommend not to use mamba/conda packages with pip packages
 # create old environment for specific packages
 # install left-over pip package in conda/mamba environment(not avaliable in system python(pip) env)
-mamba update --all
-mamba env list
-mamba deactivate py_3p6
-mamba env remove -n py_3p6
-conda remove --name py_3p6 --all
+
+# env (check email for personal auth token)
+git clone --recurse-submodules -j8 git://github.com/CoCoMilkyWay/trade.git
+
+git config --global user.name "CoCoMilkyWay"
+git config --global user.email "wangchuyin980321@gmail.com"
+git config --global http.proxy http://198.18.0.1:7890
+git config --global https.proxy https://198.18.0.1:7890
+conda config --set proxy_servers.http http://198.18.0.1:7890
+conda config --set proxy_servers.https https://198.18.0.1:7890
+conda config --set ssl_verify false
 
 # successful flow installing zipline+alphalens+pyfolio
-# c-libraries / apt system packages
-sudo apt install libatlas-base-dev python-dev-is-python3 gfortran pkg-config libfreetype6-dev hdf5-tools
+
 # ta-lib
 wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
 tar -xzf ta-lib-0.4.0-src.tar.gz
@@ -92,8 +93,21 @@ change to this so that A, B has same dimensions:
 pip list -v
 mamba list -v
 
+mamba update --all
+mamba env list
+mamba deactivate py_3p6
+mamba env remove -n py_3p6
+conda remove --name py_3p6 --all
+
+conda config --show
+conda config --remove-key proxy_servers
+conda clean --all
+
+pip freeze > requirements.txt
+cat requirements.txt | xargs -n 1 mamba install
+sed 's/==.*//' env/requirements.txt > env/requirements_nameonly.txt
+
 mamba create -n py_3p10 python=3.10 ipykernel
-mamba install numpy pandas seaborn pandas-datareader nbconvert zipline-reloaded alphalens-reloaded pyfolio-reloaded
 mamba upgrade&update --all
 
 # trade
