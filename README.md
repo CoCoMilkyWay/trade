@@ -7,30 +7,36 @@ git config --global user.name "CoCoMilkyWay"
 git config --global user.email "wangchuyin980321@gmail.com"
 git config --global http.proxy http://198.18.0.1:7890
 git config --global https.proxy https://198.18.0.1:7890
-conda config --set proxy_servers.http http://198.18.0.1:7890
-conda config --set proxy_servers.https https://198.18.0.1:7890
-conda config --set ssl_verify false
 
 ~/.bashrc
-export clash_ip="198.18.0.1"
-export http_proxy="http://$clash_ip:7890"
-export https_proxy="https://$clash_ip:7890"
-export ftp_proxy="http://$clash_ip:7890"
-export httpProxy="http://$clash_ip:7890"
-export httpsProxy="https://$clash_ip:7890"
-export ftpProxy="http://$clash_ip:7890"
-export HTTP_PROXY="http://$clash_ip:7890"
-export HTTPS_PROXY="https://$clash_ip:7890"
+export clash_ip=198.18.0.1
+export clash_port=7890
+export http_proxy="http://$clash_ip:$clash_port"
+export https_proxy="https://$clash_ip:$clash_port"
+export ftp_proxy="http://$clash_ip:$clash_port"
+export httpProxy="http://$clash_ip:$clash_port"
+export httpsProxy="https://$clash_ip:$clash_port"
+export ftpProxy="http://$clash_ip:$clash_port"
+export HTTP_PROXY="http://$clash_ip:$clash_port"
+export HTTPS_PROXY="https://$clash_ip:$clash_port"
+env | grep -i proxy
+
+alias pip="pip --proxy http://198.18.0.1:7890"
 
 # use WSL IP(dynamic, use ipconfig to check in windows cmd) as display port to external VCXSRV server
 export DISPLAY="178.28.240.1:0"
 cd /home/chuyin/work/trade
 code .
 
+# APT(ubuntu) proxy
 /etc/apt/apt.conf
 Acquire::http::proxy "http://198.18.0.1:7890";
 Acquire::https::proxy "https://198.18.0.1:7890";
 Acquire::ftp::proxy "http://198.18.0.1:7890";
+# mamba/pip (SLL connection error: set to others -> clean -> switch back)
+conda config --set proxy_servers.http http://198.18.0.1:7890
+conda config --set proxy_servers.https http://198.18.0.1:7890
+conda config --set ssl_verify false
 
 conda config --show
 conda config --remove-key proxy_servers
@@ -51,9 +57,11 @@ mamba deactivate py_3p6
 mamba env remove -n py_3p6
 conda remove --name py_3p6 --all
 
+
+# =============================================================================
 # successful flow installing zipline+alphalens+pyfolio
 # c-libraries / apt system packages
-sudo apt install libatlas-base-dev python-dev-is-python3 gfortran pkg-config libfreetype6-dev hdf5-tools
+sudo apt install libatlas-base-dev python-dev-is-python3 gfortran pkg-config libfreetype6-dev hdf5-tools libssl-dev
 # ta-lib
 wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
 tar -xzf ta-lib-0.4.0-src.tar.gz
@@ -89,13 +97,11 @@ change to this so that A, B has same dimensions:
     A = A.loc[idx]
     B = B.loc[idx]
 
+# =============================================================================
+
 # to show pip/mamba install paths (use pip to install packages not avaliable in mamba)
 pip list -v
 mamba list -v
-
-mamba create -n py_3p10 python=3.10 ipykernel
-mamba install numpy pandas seaborn pandas-datareader nbconvert zipline-reloaded alphalens-reloaded pyfolio-reloaded
-mamba upgrade&update --all
 
 # trade
 - https://bigquant.com/trading/list
