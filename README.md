@@ -116,6 +116,12 @@ sed 's/==.*//' env/requirements.txt > env/requirements_nameonly.txt
 mamba create -n py_3p10 python=3.10 ipykernel
 mamba upgrade&update --all
 
+# ===================================================================================
+# check blocked ip ports by windows
+netsh interface ipv4 show excludedportrange protocol=tcp
+
+
+
 # trade
 - https://bigquant.com/trading/list
 - https://www.kaggle.com/competitions/ubiquant-market-prediction/leaderboard
