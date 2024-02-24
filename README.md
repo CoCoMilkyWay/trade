@@ -41,10 +41,12 @@ sudo apt install python-dev-is-python3 gfortran pkg-config libfreetype6-dev liba
 # recommend not to use mamba/conda packages with pip packages
 # create old environment for specific packages
 # install left-over pip package in conda/mamba environment(not avaliable in system python(pip) env)
+curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+bash Miniforge3-$(uname)-$(uname -m).sh
 
 # env (check email for personal auth token)
 git clone --recurse-submodules -j8 git://github.com/CoCoMilkyWay/trade.git
-
+(git clone https://github.com/CoCoMilkyWay/machine-learning-for-trading.git)
 git config pull.rebase false
 git config --global user.name "CoCoMilkyWay"
 git config --global user.email "wangchuyin980321@gmail.com"
