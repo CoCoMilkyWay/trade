@@ -22,6 +22,7 @@ export QUANDL_API_KEY="9Q5bVWxqJE-94HKpntUg"
 ("6y7b4GG74vHE4sssJ8Ef")
 # code .
 
+# APT(ubuntu) proxy
 /etc/apt/apt.conf
 Acquire::http::proxy "http://198.18.0.1:7890";
 Acquire::https::proxy "https://198.18.0.1:7890";
@@ -89,6 +90,8 @@ change to this so that A, B has same dimensions:
     idx = A.index.intersection(B.index)
     A = A.loc[idx]
     B = B.loc[idx]
+
+# =============================================================================
 
 # to show pip/mamba install paths (use pip to install packages not avaliable in mamba)
 pip list -v
