@@ -44,6 +44,7 @@ sudo apt install python-dev-is-python3 gfortran pkg-config libfreetype6-dev liba
 # env (check email for personal auth token)
 git clone --recurse-submodules -j8 git://github.com/CoCoMilkyWay/trade.git
 
+git config pull.rebase false
 git config --global user.name "CoCoMilkyWay"
 git config --global user.email "wangchuyin980321@gmail.com"
 git config --global http.proxy http://198.18.0.1:7890
