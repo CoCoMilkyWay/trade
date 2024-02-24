@@ -6,6 +6,7 @@ git submodule update --init --remote
 git config --global user.name "CoCoMilkyWay"
 git config --global user.email "wangchuyin980321@gmail.com"
 git config --global http.proxy http://198.18.0.1:7890
+git config --global https.proxy https://198.18.0.1:7890
 conda config --set proxy_servers.http http://198.18.0.1:7890
 conda config --set proxy_servers.https https://198.18.0.1:7890
 conda config --set ssl_verify false
@@ -33,7 +34,7 @@ Acquire::ftp::proxy "http://198.18.0.1:7890";
 
 conda config --show
 conda config --remove-key proxy_servers
-conda clean --source-cache
+conda clean --all
 
 - pip freeze > requirements.txt
 - cat requirements.txt | xargs -n 1 mamba install
