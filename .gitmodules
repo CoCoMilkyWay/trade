@@ -4,3 +4,9 @@
 [submodule "machine-learning-for-trading"]
     path = machine-learning-for-trading
     url = https://github.com/CoCoMilkyWay/machine-learning-for-trading.git
+[submodule "vnpy"]
+	path = vnpy
+	url = https://github.com/CoCoMilkyWay/vnpy.git
+[submodule "wondertrader"]
+	path = wondertrader
+	url = https://github.com/CoCoMilkyWay/wondertrader.git
