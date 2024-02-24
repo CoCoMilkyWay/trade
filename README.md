@@ -1,9 +1,39 @@
 ![frameworks](figure/frameworks.png)
 ![quantaxis](figure/quantaxis.png)
-# env
-- code . --no-sandbox
-- git submodule update --init --remote
-- git config --global http.proxy 127.0.0.1:7890
+![quantaxis_frame](figure/quantaxis_frame.png)
+# env (check email for personal auth token)
+git submodule update --init --remote
+git config --global user.name "CoCoMilkyWay"
+git config --global user.email "wangchuyin980321@gmail.com"
+git config --global http.proxy http://198.18.0.1:7890
+conda config --set proxy_servers.http http://198.18.0.1:7890
+conda config --set proxy_servers.https https://198.18.0.1:7890
+conda config --set ssl_verify false
+
+~/.bashrc
+export clash_ip="198.18.0.1"
+export http_proxy="http://$clash_ip:7890"
+export https_proxy="https://$clash_ip:7890"
+export ftp_proxy="http://$clash_ip:7890"
+export httpProxy="http://$clash_ip:7890"
+export httpsProxy="https://$clash_ip:7890"
+export ftpProxy="http://$clash_ip:7890"
+export HTTP_PROXY="http://$clash_ip:7890"
+export HTTPS_PROXY="https://$clash_ip:7890"
+
+# use WSL IP(dynamic, use ipconfig to check in windows cmd) as display port to external VCXSRV server
+export DISPLAY="178.28.240.1:0"
+cd /home/chuyin/work/trade
+code .
+
+/etc/apt/apt.conf
+Acquire::http::proxy "http://198.18.0.1:7890";
+Acquire::https::proxy "https://198.18.0.1:7890";
+Acquire::ftp::proxy "http://198.18.0.1:7890";
+
+conda config --show
+conda config --remove-key proxy_servers
+conda clean --source-cache
 
 - pip freeze > requirements.txt
 - cat requirements.txt | xargs -n 1 mamba install
@@ -15,10 +45,7 @@
 # create old environment for specific packages
 # install left-over pip package in conda/mamba environment(not avaliable in system python(pip) env)
 mamba update --all
-mamba install python=3.6
-mamba create -n py_3p6 python=3.6
 mamba env list
-mamba activate py_3p6
 mamba deactivate py_3p6
 mamba env remove -n py_3p6
 conda remove --name py_3p6 --all
@@ -37,7 +64,7 @@ sudo make install
 mamba create -n py_3p6 python=3.6 ipykernel
 mamba env list
 mamba activate py_3p6
-mamba install numpy pandas seaborn pandas-datareader nbconvert
+mamba install numpy pandas seaborn pandas-datareader nbconvert mkl-service
 mamba search PKG --info
 mamba install -v --file req.txt
 pip install zipline
