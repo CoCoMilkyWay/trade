@@ -6,13 +6,13 @@
 ~/.bashrc
 export clash_ip="198.18.0.1"
 export http_proxy="http://$clash_ip:7890"
-export https_proxy="https://$clash_ip:7890"
+export https_proxy="http://$clash_ip:7890"
 export ftp_proxy="http://$clash_ip:7890"
 export httpProxy="http://$clash_ip:7890"
-export httpsProxy="https://$clash_ip:7890"
+export httpsProxy="http://$clash_ip:7890"
 export ftpProxy="http://$clash_ip:7890"
 export HTTP_PROXY="http://$clash_ip:7890"
-export HTTPS_PROXY="https://$clash_ip:7890"
+export HTTPS_PROXY="http://$clash_ip:7890"
 alias pip="pip --proxy http://198.18.0.1:7890"
 env | grep -i proxy
 # use WSL IP(dynamic, use ipconfig to check in windows cmd) as display port to external VCXSRV server
@@ -25,7 +25,7 @@ export QUANDL_API_KEY="9Q5bVWxqJE-94HKpntUg"
 # APT(ubuntu) proxy
 /etc/apt/apt.conf
 Acquire::http::proxy "http://198.18.0.1:7890";
-Acquire::https::proxy "https://198.18.0.1:7890";
+Acquire::https::proxy "http://198.18.0.1:7890";
 Acquire::ftp::proxy "http://198.18.0.1:7890";
 
 vim /etc/apt/apt.conf.d/proxy.conf
