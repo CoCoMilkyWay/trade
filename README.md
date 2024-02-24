@@ -49,9 +49,9 @@ git config pull.rebase false
 git config --global user.name "CoCoMilkyWay"
 git config --global user.email "wangchuyin980321@gmail.com"
 git config --global http.proxy http://198.18.0.1:7890
-git config --global https.proxy https://198.18.0.1:7890
+git config --global https.proxy http://198.18.0.1:7890
 conda config --set proxy_servers.http http://198.18.0.1:7890
-conda config --set proxy_servers.https https://198.18.0.1:7890
+conda config --set proxy_servers.https http://198.18.0.1:7890
 conda config --set ssl_verify false
 
 # successful flow installing zipline+alphalens+pyfolio
