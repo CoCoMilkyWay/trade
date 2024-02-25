@@ -1,5 +1,15 @@
+# set python local dev env
+alias up="pip install -e /home/chuyin/trade/wtpy"
+
 # mysql
+sudo snap install mysql-workbench-community
+sudo apt-get install gnome-keyring
+sudo snap connect mysql-workbench-community:password-manager-service :password-manager-service
+
+sudo systemctl status mysql
+sudo systemctl start mysql
 service --status-all
+
 mysql -u root -p
 "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"
 net stop mysql80

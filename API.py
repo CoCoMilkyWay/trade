@@ -11,7 +11,7 @@
 ##需要按照如下代码使用数据接口，您的token已在下方代码设置好
 
 ######## 使用方法一 ##############
-!pip install tushare==1.2.89 -i https://pypi.tuna.tsinghua.edu.cn/simple
+# pip install tushare==1.2.89 -i https://pypi.tuna.tsinghua.edu.cn/simple
 # 导入tushare
 import tushare as ts
 # 初始化pro接口
@@ -44,7 +44,7 @@ rt_tick_df
 
 ######## 使用方法二 ##############
 #安装或更新majorshare
-!pip install -U  majorshare  -i https://pypi.tuna.tsinghua.edu.cn/simple
+# pip install -U  majorshare  -i https://pypi.tuna.tsinghua.edu.cn/simple
 # 引入majorshare
 import majorshare as mjs
 #设置majorshare的token
