@@ -1,5 +1,6 @@
 # mysql
 service --status-all
+mysql -u root -p
 "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"
 net stop mysql80
 net start mysql80
