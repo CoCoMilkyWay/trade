@@ -1,0 +1,34 @@
+/**
+ *
+ * zm : 自定义私有命名 （防冲突）如 : zm ;
+ * zm + class : 自定义私有命名 （防冲突）如 : zm-class ;
+ * Creation time : 2022-03-1 22:55:59 ;
+ * Modification time : ====== ;
+ * Author : zm ;
+ * Modified By: zm ;
+ * Remarks: 
+ *
+ **/
+
+.zm-media {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 1rem 0;
+}
+
+.zm-media .zm-media-img,
+.zm-media .zm-media-video {
+  margin-right: 16px;
+}
+
+.zm-media .zm-media-img img {
+  width: 100%;
+  height: 100%;
+}
+
+.zm-media .zm-media-title {
+  font-size: 1.125rem;
+  margin-top: 4px;
+  margin-bottom: 6px;
+}

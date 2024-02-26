@@ -1,0 +1,61 @@
+/**
+ *
+ * 配置
+ * zm : 别名 （防冲突）如 : zm ;
+ * zm + 变量名 : 别名 （防冲突）如 : let zm_A = 0 ;
+ * zm + 方法名 : 别名 （防冲突）如 : zm_Function ;
+ * Creation time : 2022-1-27 16:29:01 ;
+ * Modification time : 2022-1-27 16:29:08 ;
+ * Author : zm ;
+ * Modified By: zm ;
+ *
+ **/
+
+if (typeof zm_service == 'undefined') {
+  // URL 前缀配置
+  console.log(ctx);
+  const baseURL = ctx !== '' ? ctx : ''; // process.env.REACT_APP_URI;
+  console.log(baseURL);
+  // 创建实例
+  var zm_service = axios.create({
+    // `baseURL` 将自动加在 `url` 前面，除非 `url` 是一个绝对 URL。
+    baseURL: baseURL,
+    // `withCredentials` 表示跨域请求时是否需要使用凭证
+    withCredentials: true,
+    // `timeout` 指定请求超时的毫秒数(0 表示无超时时间)
+    timeout: 1000 * 10,
+  });
+};
+
+!function(window, zm) {
+  // 添加请求拦截器
+  zm.interceptors.request.use(
+    function (config) {
+      if (config['type']) {
+        if (config.method == 'post') {
+          config.headers['Content-Type'] = config.type == 'form' ?
+            'application/x-www-form-urlencoded' :
+            config.headers['Content-Type'];
+          config.data = Qs.stringify(config.data);
+        }
+      }
+      return config;
+    },
+    function (error) {
+      return Promise.reject(error);
+    }
+  );
+  
+  zm.interceptors.response.use(
+    function (response) {
+      if (response.status === 200) {
+        return response.data;
+      }
+      return response;
+    },
+    function (error) {
+      return Promise.reject(error);
+    }
+  );
+
+}(window, zm_service);

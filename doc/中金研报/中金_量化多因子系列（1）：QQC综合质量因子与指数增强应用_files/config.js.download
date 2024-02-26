@@ -1,0 +1,16 @@
+/**
+ *
+ * 国际化配置
+ * zm : 别名 （防冲突）如 : zm ;
+ * zm + 变量名 : 别名 （防冲突）如 : let zm_A = 0 ;
+ * zm + 方法名 : 别名 （防冲突）如 : zm_Function ;
+ * Creation time : ====== ;
+ * Modification time : 2021-12-15 16:25:11 ;
+ * Author : zm ;
+ * Modified By: zm ;
+ *
+ **/
+
+const config = {
+  langType: ['form', 'btn', 'tips', 'conferenceCall']
+}

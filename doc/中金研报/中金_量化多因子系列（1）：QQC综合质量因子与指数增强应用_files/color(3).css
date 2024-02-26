@@ -1,0 +1,17 @@
+/**
+ *
+ * zm : 自定义私有命名 （防冲突）如 : zm ;
+ * zm + class : 自定义私有命名 （防冲突）如 : zm-class ;
+ * Creation time : 2022-02-27 11:03:59 ;
+ * Modification time : ====== ;
+ * Author : zm ;
+ * Modified By: zm ;
+ * Remarks: 
+ *
+ **/
+
+.zm-tab { background-color: #FFFFFF; }
+.zm-tab .layui-tab-title .layui-this { color: #a94442; }
+.zm-tab .layui-tab-title .layui-this:after { border-color: transparent; }
+[zm-css-type="menu"] { background-color: transparent; }
+[zm-css-type="menu"] .layui-tab-title { background-color: #FFFFFF; }

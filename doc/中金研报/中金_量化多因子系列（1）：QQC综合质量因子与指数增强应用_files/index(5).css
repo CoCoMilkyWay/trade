@@ -1,0 +1,108 @@
+/**
+ *
+ * zm : 自定义私有命名 （防冲突）如 : zm ;
+ * zm + class : 自定义私有命名 （防冲突）如 : zm-class ;
+ * Creation time : ====== ;
+ * Modification time : 2022-4-2 14:04:31 ;
+ * Author : zm ;
+ * Modified By: zm ;
+ * Remarks: 
+ *
+ **/
+
+.zm-table {
+  position: relative;
+}
+
+.zm-table .layui-table-view {
+  margin: 0;
+  border: none;
+}
+
+.zm-table .layui-table-cell {
+  height: auto;
+  line-height: 1.5;
+  padding: 0 1rem;
+}
+
+.zm-table .layui-table-header {
+  border: none;
+}
+
+.zm-table .layui-table-body table {
+  width: 100%;
+}
+
+.zm-table .layui-table-body tbody tr:nth-child(even) {
+  background-color: rgba(250, 250, 250, 1);
+}
+
+.zm-table .layui-table thead tr th,
+.zm-table .layui-table tbody tr td {
+  padding: 1rem 0;
+  border: none;
+}
+
+.zm-table .layui-table thead tr th {
+  padding: 0.75rem 0;
+}
+
+.zm-table .zm-table-btn {
+  position: relative;
+}
+
+.zm-table-btn .zm-btn-play {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.zm-table-btn .zm-btn-play:before,
+.zm-table-btn .zm-btn-play:after{
+  display: inline-block;
+  content: "";
+}
+
+.zm-table-btn .zm-btn-play:before {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+}
+
+.zm-table-main {
+  padding: 0.75rem 0;
+}
+
+.zm-table-main a {
+  color: inherit;
+}
+
+.zm-table-main button,
+.zm-table-main a[class*="btn"] {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  justify-content: center;
+  min-width: 90px;
+  height: auto;
+  line-height: 1.5;
+  margin: 0 -1rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.zm-table-main a[class*="btn"]:hover {
+  text-decoration: none;
+}
+
+.zm-table-list {
+  padding: 0;
+}
+
+.zm-table-list .layui-table thead tr th {
+  padding: 0;
+}

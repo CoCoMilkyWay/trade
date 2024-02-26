@@ -1,0 +1,12 @@
+function getLocal(LOCAL_KEY) {
+  const ret = localStorage.getItem(LOCAL_KEY);
+  return JSON.parse(ret);
+}
+
+function setLocal(LOCAL_KEY, data) {
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(data));
+}
+
+function removeLocal(LOCAL_KEY) {
+  localStorage.removeItem(LOCAL_KEY);
+}

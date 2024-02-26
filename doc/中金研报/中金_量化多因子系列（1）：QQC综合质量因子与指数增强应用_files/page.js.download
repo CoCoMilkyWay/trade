@@ -1,0 +1,72 @@
+/**
+ *
+ * 配置
+ * zm : 别名 （防冲突）如 : zm ;
+ * zm + 变量名 : 别名 （防冲突）如 : let zm_A = 0 ;
+ * zm + 方法名 : 别名 （防冲突）如 : zm_Function ;
+ * 
+ * ===Function===
+ * page : page
+ * success : 回调
+ *
+ * ===Params===
+ * dom : dom ( id )
+ * data : page对象
+ * 
+ *
+ * Creation time : 2022-02-27 11:03:59 ;
+ * Modification time : ====== ;
+ * Author : zm ;
+ * Modified By: zm ;
+ *
+ **/
+
+!function(window, zm) {
+  'use strict';
+  if (zm) {
+    layui.use(['layer', 'laypage'], function() {
+      let layer = layui.layer;
+      let laypage = layui.laypage;
+      zm['page'] = function(dom, pageData, success) {
+        let pageConfig = {
+          pageNum: 1,
+          pageSize: 10,
+          limits: [10, 20, 30, 40, 50],
+        }
+        let data = Object.assign({}, pageConfig, pageData);
+        if (data && data.count > 0) {
+          laypage.render({
+            elem: dom,
+            count: data.count,
+            limit: data.pageSize,
+            limits: data.limits,
+            curr: data.pageNum,
+            prev: '<',
+            next: '>',
+            // layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip'],
+            layout: ['count', 'prev', 'page', 'next', 'limit'],
+            jump: function(obj, first, layer){
+              if (zm_lang == 'en_GB') {
+                let element=document.getElementById(dom);
+                let count = element.getElementsByClassName('layui-laypage-count')[0];
+                    count.innerHTML = 'All ' + data.count;
+                let limit = element.getElementsByClassName('layui-laypage-limits')[0];
+                let option = limit.querySelectorAll('option');
+                for (let i = 0; i < option.length; i++) {
+                  option[i].innerHTML = data.limits[i] + ' / Page';
+                }
+              };
+              if(!first){
+                if (success) {
+                  success(obj, layer);
+                } else{
+                  console.log('No, success')
+                }
+              }
+            }
+          });
+        }
+      }
+    });
+  }
+}(window, zm_public);

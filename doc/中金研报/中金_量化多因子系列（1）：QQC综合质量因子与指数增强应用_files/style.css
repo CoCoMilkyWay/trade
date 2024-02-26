@@ -1,0 +1,65 @@
+/**
+ *
+ * zm : 自定义私有命名 （防冲突）如 : zm ;
+ * zm + class : 自定义私有命名 （防冲突）如 : zm-class ;
+ * Creation time : ====== ;
+ * Modification time : 2022-2-10 16:29:43 ;
+ * Author : zm ;
+ * Modified By: zm ;
+ * Remarks: 
+ *
+ **/
+
+html,
+body {
+  height: 100%;
+}
+
+html {
+  font-size: 16px;
+}
+
+body,
+.zm-main-body {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  line-height: 1.5;
+}
+
+.zm-main-body,
+.zm-main-body .zm-container {
+  position: relative;
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.zm-main-body .zm-container {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.zm-main-body .zm-container .zm-section-body {
+  position: relative;
+  margin: 1rem 0;
+  padding: 0 1.25rem;
+  -ms-flex: 0 0 1200px;
+  flex: 0 0 1200px;
+  max-width: 1200px;
+}
+
+.zm-main-body .zm-footer {
+  position: relative;
+}
+
+body > .footer {
+  position: relative;
+  margin-top: auto;
+}

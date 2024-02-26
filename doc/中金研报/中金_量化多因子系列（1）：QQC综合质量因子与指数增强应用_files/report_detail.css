@@ -1,0 +1,44 @@
+.report-article-info .report-title{
+  text-align: center;
+  width: 720px;
+  margin: 0px auto;
+}
+.report-article-info .report-title h4{
+  color: #9c0000;
+  /* border-bottom: 1px solid #e8e8e8; */
+  /* padding-bottom: 15px; */
+}
+
+.report-article-info .report-title .sm-title{
+  color: #666;
+}
+
+.report-article-info .report-title .sm-title i{
+  margin-left: 10px;
+  margin-right: 10px;
+  font-style: normal;
+}
+
+.report-article-info .article-content{
+ /*  margin-top: 30px; */
+/*   text-indent: 2em; */
+  line-height: 30px;
+  width: 720px;
+  margin: 30px auto;
+}
+.report-article-info .see-more{
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.disclaimer-content{
+  width: 1200px;
+}
+
+body{
+  padding-bottom: 210px;
+}
+
+.ct-detail-sm{
+	
+}

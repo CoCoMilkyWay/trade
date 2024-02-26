@@ -1,0 +1,2622 @@
+
+<!-- saved from url=(0059)https://research.cicc.com/frontend/recommend/detail?id=1758 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script src="chrome-extension://fgddmllnllkalaagkghckoinaemmogpe/scripts/content/gps.js"></script><link id="layuicss-laydate" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/laydate.css" media="all"><link id="layuicss-layer" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/layer.css" media="all"><link id="layuicss-skincodecss" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/code.css" media="all"><script src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/jquery.mousewheel.min.js.download"></script></head><body data-new-gr-c-s-check-loaded="14.1156.0" data-gr-ext-installed="" class="" style=""><div id="xxmm" style="display: none">本人在此不可撤销地确认，本人为非美国1933年证券法定义下的美国人及/或非来自于美国的读者；或者本人是符合美国SEC&nbsp;15a-6规则下的主要机构投资者（资产或管理的资产超过100万美元）。本人确保前述信息均真实、准确。对于任何虚假确认所引致的一切后果，本人将承担全部责任。<br><br>本人也不会以任何方式（包括但不限于纸质或电子方式）全部或部分地翻版、复制、刊登、发表或引用本网站上的任何内容。<br><br>本人亦同意并确认本人对本网站上的任何内容的获取不构成与中金公司的任何合同或承诺的基础，中金公司也不因本人获取本网站上的任何内容而将本人视为中金公司的客户。本人不会依赖本网站上的信息、观点和结论而取代自身的独立判断。本人会自主做出投资决策并自行承担一切风险，对本人使用本网站所造成的一切后果及风险，中金公司及/或其关联人员均不承担任何责任。</div>
+<script type="text/javascript">
+  if (typeof zm_lang == 'undefined') {
+    var zm_lang = new String();
+    //!(function(window, zm) {
+    let lang = 'cn';
+    if (lang === 'cn') {
+      zm_lang = 'zh_CN';
+    } else if (lang === 'en') {
+      zm_lang = 'en_GB';
+    } else {
+      zm_lang = lang;
+    };
+    //})(window, zm_lang);
+  };
+</script>
+
+<script type="text/javascript">
+  !function(t) {
+    let env_lang = 'cn';
+    let env_url = window.location.href;
+    if(env_lang == 'en') {
+      if(env_url.indexOf("cicc-portal") >= 0 ) {
+        
+      } else if(env_url.indexOf("dev.") >= 0 ) {
+        
+      } else if(env_url.indexOf("qa.") >= 0 ) {
+        
+      } else if(env_url.indexOf("uat.") >= 0 ) {
+        
+      } else if(env_url.indexOf("staging.") >= 0 ) {
+        
+      } else {
+        
+      }
+    } else if(env_lang != 'en') {
+      if(env_url.indexOf("cicc-portal") >= 0 ) {
+        
+      } else if(env_url.indexOf("dev.") >= 0 ) {
+        
+      } else if(env_url.indexOf("qa.") >= 0 ) {
+        
+      } else if(env_url.indexOf("uat.") >= 0 ) {
+        
+      } else if(env_url.indexOf("staging.") >= 0 ) {
+        
+      } else {
+        
+      }
+    }
+  }(window);
+</script>
+
+<script type="text/javascript">
+    var ctx = '';
+    var lang = 'cn';
+    if (lang != "en") {
+        lang = "zh";
+    } else {
+        lang = 'en'
+    }
+
+    function noPermissionAlert(sucFun) {
+    	var lang2 = lang;
+    	if (lang2 != "en") {
+    		lang2 = "zh";
+        } else {
+        	lang2 = 'en'
+        }
+    	
+        var body = "<p style='font-size: 14px;text-align: left;line-height: 2;color:#333'>" + LANGUAGE[lang2].NO_PERMISSION_CONTENT_TEXT +
+            "</p>"
+        cicc_index.ciccModal({
+            type:'cicc-modal c-confirm',
+            type: 'cicc-modal no-permission',
+            "content": {
+                "title": LANGUAGE[lang2].NO_PERMISSION_TEXT,
+                "body": body,
+                "suc_opt_text": LANGUAGE[lang2].CLOSE_TEXT, "err_opt_text": ''
+            }, "suc_opt": sucFun
+        });
+    }
+
+    //研报点击事件
+    function documentClick(documentId) {
+        if (true) {
+            window.location.href = "/login";
+            return;
+        }
+        if (true) {//自主注册用户
+            noPermissionAlert(null);
+            return;
+        }
+        var detailClick = function (documentId) {
+            var a = $("<a href='/document/detail?id=" + documentId + "' target='_parent'></a>").get(0);
+            var e = document.createEvent('MouseEvents');
+            e.initEvent('click', true, true);
+            a.dispatchEvent(e);
+        }
+        detailClick(documentId);
+    }
+
+    function unAmericanConfirm(email,completeFun) {
+        $.post("/index/unAmericanConfirm", {"username":email}, function (result) {
+            if (result.ret == 1) {
+                if(completeFun!=null){
+                    completeFun();
+                }
+                return;
+            }
+            if(lang!="en"){
+                lang="zh";
+            }
+            var content = LANGUAGE[lang].UNAMERICAN_TEXT;
+            var tipTitle = LANGUAGE[lang].UNAMERICAN_TITLE_TEXT;
+            if (result.data != null) {
+                if (lang != 'en') {
+                    content = result.data.content;
+                    tipTitle = result.data.title;
+                } else {
+                    content = result.data.econtent;
+                    tipTitle = result.data.etitle;
+                }
+            }
+            var confirmFun = function (dom) {
+                $.post("/index/unAmericanConfirmClick", {"username":email}, function (rvrv) {
+                    $(dom).modal('hide');
+                    if(completeFun!=null){
+                        completeFun();
+                    }
+                });
+            }
+             $('#xxmm').html(content)
+             content = $('#xxmm').html()
+            var xxxx = content.replace(/&nbsp;/g, ' ')
+            var h = '<div class="clearfix">' +
+                    '<div class="disclaimer-content" id="disclaimer_content"><div class="ct-detail">' + xxxx+ '</div></div>' +
+                    '<div class="clearfix">' +
+                    '<p class="text-center c-declare-btn"><span class="btn btn-primary cus-primary" id="confirm-claimer" >'+LANGUAGE[lang].UNAMERICAN_CONFIRM_TEXT+'</span></p>' +
+                    '</div></div>'
+            cicc_index.ciccModal({
+                type:'c-declare',
+                content: {
+                    title: tipTitle,
+                    suc_opt_text: '',
+                    err_opt_text: '',
+                    body: h
+                }, "cicc_backdrop": 'static',
+                initModal: function () {
+	                  cicc_index.scrollBar('load', '.disclaimer-content')
+                    $('#confirm-claimer').on('click', function () {
+                        confirmFun('#ciccModal');
+                    })
+                }
+            });
+        });
+    }
+    
+	function checkIsNumber(e) {
+		//限定输入只能为正整数
+		var regu = /^[1-9]\d*$/;
+		if(!regu.test($(e).val()) ){
+			var currentNum = $(e).parent().parent().find(".active").children(":eq(0)").text();
+			$(e).val(currentNum);
+		}
+	}
+	var today = new Date('');
+    
+</script>
+
+
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="https://research.cicc.com/static/front/img/cicc.ico" type="image/x-icon">
+    <title>每日推荐</title>
+    <!-- Bootstrap -->
+    <link href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/bootstrap.min.css" rel="stylesheet">
+    <!-- 通用样式，每个页面都需要 -->
+    <link href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/common.css" rel="stylesheet">
+    <link rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/jquery.mCustomScrollbar.min.css">
+    <!-- 当前页面样式 -->
+    <link href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/report_detail.css" rel="stylesheet">
+    <style>
+	    .ct-detail-sm{
+	        height: 79px;
+          overflow: hidden;
+          padding: 0 20px;
+          color: #666;
+          line-height: 20px;
+          font-size: 12px;
+	    }
+	    .sm-title{
+	    	color:#640000;
+	    }
+	    .sm-title i{
+	    	margin-left:10px; cursor:pointer; font-size: 12px; position: relative; top: 0px;    	
+	    }
+	    .disclaimer-content{
+	        width: auto;
+	    }
+	    .c-content{
+	    	margin-top:0px;
+	    }
+	    .report-article-info .report-title h4{
+		  color: #333; font-weight:bold; font-size:20px;
+		}
+		.report-article-info .article-content{
+			margin-top: 60px;
+		}
+    .article-content{
+      word-wrap: break-word;
+    }
+	</style>
+
+
+<div id="xxmm" style="display: none"></div>
+<script type="text/javascript">
+  if (typeof zm_lang == 'undefined') {
+    var zm_lang = new String();
+    //!(function(window, zm) {
+    let lang = 'cn';
+    if (lang === 'cn') {
+      zm_lang = 'zh_CN';
+    } else if (lang === 'en') {
+      zm_lang = 'en_GB';
+    } else {
+      zm_lang = lang;
+    };
+    //})(window, zm_lang);
+  };
+</script>
+
+<script type="text/javascript">
+  !function(t) {
+    let env_lang = 'cn';
+    let env_url = window.location.href;
+    if(env_lang == 'en') {
+      if(env_url.indexOf("cicc-portal") >= 0 ) {
+        
+      } else if(env_url.indexOf("dev.") >= 0 ) {
+        
+      } else if(env_url.indexOf("qa.") >= 0 ) {
+        
+      } else if(env_url.indexOf("uat.") >= 0 ) {
+        
+      } else if(env_url.indexOf("staging.") >= 0 ) {
+        
+      } else {
+        
+      }
+    } else if(env_lang != 'en') {
+      if(env_url.indexOf("cicc-portal") >= 0 ) {
+        
+      } else if(env_url.indexOf("dev.") >= 0 ) {
+        
+      } else if(env_url.indexOf("qa.") >= 0 ) {
+        
+      } else if(env_url.indexOf("uat.") >= 0 ) {
+        
+      } else if(env_url.indexOf("staging.") >= 0 ) {
+        
+      } else {
+        
+      }
+    }
+  }(window);
+</script>
+
+<script type="text/javascript">
+    var ctx = '';
+    var lang = 'cn';
+    if (lang != "en") {
+        lang = "zh";
+    } else {
+        lang = 'en'
+    }
+
+    function noPermissionAlert(sucFun) {
+    	var lang2 = lang;
+    	if (lang2 != "en") {
+    		lang2 = "zh";
+        } else {
+        	lang2 = 'en'
+        }
+    	
+        var body = "<p style='font-size: 14px;text-align: left;line-height: 2;color:#333'>" + LANGUAGE[lang2].NO_PERMISSION_CONTENT_TEXT +
+            "</p>"
+        cicc_index.ciccModal({
+            type:'cicc-modal c-confirm',
+            type: 'cicc-modal no-permission',
+            "content": {
+                "title": LANGUAGE[lang2].NO_PERMISSION_TEXT,
+                "body": body,
+                "suc_opt_text": LANGUAGE[lang2].CLOSE_TEXT, "err_opt_text": ''
+            }, "suc_opt": sucFun
+        });
+    }
+
+    //研报点击事件
+    function documentClick(documentId) {
+        if (true) {
+            window.location.href = "/login";
+            return;
+        }
+        if (true) {//自主注册用户
+            noPermissionAlert(null);
+            return;
+        }
+        var detailClick = function (documentId) {
+            var a = $("<a href='/document/detail?id=" + documentId + "' target='_parent'></a>").get(0);
+            var e = document.createEvent('MouseEvents');
+            e.initEvent('click', true, true);
+            a.dispatchEvent(e);
+        }
+        detailClick(documentId);
+    }
+
+    function unAmericanConfirm(email,completeFun) {
+        $.post("/index/unAmericanConfirm", {"username":email}, function (result) {
+            if (result.ret == 1) {
+                if(completeFun!=null){
+                    completeFun();
+                }
+                return;
+            }
+            if(lang!="en"){
+                lang="zh";
+            }
+            var content = LANGUAGE[lang].UNAMERICAN_TEXT;
+            var tipTitle = LANGUAGE[lang].UNAMERICAN_TITLE_TEXT;
+            if (result.data != null) {
+                if (lang != 'en') {
+                    content = result.data.content;
+                    tipTitle = result.data.title;
+                } else {
+                    content = result.data.econtent;
+                    tipTitle = result.data.etitle;
+                }
+            }
+            var confirmFun = function (dom) {
+                $.post("/index/unAmericanConfirmClick", {"username":email}, function (rvrv) {
+                    $(dom).modal('hide');
+                    if(completeFun!=null){
+                        completeFun();
+                    }
+                });
+            }
+             $('#xxmm').html(content)
+             content = $('#xxmm').html()
+            var xxxx = content.replace(/&nbsp;/g, ' ')
+            var h = '<div class="clearfix">' +
+                    '<div class="disclaimer-content" id="disclaimer_content"><div class="ct-detail">' + xxxx+ '</div></div>' +
+                    '<div class="clearfix">' +
+                    '<p class="text-center c-declare-btn"><span class="btn btn-primary cus-primary" id="confirm-claimer" >'+LANGUAGE[lang].UNAMERICAN_CONFIRM_TEXT+'</span></p>' +
+                    '</div></div>'
+            cicc_index.ciccModal({
+                type:'c-declare',
+                content: {
+                    title: tipTitle,
+                    suc_opt_text: '',
+                    err_opt_text: '',
+                    body: h
+                }, "cicc_backdrop": 'static',
+                initModal: function () {
+	                  cicc_index.scrollBar('load', '.disclaimer-content')
+                    $('#confirm-claimer').on('click', function () {
+                        confirmFun('#ciccModal');
+                    })
+                }
+            });
+        });
+    }
+    
+	function checkIsNumber(e) {
+		//限定输入只能为正整数
+		var regu = /^[1-9]\d*$/;
+		if(!regu.test($(e).val()) ){
+			var currentNum = $(e).parent().parent().find(".active").children(":eq(0)").text();
+			$(e).val(currentNum);
+		}
+	}
+	var today = new Date('');
+    
+</script>
+<link rel="shortcut icon" href="https://research.cicc.com/static/front/img/cicc.ico" type="image/x-icon">
+<link rel="stylesheet" type="text/css" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/jquery.mCustomScrollbar.min.css">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<link rel="stylesheet" type="text/css" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/cicc-modal.css">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="expires" content="0">
+
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/layui.css">
+
+<!-- zm 自定义通用样式 -->
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/index.css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/color.css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/index(1).css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/color(1).css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/index(2).css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/index(3).css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/color(2).css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/index(4).css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/color(3).css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/index(5).css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/color(4).css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/index(6).css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/color(5).css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/index(7).css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/color(6).css">
+
+<!-- zm 自定义通用样式 -->
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/search.css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/style.css">
+<link type="text/css" rel="stylesheet" href="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/color(7).css">
+
+<script>
+  let zmENV = '';
+  let THISENV = zmENV.replace(/\-/g, '_');
+  let ENV = THISENV.replace(/\//g, '');
+  sessionStorage.setItem('ENV', JSON.stringify(ENV));
+</script>
+
+<!-- 埋点 -->
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/session.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/local.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/i18n.extend.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/config.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/index.js.download"></script>
+
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/es6-promise.auto.min.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/polyfill.min.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/qs.min.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/axios.min.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/layui.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/maidian.min.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/index(1).js.download"></script>
+
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/index(2).js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/layer.js.download"></script>
+
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/request.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/index(3).js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/layer(1).js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/page.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/getUrl.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/formReset.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/timeFormat.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/lang.js.download"></script>
+
+<script type="text/javascript">
+  console.info(window);
+  // console.info(zm_lang);
+  // console.info(zm_public.timeFormat(null, 'YYYY/MM/DD HH:mm:ss W'));
+  // console.info(zm_public.timeFormat(1639642190919, 'yyyy-MM-dd HH:mm:ss W'));
+  // console.info(zm_public.timeFormat(1639643172000, 'yyyy-mm-dd HH:mm:ss W'));
+</script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/jquery-1.11.1.min.js.download"></script>
+
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/jquery.validate.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/messages_zh.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/index(4).js.download"></script>
+
+<style>
+  .zm-modal-closeInfo {
+    width: 600px;
+  }
+  .zm-modal-closeInfo .layui-layer-content {
+    padding: 18px 24px 20px 24px;
+  }
+  .zm-modal-closeInfo .zm-modal-header {
+    padding: 19px 24px 0 24px;
+    font-weight: bold;
+  }
+  .zm-modal-closeInfo .zm-modal-body {
+    margin: 0 4px;
+    padding: 20px;
+    font-weight: bold;
+    border: 1px solid rgba(232, 232, 232, 1);
+    border-radius: 4px;
+  }
+  .zm-modal-closeInfo .layui-layer-btn0 {
+    width: 300px;
+    height: 40px;
+    text-align: center;
+    background: #610E10;
+    border-radius: 4px;
+  }
+</style>
+<script type="text/javascript">
+  !function(t) {
+    /* let time = new Date().getTime();
+    let closeInfo = getLocal('closeInfo');
+    if (time > 1663632001000 && !closeInfo) {
+      layer.open(
+        Object.assign({}, zm_layer.config, {
+          skin: 'zm-modal zm-modal-success zm-modal-closeInfo',
+          title: '<article class="zm-modal-header">' +
+            '<div class="zm-modal-title">系统维护预告/System Maintenance Notice</div>' +
+            '</article>',
+          btn: ['我知道了/Close'],
+          closeBtn: 0,
+          content: '<article class="zm-modal-body">' +
+            '<p>尊敬的用户：</p>' +
+            '<p style="text-indent: 26px">您好，为提高您的使用体验，中金研究平台，将于2022年9月21日进行系统维护，请您知晓。</p>' +
+            '<p style="text-indent: 26px">如有疑问，请联系我们：<span style="color: #610E10;">research_support@cicc.com.cn</span></p>' +
+            '<p style="text-indent: 26px">CICC Research Portal will upgrade system on September 21, 2022. Please contact us: research_support@cicc.com.cn if you need any help. Thanks!</p>' +
+            '</article>',
+          yes: function(index) {
+            layer.close(index);
+            setLocal('closeInfo', 1);
+          },
+          cancel: function(index, layero) {},
+        })
+      )
+    } */
+
+    function switchUrl(href, urlArr){
+      let n = urlArr.length;
+      for (let i = 0; i < n; i++) {
+        if (urlArr[i] == href) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function hrefUrl(){
+      // let url = 'https://research.cicc.com/';
+      let url = window.location.href;
+      let thisUrl;
+      let length = ctx.length;
+      if (ctx) {
+        thisUrl = url.substring(url.indexOf(ctx) + length);
+      } else {
+        thisUrl = url.substring(url.indexOf('.com') + 4);
+      }
+      let urlArr = ['/', '/index'];
+      let result = switchUrl(thisUrl, urlArr);
+      if(lang == 'en' && result) {
+        // console.log(lang);
+      } else if(lang != 'en' && result) {
+        if (ctx == '/cicc-portal') {
+          // window.location.href = ctx + '/index';
+        } else if(url.indexOf("dev.") >= 0 ) {
+          window.location.href = 'https://www.dev.rs.cicc.com';
+        } else if(url.indexOf("qa.") >= 0 ) {
+          window.location.href = 'https://www.qa.rs.cicc.com';
+        } else if(url.indexOf("uat.") >= 0 ) {
+          window.location.href = 'https://www.uat.rs.cicc.com';
+        } else if(url.indexOf("staging.") >= 0 ) {
+          window.location.href = 'https://www.staging.rs.cicc.com';
+        } else {
+          window.location.href = 'https://www.research.cicc.com';
+        }
+      }
+    }
+    hrefUrl();
+  }(window);
+</script><style>
+[data-role="hover-content"] {
+	display: none;
+}
+
+.search-keyword {
+	width: 193px;
+}
+
+.search-result-item.auto-complete a {
+	max-width: 170px;
+}
+.icon-search-head{
+	height:16px;
+	width:16px;
+	background-position:-21px 0;
+    cursor: pointer;
+}
+.login-info-box{
+	display:flex; 
+	padding:20px;
+}
+.login-info-box > span{
+	display:block;
+	width:50%;
+}
+.login-info-box > span:first-child{
+	border-right: 1px solid #e6e8eb;
+}
+.cn-slide-content{
+    right: -37px!important;
+}
+.info .info-user img{
+	position: relative;
+    left: -15px;
+    top: -6px;
+}
+.info .info-item{
+	border-radius: 4px;
+	border:none;
+	-webkit-box-shadow: 1px 2px 1px 0px rgba(0,0,0,0.20);
+    -moz-box-shadow: 1px 2px 1px 0px rgba(0,0,0,0.20);
+    box-shadow: 1px 2px 1px 0px rgba(0,0,0,0.20);
+}
+.info-item > i{
+	top: -9px;
+}
+.info .slide-content{
+	padding-top: 13px;
+}
+.sanjiao{
+    width: 0;
+    height: 0;
+    border-right: 10px solid transparent;
+    border-bottom: 15px solid #fff;
+    border-left: 10px solid transparent;
+}
+.c-nav .en-header li{
+	margin-left: 20px;
+}
+.c-nav .en-header li:first-child{
+	margin-left: 0;
+}
+
+
+.zm-header-nav {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+  min-width: 1200px;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+.zm-header-nav > .clearfix {
+  min-width: 1200px;
+}
+.zm-header-nav .zm-navigation > .clearfix {
+  position: relative;
+  margin-left: auto;
+  order: 1
+}
+.zm-header-nav .zm-navigation > .head-left {
+  float: none !important;
+}
+.zm-navigation {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+.zm-navigation>.clearfix {
+  position: absolute;
+  top: 5px;
+  right: 0;
+  float: none !important;
+  padding-top: 16px;
+  background-color: #FFFFFF;
+}
+.zm-navigation>.clearfix #search-input,
+.zm-navigation>.clearfix #search-input+.search-keyword {
+  width: 220px;
+}
+.zm-navigation>.clearfix .search-result-item.auto-complete a {
+  max-width: 100%;
+}
+.over-ell.zm-search-item-flex {
+  min-width: 100%;
+}
+.over-ell.zm-search-item-flex .zm-search-text {
+  max-width: 100%;
+}
+.zm-search-text {
+  display: -ms-flexbox !important;
+  display: flex !important;
+  -ms-flex-pack: justify !important;
+  justify-content: space-between !important;
+}
+.zm-search-text-name {
+  position: relative;
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  max-width: 100%;
+  padding-right: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zm-header-nav {
+  padding: 10px 0;
+}
+.zm-header-nav > .clearfix {
+  height: auto;
+  padding-top: 0;
+}
+.zm-header-nav .zm-navigation {
+  height: 60px;
+  -ms-flex-align: center;
+  align-items: center;
+}
+.zm-header-nav .zm-navigation .logo {
+  float: none;
+  top: auto;
+  bottom: auto;
+}
+.zm-header-nav .zm-navigation > .head-left {
+  min-width: auto;
+}
+.zm-header-nav .zm-navigation > .header-right {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  top: auto;
+  bottom: auto;
+  width: 100%;
+  padding-top: 0;
+}
+.zm-header-nav .zm-navigation > .header-right .layui-btn {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 32px;
+  line-height: 1.4;
+  padding: 4px 16px;
+  background-color: #640000;
+  border: 1px solid #640000;
+  border-radius: 4px;
+}
+.zm-header-nav .zm-navigation > .header-right .layui-btn img {
+  margin-right: 4px;
+}
+.zm-header-nav .zm-navigation > .header-right .lang-btn {
+  height: 32px;
+  line-height: 1.4;
+  padding: 4px 16px;
+  color: #333;
+  background-color: #FFFFFF;
+  border: 1px solid #333;
+  border-radius: 4px;
+  margin-left: 12px;
+}
+.zm-header-nav .zm-navigation > .header-right .info {
+  margin-left: auto;
+  padding-top: 0;
+}
+.zm-header-nav .zm-navigation > .header-right .info .info-user img {
+  top: 0;
+}
+.zm-header-nav .zm-navigation > .header-right .info .info-user .icon-arron-bottom {
+  top: 12px;
+}
+
+.rs-search .rs-search-box {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 36px;
+}
+.rs-search .rs-search-box .search {
+  border: none;
+}
+.rs-search .rs-search-box:hover #index-search {
+  margin-left: 0px;
+  transition: all .2s;
+}
+.rs-search .rs-search-box .search input#search-input {
+  width: 0px;
+  padding-right: 0;
+  transition: all .2s;
+}
+.rs-search .rs-search-box:hover {
+  padding-right: 20px;
+  background-color: rgba(51, 51, 51, 0.08);
+}
+.rs-search .rs-search-box:hover #index-search {
+  margin-left: 8px;
+}
+.rs-search .rs-search-box:hover .search input#search-input {
+  width: 175px;
+}
+
+</style>
+<!-- header -->
+<div class="c-head">
+	<div class="language-top" style="display: none;">
+		<div class="lan-box">
+			<div class="pull-right" id="langChangeDiv">
+			<!-- 语言切换 -->
+			</div>
+		</div>
+	</div>
+	<div class="clearfix header-container zm-header-nav">
+		<div class="head-top  clearfix">
+			<!-- logo -->
+			<div class="clearfix zm-navigation">
+				<div class="logo">
+					<a href="https://research.cicc.com/index"> <img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/logo.png" alt="">
+					</a>
+				</div>
+
+				<div class="header-right pull-right clearfix pt15">
+					<!-- 搜索 -->
+					<div class="rs-search" style="">
+            <div class="rs-search-box">
+              <img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/search_2x.png" alt="" style="width: 20px; height: 20px;" id="index-search">
+						<div class="search clearfix" data-role="list-box">
+							<div class="search-type pull-left" data-role="list-ctr" data-select="">
+								<i class="icon-angle-down"></i> <span data-value="-1" data-role="value"> 研报</span>
+								<div class="list-content" data-role="list" id="search-type-list" style="display: none;">
+									<div class="list-item">
+										<ul>
+											<li data-value="1"><a href="javascript:void(0)">活动</a></li>
+												<li data-value="2"><a href="javascript:void(0)">专题</a></li>
+											</ul>
+									</div>
+								</div>
+							</div>
+							<div class="search-content pull-left">
+								<input type="text" id="search-input" autocomplete="off" name="search-input" placeholder="分析师/股票/行业/关键词">
+								<div class="search-keyword" style="display: none;">
+									<ul>
+									</ul>
+								</div>
+							</div>
+							</div>
+						</div>
+					</div>
+
+
+					<div class="info pull-right">
+							<div class="info-all">
+								<div style="position: relative;">
+									<!-- <span style="position: relative; top: -3px;"> <a href="/register" style="display: inline-block; margin-right: 5px;">注册</a> <i class="img icon-shu"></i>
+										</span> -->
+									<a href="https://research.cicc.com/login" class="layui-btn">
+                    <img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/info2x.png" alt="" style="width: 16px; height: 16px;">
+                    <span>登录</span>
+                  </a>
+								</div>
+							</div>
+						</div>
+					<button class="layui-btn lang-btn demo1">
+            <img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/lang2x.png" alt="" style="width: 16px; height: 16px;">
+            <span id="langText">中文</span>
+            <i class="layui-icon layui-icon-down layui-font-12"></i>
+          </button>
+				</div>
+
+				<div class="head-left pull-left">
+          <div id="zMenu" class="zm-nav"><ul class="layui-nav zm-nav-menu" lay-filter="navMenu"><li class="layui-nav-item"><a class="zm-nav-title" href="https://www.research.cicc.com/zh_CN/home" data-url="https://www.research.cicc.com/zh_CN/home">首页</a></li><li class="layui-nav-item"><a class="zm-nav-title" href="https://www.research.cicc.com/zh_CN/reportList" data-url="https://www.research.cicc.com/zh_CN/reportList">研报</a></li><li class="layui-nav-item"><a class="zm-nav-title" href="https://www.research.cicc.com/zh_CN/teamList" data-url="https://www.research.cicc.com/zh_CN/teamList">研究团队</a></li><li class="layui-nav-item"><a class="zm-nav-title" href="https://research.cicc.com/v2/videos" data-url="/v2/videos">视频</a></li><li class="layui-nav-item"><a class="zm-nav-title" href="https://www.research.cicc.com/zh_CN/activity/index" data-url="https://www.research.cicc.com/zh_CN/activity/index">活动</a></li><li class="layui-nav-item"><a class="zm-nav-title" href="https://www.research.cicc.com/data" data-url="https://www.research.cicc.com/data">知识库</a></li><span class="layui-nav-bar"></span></ul></div>
+
+<script>
+  !function(t) {
+    'use strict';
+    let getMenu = function(params) {
+      return zm_service.get('/backend/v1/home/header', {
+        params: params
+      });
+    };
+
+    let domMenu = function(params) {
+      let dom = $('<ul class="layui-nav zm-nav-menu" lay-filter="navMenu"></ul>');
+      $("#zMenu").append(dom);
+      let listMenu = function(params, dom) {
+        for(var item of params) {
+          if (item.children) {
+            let menuStr = $('<li class="layui-nav-item zm-nav-dropdown">' +
+              '<a class="zm-nav-title" href="javascript:;">'+ item.name +'</a>' +
+              '<i class="layui-icon layui-icon-down"></i>' +
+              '</li>'
+            );
+            let ul = $("<ul class='zm-nav-child'></ul>");
+            $(menuStr).append(ul).appendTo(dom);
+            listMenu(item.children, $(menuStr).children().last());
+          } else{
+            let menuStr = '';
+            if(item.url.indexOf('http') !== -1) {
+              menuStr = $('<li class="layui-nav-item">' +
+                '<a class="zm-nav-title" href="'+ item.url +'" data-url="'+ item.url +'">'+ item.name +'</a>' +
+                '</li>'
+              );
+            } else {
+              menuStr = $('<li class="layui-nav-item">' +
+                '<a class="zm-nav-title" href="'+ ctx +''+ item.url +'" data-url="'+ ctx +''+ item.url +'">'+ item.name +'</a>' +
+                '</li>'
+              );
+            }
+            $(dom).append(menuStr);
+          }
+        }
+      }
+      listMenu(params, dom);
+      layui.use(['layer', 'element'], function() {
+        let layer = layui.layer;
+        let element = layui.element;
+        element.on('nav(navMenu)', function(elem) {
+          // console.log(elem)
+          let url = $(elem).attr('data-url');
+          if (url) {
+            // window.location.href = url;
+          }
+        });
+      });
+    };
+
+    let axios = function() {
+      getMenu()
+        .then(function (res) {
+          console.log(res);
+          if (res.data) {
+            let menu = res.data.headerTabs;
+            domMenu(menu)
+          } else{
+            console.log(res);
+          }
+        })
+        .finally(function () {
+          // layer.close(laoding);
+        })
+    }
+
+    axios();
+  }(window);
+</script>
+
+<style>
+  .zm-header-nav .zm-navigation > .head-left {
+    /* -ms-flex-item-align: start; */
+    /* align-self: flex-start; */
+    top: auto;
+    bottom: auto;
+    margin-left: 20px;
+  }
+  .zm-nav {
+    position: relative;
+    display: -ms-flexbox;
+    display: flex;
+    margin-top: 0;
+  }
+  .zm-nav-menu {
+    position: relative;
+    display: -ms-flexbox;
+    display: flex;
+    background-color: transparent;
+  }
+  .zm-nav-menu .layui-nav-bar,
+  .zm-nav-menu .layui-nav-item:after {
+    display: none;
+  }
+  .zm-nav-menu .layui-nav-item {
+    position: relative;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: center;
+    align-items: center;
+    height: 60px;
+    line-height: 1.5;
+    padding: 0 20px;
+    color: #333;
+    background-color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+  }
+  .zm-nav-menu .layui-nav-item .layui-icon-down {
+    line-height: 1;
+    transition: all 0.2s ease 0.2s;
+  }
+  .zm-nav-menu .layui-nav-item a {
+    position: relative;
+    display: -ms-flexbox;
+    display: flex;
+    width: 100%;
+    padding: 0;
+    color: #333;
+  }
+  .zm-nav-menu .layui-nav-item > a:hover {
+    color: #999;
+  }
+  .zm-nav-child {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    padding-top: 6px;
+    opacity: 0;
+    visibility: hidden;
+    z-index: -1;
+    transition: all 0.3s ease 0s;
+  }
+  .zm-nav-child .layui-nav-item {
+    padding: 6px 20px;
+    width: 200px;
+  }
+  .zm-nav-child .layui-nav-item:first-child {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+  }
+  .zm-nav-child .layui-nav-item:last-child {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+  .zm-nav-child .zm-nav-child {
+    padding-top: 0px;
+    padding-left: 6px;
+    z-index: -1;
+  }
+  .zm-nav-menu > .layui-nav-item:hover > .layui-icon-down {
+    transform:rotateZ(180deg);
+  }
+  .zm-nav-menu > .layui-nav-item:hover > .zm-nav-child {
+    top: 100%;
+    left: 0;
+    opacity: 1;
+    visibility: visible;
+  }
+  .zm-nav-child > .layui-nav-item .layui-icon-down {
+    transform:rotateZ(-90deg);
+  }
+  .zm-nav-child > .layui-nav-item:hover > .layui-icon-down {
+    transform:rotateZ(90deg);
+  }
+  .zm-nav-child > .layui-nav-item:hover > .zm-nav-child {
+    top: 0;
+    left: 100%;
+    opacity: 1;
+    visibility: visible;
+  }
+  .zm-nav-dropdown a {
+    margin-right: 6px;
+  }
+</style></div>
+
+			</div>
+		</div>
+
+		<i class="icon-h"></i>
+	</div>
+</div>
+
+<script>
+  layui.use(['dropdown'], function(){
+    let dropdown = layui.dropdown;
+    dropdown.render({
+      elem: '.demo1',
+      data: [{
+        title: '中文',
+        id: 'zh_CN',
+      },{
+        title: 'English',
+        id: 'en',
+      }],
+      click: function(obj){
+        let url = window.location.href;
+        let params = {'language': obj.id}
+        getLang(params)
+          .then(function (res) {
+            console.log(res);
+            if(obj.id == 'en') {
+              if (ctx == '/cicc-portal') {
+                window.location.href = ctx + '/index';
+              } else if(url.indexOf("dev.") >= 0 ) {
+                window.location.href = 'https://dev.rs.cicc.com' + ctx;
+              } else if(url.indexOf("qa.") >= 0 ) {
+                window.location.href = 'https://qa.rs.cicc.com' + ctx;
+              } else if(url.indexOf("uat.") >= 0 ) {
+                window.location.href = 'https://uat.rs.cicc.com' + ctx;
+              } else if(url.indexOf("staging.") >= 0 ) {
+                window.location.href = 'https://staging.rs.cicc.com' + ctx;
+              } else {
+                window.location.href = 'https://research.cicc.com' + ctx;
+              }
+            } else if(obj.id == 'zh_CN')  {
+              clearStorage();
+              if (ctx == '/cicc-portal') {
+                window.location.href = ctx + '/index';
+              } else  {
+                window.location.href = 'https://www.'+window.location.host+'/zh_CN/home';
+              }
+            }
+          })
+          .finally(function () {
+          });
+      },
+    });
+
+    if(lang == 'en') {
+      $('#langText').text('English');
+    } else {
+      $('#langText').text('中文');
+    }
+  });
+
+  function getcookie(objname){
+    var arrstr = document.cookie.split("; ");
+    for(var i = 0;i < arrstr.length;i ++){
+      var temp = arrstr[i].split("=");
+      if(temp[0] == objname) {
+        return unescape(temp[1]);
+      }
+    }
+  }
+  function getLang(params) {
+    return zm_service.get('/internal/v2/language', {params: params});
+  }
+</script>
+
+<script>
+  /* (function(para) {
+    var p = para.sdk_url, n = para.name, w = window, d = document, s = 'script',x = null,y = null;
+    if(typeof(w['sensorsDataAnalytic201505']) !== 'undefined') {
+        return false;
+      }
+    w['sensorsDataAnalytic201505'] = n;
+    w[n] = w[n] || function(a) {return function() {(w[n]._q = w[n]._q || []).push([a, arguments]);}};
+    var ifs = ['track','quick','register','registerPage','registerOnce','clearAllRegister','trackSignup', 'trackAbtest', 'setProfile','setOnceProfile','appendProfile', 'incrementProfile', 'deleteProfile','unsetProfile','identify','login','logout','trackLink','deleteItem','setItem'];
+    for (var i = 0; i < ifs.length; i++) {
+      w[n][ifs[i]] = w[n].call(null, ifs[i]);
+    }
+    if (!w[n]._t) {
+      x = d.createElement(s), y = d.getElementsByTagName(s)[0];
+      x.async = 1;
+      x.src = p;
+      x.setAttribute('charset','UTF-8');
+      w[n].para = para;
+      y.parentNode.insertBefore(x, y);
+    }
+  }) ({
+    sdk_url: '//research.cicc.com/static/libs/sensorsdata.min.js',
+    name: 'sensors',
+    server_url:'https://uba.cicc.com.cn:8001/sa?project=rs_portal_qa',
+    is_track_single_page: false, // 单页面配置，默认开启，若页面中有锚点设计，需要将该配置删除，否则触发锚点会多触发 $pageview 事件
+    use_client_time: false,
+      send_type: 'beacon',
+    heatmap: {
+      //是否开启点击图，default 表示开启，自动采集 $WebClick 事件，可以设置 'not_collect' 表示关闭。
+      clickmap: 'default',
+      //是否开启触达图，not_collect 表示关闭，不会自动采集 $WebStay 事件，可以设置 'default' 表示开启。
+      scroll_notice_map: 'not_collect'
+    }
+  });
+  sensors.quick('autoTrack'); */
+</script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/cicc_core.js.download"></script>
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/config(1).js.download"></script>
+<script>
+
+//自主注册用户使用高级搜索弹出权限不足  在c-search.js中使用
+var level = "";
+var customerLangType = '';
+var ciccDataAccess = '';
+/**
+ * 以下代码用于控制《我的研报、管理中心》菜单显示
+ * @author yxu
+ */
+// 控制语言切换栏显示
+function setLangChange(customerLangType,lang) {
+    // 非登录情况下可以切换语言
+    if(customerLangType != 3 && '' !== '') {
+      $('.demo1').hide();
+      return;
+    } else {
+      $('.demo1').show();
+    } 
+    /* 
+    if(lang == 'en') {
+      if (ctx == '/cicc-portal') {
+        // $("#langChangeDiv").html('<span><a href="' + ctx + '/internal/language?language=zh_CN">中文</a></span><i>|</i><span><a href="' + ctx + '/internal/language?language=en"><b>English</b></a></span>');	
+        $("#langChangeDiv").html('<span><a href="https://www.dev.rs.cicc.com">中文</a></span><i>|</i><span><a href="' + ctx + '/internal/language?language=en"><b>English</b></a></span>');
+      } else if (ctx == '/portal-dev') {
+        $("#langChangeDiv").html('<span><a href="https://www.dev.rs.cicc.com">中文</a></span><i>|</i><span><a href="' + ctx + '/internal/language?language=en"><b>English</b></a></span>');
+      } else if (ctx == '/portal-qa') {
+        $("#langChangeDiv").html('<span><a href="https://www.qa.rs.cicc.com">中文</a></span><i>|</i><span><a href="' + ctx + '/internal/language?language=en"><b>English</b></a></span>');
+      } else if (ctx == '/portal-uat') {
+        $("#langChangeDiv").html('<span><a href="https://www.uat.rs.cicc.com">中文</a></span><i>|</i><span><a href="' + ctx + '/internal/language?language=en"><b>English</b></a></span>');
+      } else {
+        $("#langChangeDiv").html('<span><a href="https://www.staging.rs.cicc.com">中文</a></span><i>|</i><span><a href="' + ctx + '/internal/language?language=en"><b>English</b></a></span>');
+      }
+    } else {
+    	$("#langChangeDiv").html('<span><a href="' + ctx + '/internal/language?language=zh_CN"><b>中文</b></a></span><i>|</i><span><a href="' + ctx + '/internal/language?language=en">English</a></span>');	
+    } */
+}
+setLangChange(customerLangType,lang);
+
+function clearStorage() {
+  if(localStorage.getItem('userIdentity')){
+    localStorage.removeItem('userIdentity');
+  }
+  if(localStorage.getItem('checkedAmericanConfirm')){
+    localStorage.removeItem('checkedAmericanConfirm');
+  }
+}
+
+function getMyReportPerm(level,customerLangType) {
+	// 校验等级权限
+	if(level =='' || level == 'D') {
+		return false;
+	}
+	// 校验语言权限
+	var currentLangType = (lang !='en') ? 1: 2;
+	if(customerLangType!=currentLangType && customerLangType!=3 ){
+		return false;
+	}
+	return true;
+}
+
+var isShowMyReport = getMyReportPerm(level,customerLangType);
+if(isShowMyReport) {
+	var aEle = '<a href="/ucenter/preference" data-list="/ucenter/preference">';
+	aEle += '我的研报';
+	aEle += '</a> <i class="icon-delive"></i>';
+	aEle += '<i class="icon-nav-active"></i>';
+	$("#myReport").html(aEle);
+}
+
+function getManagerCenterPerm(isAdmin,level,customerLangType) {
+	//alert(level);
+	//alert(isAdmin);
+	if(level =='' || level == 'D' || level == 'employee') {
+		return false;
+	}
+	if(isAdmin == 'false'){
+		return false;
+	}
+	// 校验语言权限
+	var currentLangType = (lang !='en') ? 1: 2;
+	if(customerLangType!=currentLangType && customerLangType!=3 ){
+		return false;
+	}
+	return true;
+}
+var isShowManageCenter = getManagerCenterPerm('false',level,customerLangType);
+if(isShowManageCenter) {
+	var mEle ='<i class="icon-delive"></i>';
+	mEle +='<i class="icon-nav-active"></i>';
+	mEle +='<a target="_self" href="' + ctx + '/admin/index">管理中心</a>';
+	$("#managerCenter").html(mEle);
+}
+
+function setProfitData() {
+	var ciccDataDoc = '<i class="icon-delive"></i><i class="icon-nav-active"></i>'
+	if (ciccDataAccess == 1) {
+		ciccDataDoc += '<a target="_self" href="' + ctx + '/frontend/profitData/getStockList" data-list="/frontend/profitData/getStockList">数据</a>';
+		$("#ciccDataAccess")[0].style.display = 'list-item'
+	} else {
+		ciccDataDoc += '<a target="_self"></a>'
+	}
+	$("#ciccDataAccess").html(ciccDataDoc);
+}
+
+setProfitData()
+/*************************************/
+
+	function validateUser() {
+		if (true) {
+			window.location.href = "/login";
+			return false;
+		} else if (true) {//自主注册用户
+			noPermissionAlert(null);
+			$('#search-input').blur()
+			return false;
+		}
+		return true;
+	}
+	
+</script>
+
+
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/c-search.js.download"></script>
+<script type="text/javascript">
+  
+    // 设置返回顶部按钮的位置
+    var setBackTopPosObj = {
+        init: function () {
+          var _this = this
+          _this.setBackTopPos()
+          $(window).resize(function() {
+            _this.setBackTopPos()
+          });
+        },
+        setBackTopPos: function() {
+          var curDom = null
+          if ($('.container-fluid').length > 0) {
+            curDom = $('.container-fluid')
+          } else if ($('.search-container').length > 0) {
+	          curDom = $('.search-container')
+          } else {
+            curDom = $('.c-content.sm-content')
+          }
+          if (!curDom || $('#back-top').length < 1 || !curDom.offset()) return
+          var curRight = parseInt(curDom.offset().left) // 右边距
+          $('#back-top').css('left', curRight+1200+30 + 'px')
+        }
+      }
+    
+    // 设置内容容器的最小宽度
+    function setSerchBoxWidth(lang, search_type) {
+        if (lang == 'en') {
+            $('.search-keyword').css({'width': '177px'})
+            $('.header-top .search').css({'min-width': '280px'})
+            // 英文时头部最大宽度
+            $('body, .c-head, .c-banner, .footer').css({'min-width': '1500px'})
+           /* $('.c-nav ul li+li').css({'margin-left': '15px'})*/
+        } else {
+            /*$('.c-nav ul li+li').css({'margin-left': '40px'})*/
+            $('.search-keyword').css({'width': '177px'})
+            // 中文时头部最大宽度
+            $('body, .c-head, .c-banner, .footer').css({'min-width': '1240px'})
+        }
+        var w = $('.search-content').width()
+    }
+
+    function validateUser() {
+        if (true) {
+            window.location.href = "/login";
+            return false;
+        } else if (true) {//自主注册用户
+            noPermissionAlert(null);
+            $('#search-input').blur()
+            return false;
+        }
+        return true;
+    }
+
+    function showNoPermissonAlert(successUrl, isSearch) {
+        
+        
+        if (isSearch == 0) {
+            window.location.href = successUrl;
+        } else {
+            window.open(successUrl);
+        }
+
+    }
+
+    //获取登录之后的分析师（或分析师助理）收到的新增留言与新增评论数量
+    /* function getNewMsgAndCommentNum(){
+    	$.ajax({
+    		type: 'POST',
+            url: "/index/getNewMsgAndCommentNum",
+            data: {},
+            error: function (result) {
+            },
+            success: function (result) {
+                if (result.ret == 0) {
+                	var newMsgNum = (result.data.newMsgNum == null || result.data.newMsgNum == "") ? 0 : result.data.newMsgNum ;
+                	var newCommentNum = (result.data.newCommentNum == null || result.data.newCommentNum == "") ? 0 : result.data.newCommentNum ;
+                	$("#newMsgCounts").text("新增留言："+newMsgNum);
+                	//$("#newCommentCounts").text("今日新增评论："+newCommentNum);
+                }
+            }
+    	});
+    } */
+    
+    $(function () {
+        // 返回顶部按钮位置初始化
+        setBackTopPosObj.init()
+      
+        // 个人信息下拉列表
+        var outTimer
+        $('[data-role="hover-ctr"]').hover(function(){
+        	clearTimeout(outTimer);
+          $(this).find('[data-role="hover-content"]').show()
+        }, function () {
+        	var _this = this
+        	outTimer = setTimeout(function(){
+          		$(_this).find('[data-role="hover-content"]').hide()
+        	},100)
+        });
+        /*$('#search-input').on('focus', function () {
+            $('#search-type-list').hide()
+        })*/
+        /* if($("#newMsgCounts").length > 0){
+        	//绑定留言数目与评论数目的点击事件
+        	$(".header-opt span").eq(0).on("click",function(){
+        		window.open(ctx + "/admin/analyst/message");
+        	});
+        	$(".header-opt span").eq(1).on("click",function(){
+        		window.open(ctx + "/admin/document/comment/list");
+        	});
+        	getNewMsgAndCommentNum();//初始执行一次
+        	setInterval(getNewMsgAndCommentNum, 30*60*1000);//30min刷新一次
+        } */
+        
+    });
+</script>
+<!-- content -->
+<div class="c-content sm-content clearfix border-box" style="border:none;">
+    <div class="report-article-info">
+    <div class="report-title" style="margin-top: 30px;">
+            <h4>QQC综合质量因子与指数增强应用</h4>
+           <p></p>
+        </div>
+    <div class="article-content"><p style="text-align:center;">
+	<strong><span style="font-family:Helvetica;font-size:14px;"><span style="font-size:14px;">◆</span><strong><span style="font-size:14px;">&nbsp; &nbsp; &nbsp; &nbsp;</span></strong></span><span style="font-size:14px;">摘要</span><strong><span style="font-family:Helvetica;font-size:14px;"><strong><strong><span style="font-size:14px;"><strong>&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;</strong></span></strong></strong></span></strong><span style="font-size:14px;">◆</span></strong> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>资金与监管双重影响下，公司质量的重要性进一步提升</strong></span><span style="color:#333333;"></span> 
+</p>
+<p style="color:#333333;font-family:Helvetica;font-size:14px;text-align:justify;">
+	<span style="color:#7B0C00;"><strong><span></span></strong></span> 
+</p>
+<p style="color:#333333;font-family:Helvetica;font-size:14px;text-align:justify;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>外资流入带来结构变化：优质公司持续获得关注。</strong></span><span style="font-size:14px;">随着外资的持续流入和外资占比的逐渐提升，外资的持股偏好也将进一步地影响A股的市场风格。通过北上资金持仓的风格分析可以发现外资对于优质公司的偏好是较为明显的。同时，随着近年来投资者结构逐渐优化和机构化进程的加速，公司基本面质量的重要性将进一步凸显。</span> 
+</p>
+<p style="color:#333333;font-family:Helvetica;font-size:14px;text-align:justify;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>退市新规出台，促进上市公司质量优化。</strong></span><span style="font-size:14px;">2020年12月31日，沪深交易所正式发布新修订的《上海证券交易所股票上市规则》、《深圳证券交易所股票上市规则》等退市制度改革文件。新规主要内容是进一步优化上市企业质量标准，缩短退市流程，加大退市力度。此次退市机制改革强化将优胜劣汰机制从而进一步优化市场资源配置，完善国内资本市场结构。投资者将更为关注企业经营质量，公司基本面质量的重要性有望进一步提升。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>六大维度构建QQC（Quantified Quality Composite）综合质量因子</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<strong></strong> 
+</p>
+<p style="color:#333333;font-family:Helvetica;font-size:14px;text-align:justify;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>将公司基本面质量分解为六个维度。</strong></span><span style="font-size:14px;">根据Gordon成长模型拆解，并结合我们对于公司基本面质量的理解，将质量因子梳理为盈利能力、成长能力、盈余质量、营运效率、安全性、公司治理6个大类。并进一步地在每一类别中分别寻找样本内具有显著预测能力且稳定性较好的细分因子。</span> 
+</p>
+<p style="color:#333333;font-family:Helvetica;font-size:14px;text-align:justify;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>QQC综合质量因子：六大类因子等权加权减少过拟合。</strong></span><span style="font-size:14px;">6大类因子之间的相关性均处在相对较低的水平，其中公司治理因子与其他大类的质量因子直接相关性均低于0.2。同时为了降低过拟合的程度，通过等权加权的方式将六大类因子结合为综合质量因子QQC。</span> 
+</p>
+<p style="color:#333333;font-family:Helvetica;font-size:14px;text-align:justify;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>QQC因子各样本空间内均有较强预测能力，样本外表现出色。</strong></span><span style="font-size:14px;">QQC因子在不同样本空间内均具有较强的预测能力，因子在全市场的IC_IR高达0.87；在中证500样本内IC高达5.67%，多空组合的夏普比率达到2.18。QQC因子在样本外（2019-01-01至2020-12-31）的月度平均IC达到5.84%，月度胜率高达87.5%，样本外表现同样相当出色。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><strong><span style="color:#7B0C00;font-size:14px;">基于QQC的沪深300指数增强模型：超额稳定，样本外年化超额15%</span></strong></span> 
+</p>
+<p style="color:#333333;font-family:Helvetica;font-size:14px;text-align:justify;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>沪深300指数增强的难点所在：行业与个股偏离度大，有效因子少。</strong></span><span style="font-size:14px;">行业权重和个股权重的较高偏离度，以及成分股内较为有限的有效因子数量，是沪深300指数增强模型构建中较为棘手的问题。</span> 
+</p>
+<p style="color:#333333;font-family:Helvetica;font-size:14px;text-align:justify;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>基于QQC因子的沪深300增强：超额稳定，样本外表现出色。</strong></span><span style="font-size:14px;">采用估值因子、动量因子、换手率因子、一致预期等因子与QQC因子一同作为模型底层因子构建沪深300增强组合。组合年化超额收益10.47%，跟踪误差3.37%，信息比3.11。组合自2011年至今每年度均跑赢沪深300指数，月度胜率接近80%，相对基准的最大回撤仅为3.9%。</span> 
+</p>
+<p style="color:#333333;font-family:Helvetica;font-size:14px;text-align:justify;">
+	<span style="font-size:14px;">样本外（2019-01-01至2020-12-31）年化超额收益为15.02%，跟踪误差3.65%，信息比4.11。2020年全年，组合累计收益46.58%，跑赢沪深300指数19.37个百分点。</span> 
+</p>
+<p style="text-align:center;">
+	<strong><span style="font-family:Helvetica;font-size:14px;"><span style="font-size:14px;">◆</span><strong><span style="font-size:14px;">&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;</span></strong></span><span style="font-size:14px;">正文</span><strong><span style="font-family:Helvetica;font-size:14px;"><strong><strong><span style="font-size:14px;"><strong>&nbsp; &nbsp; &nbsp; &nbsp;</strong></span></strong></strong></span></strong><span style="font-size:14px;">◆</span></strong> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><strong>资金与监管双重影响下，公司质量</strong></span><span style="font-size:14px;"><strong>的重要性进一步提升</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;color:#7B0C00;"><strong><span style="font-size:14px;">外资</span></strong><strong><span style="font-size:14px;">流入带来结构变化：优质公司持续获得关注</span></strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">近年来外资的持续流入对A股市场风格产生了逐渐的影响。在2016-2020的五年间，北向资金净流入近1.2万亿元，同时，外资持股市值占 A股流通市值比例从1.7%上升至4.8%（提升3.1个百分点），占比提升接近两倍。随着外资的持续流入和外资占比的逐渐提升，外资的持股偏好也将进一步地影响A股的市场风格。</span> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/cca14cc7-c378-423e-b82f-42dfacff3ac6.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">我们整理了北上资金2020年全年净流入最多的20只个股，从个股层面上直观的来看，北上资金更为青睐的是各个行业领域内的龙头公司，以及具有稳定发展前景的公司。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">从具体的盈利指标上看，北上资金2020年净流入排名前20的个股的平均ROE水平高于沪深300的平均ROE水平，并且显著的高于全体A股的ROE水平。通过ROE水平可以比较直接的证明外资对于优质公司的偏好是较为明显的。</span> 
+</p>
+<p style="margin-top:25px;">
+	<em><span style="color:#640000;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/734c430d-e779-4a32-b0b5-92268cd9e32f.jpg" alt=""><br>
+</span></em> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/ef2544ad-f47c-40d2-b0c3-10cc38d527e8.jpg" alt=""><br>
+</span>
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">进一步的，将北上资金持仓占比大于1%的个股作为北上资金的股票组合，并对该组合的风格因子暴露度进行计算。下图为北上资金持股组合在所选取因子上的暴露程度，其中前9个因子为参照Barra模型构建9个常见因子，第10个为ROE因子。由此可见，</span><span style="color:#7B0C00;font-size:14px;"><strong>北上资金更偏向于低Beta、大市值、高动量及高估值的股票，同时在ROE上有非常明显的正向暴露。</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">在外资持仓占比不断提升的同时，A股的投资者结构也在逐渐发生变化。在过去较长的一段时间内，投资者结构失衡是A股长期震荡的重要原因之一，中小散户的非理性因素助推了股市波动性。近年来，投资者结构逐渐优化，机构投资者发展较快，从近期爆款公募基金频发也可见一斑。</span><span style="color:#7B0C00;font-size:14px;"><strong>我们认为外资流入的影响加上机构化进程的加速，将使得公司基本面质量的重要性进一步凸显。</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>退市新规出台，促进上市公司质量优化</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">2020年12月31日，沪深交易所正式发布新修订的《上海证券交易所股票上市规则》、《深圳证券交易所股票上市规则》，及《上海证券交易所科创板股票上市规则》和《深圳证券交易所创业板股票上市规则》等退市制度改革文件。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">此次上交所与深交所的退市新规主要内容是进一步优化上市企业质量标准，缩短退市流程，加大退市力度。内容包括以下几点：</span> 
+</p>
+<p style="margin-top:25px;">
+	<strong><span style="color:#7B0C00;font-size:14px;">►完善退市指标，提高指标针对性：</span></strong><span style="font-size:14px;">将退市指标分为交易类、财务类、规范类和重大违法类四大类。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>►造假违法指标量化，增加限制减持：</strong></span><span style="font-size:14px;">在保留原欺诈发行、重大信息披露违法、五大安全等重大违法强制退市标准的前提下，将重大财务造假指标量化。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>►缩短退市时间，提高退市效率：</strong></span><span style="font-size:14px;">取消暂停上市和恢复上市环节；退市整理期由 30 个交易日缩短为 15 个交易日。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">伴随着退市新规的落地，质量较差的企业将被淘汰出局。此次退市机制改革强化优胜劣汰机制从而进一步优化市场资源配置，完善国内资本市场结构。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>投资者应将更关注企业经营本身，公司基本面质量的重要性进一步提升。</strong></span><span style="font-size:14px;">新规要求企业管理人需更加注重企业持续经营的能力，调整企业的发展战略。未来投资者也将重点关注经营稳定和业绩预增的企业。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">下文中我们将着重从量化多因子的角度出发，构造多维度的量化综合质量因子QQC（Quantified QualityComposite），并展示其应用于指数增强策略的实际效果。</span> 
+</p>
+<p style="margin-top:25px;">
+	<strong><span style="font-size:14px;">质量因子定义及细分类别</span></strong> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">在定义我们的综合质量因子之前，首先可以从定性的角度来描述一个优质的公司：</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">►&nbsp;盈利能力强且具有稳定的盈利能力；</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">►&nbsp;成长能力强且具有稳定的成长能力；</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">►&nbsp;财务情况稳定，流动性好，资本结构合理；</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">►&nbsp;运营效率高，周转能力强；</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">►&nbsp;公司治理情况优良，等等。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">在上述条件满足的情况下，则可以认为这个公司的整体质量较高。学术界在研究中也有很多中对于质量指标定义方式的探讨和实践。例如，Asness（2017）通过对Gordon成长模型的分解，来定义质量因子。原始的Gordon成长模型为：</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/930ede56-30c4-403f-8f83-7f8760b5a6a1.jpg" alt=""><br>
+</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">利用净资产B（Book Value）来缩放价格, 使其在一段时间内和横截面上更加稳定。等式两边同时除以净资产B：</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/6e9c00a0-d1b8-4fd0-bf94-1eea6016f7a7.jpg" alt=""><br>
+</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">等式（2）则可以理解为：</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/d19644d4-1ce3-4ba1-b43f-ef8b1c80a09a.jpg" alt=""><br>
+</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">等式右侧的四个部分就是对于公司质量定义的四个基础组成部分，其中，Profitability 为盈利能力，可以由ROE、ROA、毛利率在内的多个盈利能力指标表示；payout_ratio表示股东所得红利在总利润中的占比，主要用来衡量公司管理层对于股东的友好程度；growth为成长能力，可以由不同的成长因子来评价；required return则可以用来反映公司的稳定性或者安全性，因为要求回报率越高的公司，自然风险越大。</span> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/31c9e9a8-6dd0-4da5-8b69-0362e80cc05d.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">根据上述分析，并结合我们对于公司基本面质量的理解，我们将质量因子梳理为盈利能力、成长能力、盈余质量、营运效率、安全性、公司治理这6个大类，如下图所示：</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><strong>常用质量因子单因子表现</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">首先我们分别对盈利能力、成长能力、盈余质量、营运效率、安全性、公司治理这6个大类质量指标中的单因子进行全面的测试，并在每个大类中挑选满足一定筛选条件（IC大于2%，IR大于0.3，tstats大于3）的因子来构成大类复合因子（注：若某一大类的因子表现均不满足上述条件，则挑选IC_IR表现较好的具有代表性的此类因子作为基础因子）。为了降低过拟合的程度，下文中的因子测试时间段均为2009-01-01至2018-12-31的样本内时间，并将2019-01-01至2020-12-31作为样本外检验综合因子的预测能力和选股能力。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>盈利能力（Profitability）</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">盈利能力可以说是质量因子中最重要也最受关注的一类指标，不同的人对于盈利能力的衡量标准也会略有不同。例如上文提到的Asness（2017）在定义QmJ（Quality minus Junk）因子时对于盈利能力方面的指标采用了6个指标等权相加的方式来打分，6个指标分别为：总资产毛利率（GPOA）、ROE、ROA、经营现金流/总资产（CFOA）、毛利率（GMAR）、净利润现金占比（ACC）。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">公司利润表中直接反映公司赚钱能力的项目包括毛利润、营业利润、净利润，这三项中使用最广泛的净利润一般被认为可以比较全面的反映该公司在剔除费用项之后的盈利情况。但是在一些行业中（例如消费类行业）毛利润指标会具有超越净利润的选股能力。营业利润相关因子的预测能力也常常优于净利润类因子。学术界和业界也对毛利润和营业利润的优势有不少的分析，因此这三个利润类的指标可以说是各有千秋，我们在盈利能力类因子中会较为全面的对涉及这三类利润指标的因子做测试。&nbsp;&nbsp;</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">在筛选盈利能力因子时，我们将首先对盈利能力方面的因子做全面的测试，测试的盈利能力因子明细及其构造方式说明如下表所示。</span> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/8a30438f-7865-408b-a441-55c5cacd0d41.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/e8584968-c5bf-46a7-b377-02eb3d4448ad.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>经营现金流/总资产（CFOA）具有相对较高的预测能力，</strong></span><span style="font-size:14px;">其因子IC_IR高达0.47。同时，ROE和ROIC的IC_IR也超过0.2。结合上述测试结果，并考虑到ROE和ROIC指标是使用率较高的盈利能力类指标，我们将CFOA、ROE、ROIC作为盈利能力类因子的子指标，并等权加权后得到盈利能力类因子的复合因子（Profitability）。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>成长能力（Growth）</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">成长因子是量化多因子体系中的一类很重要的风格因子，同时也是投资者关注度较高的一类因子。因为从投资的最根本目的出发，具有成长潜力或者发展潜力较大的公司才会更有可能给投资者带来更多回报，投资者也会更愿意为高成长的公司支付较高的股价。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">在成长因子的构造方式上，我们将对每一个增速类（同比增速、环比增速）因子均使用与分母值回归取残差的处理方式，来减小前期值对增速因子分布上的影响。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">同时，引入几个较为创新的成长因子构造方式（以净利润NP为例）：</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>►加速度指标：NP_Acc</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">加速度指标的计算方法是：利用连续N个季度的单季利润，对期数的二次方程进行回归，取二次项系数作为业绩增长加速度的代理变量，回归公式如下：</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/d29072b6-b2fd-4d06-a570-d1a25c0546fe.jpg" alt=""><br>
+</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">其中，NP为单季度利润，t为季度数，为上市公司业绩增长加速度的代理变量，越高，表示业绩增长的加速度越高。该指标的计算涉及到一个参数N，依据参数敏感性的测试结果，在后续的测试中均取相对稳健的N=8。</span> 
+</p>
+<p style="margin-top:25px;">
+	<strong><span style="color:#7B0C00;font-size:14px;">►稳健增速指标：NP_Stable</span></strong> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">稳健增速指标刻画的是过去一段时间内业绩增速的稳定性，当指标值比较高的时候，表示过去一段时间内上市公司的业绩保持了稳定增长的态势。它的计算方式是用过去N期的利润增速均值除以利润增速标准差。在后续的测试中，我们依然取N=8这一参数，即用过去两年的利润增速数据计算该指标。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>►稳健加速度指标：NP_SD</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">稳健加速度指标则是稳健增速指标的一阶差分。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>►业绩趋势因子：QPT</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">业绩趋势模型采用分层筛选的方式实现，首先依据业绩增速指标筛选增速较高的三分之一的股票作为基础股票池；再依据业绩增长加速度指标在基础股票池中筛选三分之一的股票作为最终持仓。我们将该模型进行因子化同样考虑分层打分的方式：</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">•&nbsp; 首先，依据业绩增速指标将全市场股票均分成三组，给每组股票打分，增速最高一组得分为3，增速最低一组得分为1，中间一组得分为2；</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">•&nbsp; 其次，每一组内依据业绩增长加速度指标进行打分（标准分法），加速度越高得分也越高；</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">•&nbsp; 最后，将两步骤的得分相加为每只股票的最终得分。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">我们运用业绩预告数据（净利润下限）降低财务公告数据的滞后性后，在构造月频的业绩趋势因子时，需每月对业绩数据进行更新；当同时存在不同类型的业绩报告时，优先级次序依据其准确性确定，即：定期报告&gt;业绩快报&gt;业绩预告。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">结合上述新增成长类因子，和盈利能力指标的变动类因子，我们将成长能力的大类因子梳理如下：</span> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/5580bce4-e8d8-4b75-a0b3-029a29540a07.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/fae3d257-1384-47da-8dac-bf66c37b8ce8.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>综合考虑收入成长能力和收入增速稳定性的因子营业收入稳健加速度因子（OP_SD）具有较高的预测能力，</strong></span><span style="font-size:14px;">其因子IC_IR高达0.73，多空组合的Sharpe比率高达2.95，单调性得分也超过2。同时，成长能力因子中IC均值最高的因子分别为：营业利润增速（单季度同比）OP_Q_YOY、净利润增速（单季度同比）NP_Q_YOY、业绩趋势因子（QPT）。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>营运效率（Operation）</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">营运效率是指公司运用资产的效率或者有效程度，可以反映公司资金的周转状况。营运效率的高低取决于企业营运状况的好坏及管理水平的高低。例如，存货周转率、总资产周转率都是很常用的用来衡量公司营运效率的指标，在此基础上我们也将上述指标的变动指标作为因子进行了测试，尝试从营运效率改善的角度寻找具有更好预测能力的营运效率因子。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">产能利用率提升因子（OCFA，Operation Cost on FixedAssets）的因子是我们采用创新基本面因子挖掘框架挖掘出来的具有较强预测能力的营运效率类因子，其具体的构造方式为，营业总成本在固定资产上滚动回归取最近一期残差，具体的：</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/9742bda6-7581-4ace-9386-fc95265763bd.jpg" alt=""><br>
+</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">这里我们采用残差项来表征产能利用率的提升。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">结合上述新增的产能利用率因子，我们将营运效率的大类因子梳理如下：</span> 
+</p>
+<p style="margin-top:25px;">
+	<em><span style="color:#640000;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/7ca80a1c-2c2a-45e0-ac3a-f5df2f02b912.jpg" alt=""><br>
+</span></em> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/8bfa525c-84c0-4f3b-99e5-785bc9a3193b.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">总资产周转率变动指标ATD的各项表现均优于其他营运效率因子，IC_IR达到0.55，多空年化收益7.20%，多空组合的Sharpe比率也达到2.07，该因子的预测能力和稳定性均较好。OCFA因子IC_IR表现较好，且与其他常用因子相关性较低，因此，我们将满足入选条件（IC大于2%，IR大于0.3，tstats大于3）的因子ATD和创新基本面因子OCFA作为营运效率类因子的子指标。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>盈余质量（Accrual）</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">盈余质量类指标能够为投资者提供关于上市公司的盈余信息，如果上市公司进行了盈余操纵或管理，那么其财报盈余向投资者传递的信息质量往往较差；较差的盈余信息不利于我们合理地对公司的未来业绩做出预测，因此对上市公司盈余质量好坏的评价具有重要的意义。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">应计利润的定义通常为：</span> 
+</p>
+<p style="text-align:center;">
+	<span style="font-size:14px;">应计利润 = 营业利润 - 经营性现金流量净额</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">同时，为了使得不同规模的公司的该项指标能够进行横向比较，我们采用将应计利润除以营业利润作为应计利润占比指标，来作为盈余质量指标的一种构建方式，明显的，该指标数值越大，标的盈余质量越差。因为现金利润来源于当期经营净现金流的增加；而应计利润则更多反映对未来现金流的确认，应计利润中存在较大的利润操纵空间，从而导致应计利润持续性较差，拥有较高应计利润的公司未来盈余往往会出现下滑。所以基于以上的逻辑，</span><span style="color:#7B0C00;font-size:14px;"><strong>应计利润占比越大的公司，盈余质量越差。</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/be2c9dd0-06fc-40b0-8f27-e5dc389ad120.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/f8c025e2-5c98-4bde-bfb3-399690b0b6f6.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">我们同时构造了收现比因子（CSR）来衡量公司主营业务收入背后现金流量的支持程度。该指标越高，说明公司收入的变现能力越强。反之，说明公司当前账面收入高，而实际现金收入低，有很大一部分形成了应收账款，这时可以认为公司的整体盈余质量较低。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">上述测试的盈余质量因子整体预测能力相对较弱，其中，应计利润占比（APR）因子的负向预测能力相对较强，IC均值为-1.23%，IC_IR达到-0.42。因此在盈余质量方面的因子中，选择APR作为基础因子。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>安全性（Safety）</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">Asness（2017）在定义QmJ因子时对于安全性方面的指标给予了较高的权重，文章认为前文公式（3）中的必要报酬率（requiredreturn）是比较难以定义的或者说学术界对其定义方式的争议仍然较大。因此文章采用了一种更为通俗的方式来定义安全性（safety），其主要关注的指标包括：低beta，低波动，杠杆率，信用风险等等。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">由于beta和股价波动这些指标更多的反映来自市场内的投资者行为对股价所产生的影响，其与公司本身的质量的相关性是否较高我们认为有待验证。同时，考虑到A股与海外成熟市场的参与者结构差异，散户占比较大的A股市场上个股的价格波动更容易受到公司本身质地意外的因素影响，因此我们暂未将beta和波动率因子纳入安全性因子中测试。这里我们讨论的安全性将主要从公司的经营杠杆等方面考虑：</span> 
+</p>
+<p style="margin-top:25px;">
+	<em><span style="color:#640000;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/ce0f99a2-3bdb-40f8-88ff-c2b4938c1ecc.jpg" alt=""><br>
+</span></em> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/7a05038f-7d4e-4871-8132-549c75e9fe41.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">上述测试的安全性因子整体预测能力不高，其中，现金流动负债比率（CCR）因子具有较好的预测能力，IC均值为1.53%，IC_IR达到0.39，因子收益均值为0.13%，月度胜率68%。因此我们在安全性方面的因子中，选择现金流动负债比率CCR作为基础因子。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>公司治理（Governance）</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">公司治理也是一个较为重要的评判上市公司经营质量的指标，通俗理解只有公司治理能够影响公司股票价格和股票收益，从而产生治理溢价，投资者才能通过比较上市公司的治理水平选择配置在未来可能获得更高溢价的股票。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">本文采用股权结构与股东权利、董事会构成、管理层激励、信息披露与合规、激励约束机制等多维度衡量公司的治理水平。具体的指标和权重设置如下表所示：</span> 
+</p>
+<p style="margin-top:25px;">
+	<em><span style="color:#640000;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/55195814-e39c-400a-933f-5ace19259c35.jpg" alt=""><br>
+</span></em> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">在简单加权的方法下，将流通股占比、管理层薪酬、管理层持股数量、受证监会、交易所等处罚情况、是否实施股权激励这5大指标根据方向调整等权相加结合成为公司治理因子（Governance）。</span> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/ef0b8998-e17d-47d7-a8a2-60792e13072e.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">公司治理因子的整体表现尚可，IC均值为2.79%，IC_IR达到0.49，因子收益均值为0.23%，而多空收益表现一般，单调性得分较低，因子的收益稳定性相对较弱。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><strong>QQC综合质量因子</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>六大类因子综合表现：样本内成长因子优势明显</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">为了构造一个全面且综合的质量因子，我们首先将上文整理的6大类指标按照大类内因子等权加权的方式构造6个大类因子，并比较他们的因子表现以及相关性。可以看到上面整理的这6类质量指标的整体预测能力和收益稳定性仍存在较大的差异，其中成长能力指标的IC和IC_IR均显著高于其他5类指标，而盈利能力指标的表现则相对较弱：</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">从IC序列的相关性矩阵来看，6大类质量因子之间的相关性均处在相对较低的水平，其中，公司治理因子与其他大类的质量因子直接相关性均较低，而营运效率与成长能力之间的相关性为0.6，相对较高。</span> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/a60c97ac-8f9d-470e-b6dc-427a5c46b3f7.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">因此，在将上文梳理完成的盈利能力、成长能力、盈余质量、营运效率、安全性、公司治理这6个大类质量指标综合为一个综合的质量因子时，可以考虑的加权方式主要包括：等权加权，IC加权，IC_IR加权等等。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><strong><span style="color:#7B0C00;font-size:14px;">不同加权方式对比：等权加权减少过拟合</span></strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">等权加权是最为直观的加权方式，其优点在于逻辑直观，减少参数优化过程，从而减小过拟的概率。但IC加权和IC_IR加权也是较为常用的因子合成方法，这两种加权方式下可以比较有效的提高预测能力较高的因子的权重占比，从而提高合成因子的预测能力。因此我们主要比较了下述三种因子加权方式：</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/5fffd4fc-f60a-419a-8419-62aacd91df05.jpg" alt=""><br>
+</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">下表给出了不同加权方式下的综合质量因子表现统计，由于IC加权或者IC_IR加权均需要滚动历史12个月的IC数据，因此因子测试的起始时间统一为了2010-01-01.</span> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/3129f0ec-946a-4183-b7c0-0e16f7e9b20e.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">IC_IR加权方式下得到的综合质量因子IRW_QQC的IC_IR表现最优，但多空组合的夏普比率1.50却略低于其他两种组合方式。同时，考虑到IC_IR加权方法下，成长能力因子的权重会显著高于其余因子，因此综合质量因子会更多的暴露在成长风格上，一旦成长风格出现回撤时，整体质量因子也会遭遇较大回撤。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">而等权加权方式下的QQC因子在IC或者IC_IR的表现上与另外两种加权方式下的因子差异并不明显，并且等权相加的方式逻辑更为直观，省去了滚动计算IC或者IC_IR的时间区间长度的参数优化过程，一定程度上避免了样本内的过拟概率。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong><span style="font-size:14px;">QQC因子各样本空间内均有较强预测能力，样本外表现同样出</span></strong><strong><span style="font-size:14px;">色</span></strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">基于以上的分析，我们定义等权加权方式下的EW_QQC因子为综合质量因子，命名为QQC（Quantified Quality Composite）。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">该因子在中证全指、中证500、沪深300不同样本空间内，均具有较强的预测能力，因子的IC均高于3%，IC_IR均大于0.5。其中，QQC在全市场的IC_IR高达0.87；在中证500样本内的表现也较为出色，因子IC高达5.67%，因子平均收益也达到0.48%，多空组合的夏普比率达到2.18。</span> 
+</p>
+<p style="margin-top:25px;">
+	<em><span style="color:#640000;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/334fe959-f8b6-4c83-b844-7970d213858e.jpg" alt=""><br>
+</span></em> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>QQC因子在样本外同样具有显著的预测能力，样本内和样本外的表现均十分出色。</strong></span><span style="font-size:14px;">从因子IC来看，QQC因子在样本外区间（2019-01-01至2020-12-31）的月度平均IC达到5.84%，样本外月度胜率高达87.5%，样本外表现甚至优于样本内测试结果。这一结果也一定程度上归功于我们采取的等权加权方式，减小了过拟合导致样本外表现下滑的概率。</span> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/f088bc1e-1b68-45de-9d3c-c3ea15053ecf.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<strong><span style="font-size:14px;">QQC应用于指数增强：沪深300增强样本外年化超额15个百分点</span></strong> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>沪深300指数增强：难度较大，基本面指标更有</strong></span><span style="color:#7B0C00;font-size:14px;"><strong>效</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">在各类宽基指数的指数增强模型中，沪深300指数增强模型是关注度较高但同时难度也较高的模型。近几年来沪深300指数的相对强势的表现，和沪深300股指期货贴水较小的优势，是导致沪深300指数增强策略关注度上升的主要原因。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">同时，采用量化多因子手段构建沪深300指数增强组合是比较具有难度的，我们总结沪深300指数增强的难点主要包括：</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>►行业分布不均衡，个股权重差异大</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">将沪深300与中证500这两个指数的成分股行业分布做一个统计，可以发现沪深300内的300只股票行业分布更为不均衡，其中食品饮料行业、银行行业与非银金融行业的权重占比较高：</span> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/e13690da-318a-40b0-9bef-64c85bda5157.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">通常在分析沪深300指数成分股时，前面提到的行业分布偏离度高的问题是比较容易关注到的信息。但如果仔细观察分析沪深300指数成分中的个股权重，就可以发现沪深300的个股权重也存在很大的分布偏离。</span> 
+</p>
+<p style="margin-top:25px;">
+	<em><span style="color:#640000;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/f3ae252b-ea94-46fd-bb11-ea3858990d2f.jpg" alt=""><br>
+</span></em> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">将沪深300内权重大于1%的个股作为权重股，则可以发现，截止2020年12月31日，占沪深300成份个股1/20的15只权重股，权重之和已达到31.88%。&nbsp;</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#640000;font-size:14px;"><strong>►有效因子数量少，且大部分为基本面因子</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">沪深300指数增强较为困难另外一个重要原因在于：沪深300内的有效因子数量较少。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">我们以因子库中，包括估值因子，规模因子，成长因子，质量因子，杠杆因子，动量因子，波动因子，技术因子，流动性因子，情绪类因子等共10大类200个细分因子为例，测试这些因子在沪深300成分股内的预测能力和选股能力。以IC绝对值大于3%，IC_IR绝对值大于0.3为标准，沪深300成分股内，满足上述标准的具有一定选股能力的因子个数仅有20个，有效因子占比只有10%，如下图所示：</span> 
+</p>
+<p style="margin-top:25px;">
+	<em><span style="color:#640000;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/6acee37a-18d7-4d87-81d0-14061b2d2d3c.jpg" alt=""><br>
+</span></em> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>沪深300内的有效因子中以基本面类</strong></span><span style="color:#7B0C00;font-size:14px;"><strong>型的因子为主，</strong></span><span style="font-size:14px;">基本面因子的占比超过65%。而这一特征与中证500或者中证1000是截然相反的。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="color:#7B0C00;font-size:14px;"><strong>基于QQC的沪深300指数增强：样本外表现出色，年化超额15%</strong></span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">基于前文的分析，我们发现沪深300中基本面相关的因子更具有超额收益能力，同时沪深300成分股的行业偏离和个股偏离都较为严重，我们构造了基于QQC综合质量因子的沪深300指数增强模型，模型的具体设置如下：</span> 
+</p>
+<p style="margin-top:25px;">
+	<strong><span style="color:#7B0C00;font-size:14px;">因子选择：</span></strong><span style="font-size:14px;">选择包括估值因子、动量因子、换手率因子、一致预期类因子在内的沪深300内较为有效的因子，与QQC因子一同作为模型底层因子。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/68d4cf57-671a-4b08-9cb7-7214bacd0355.jpg" alt=""><br>
+</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">因子权重设置：滚动24个月IC_IR（QQC因子的权重若小于50%，将其调整至50%，其他因子再做归一化处理）</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">组合优化及参数设置：</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">（1）成分股内选股</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">（2）约束行业偏离度不超过5%；</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">（3）约束市值因子暴露度不超过5%；</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">（4）约束个股权重相对沪深300成分股原始权重的偏离度不超过1个百分点（绝对值）；</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">（5）月度调仓，费率假设为单边0.3%</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">（6）样本内2011-01-01至2018-12-31，样本外为2019-01-01至2020-12-31</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">模型表现：组合年化超额收益为10.47%，跟踪误差3.37%，信息比3.11。组合自2011年至今每年度均跑赢沪深300指数，月度胜率接近80%，相对基准的最大回撤仅为3.9%。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">样本外（2019-01-01至2020-12-31）组合年化超额收益为15.02%，跟踪误差3.65%，信息比4.11。2020年全年，组合累计收益46.58%，跑赢沪深300指数19.37个百分点，表现相当出色。</span> 
+</p>
+<p style="margin-top:25px;">
+	<em><span style="color:#640000;"><em><span style="font-size:14px;"><img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/dd61012b-578f-46df-9b4a-e274161649d9.jpg" alt=""><br>
+</span></em></span></em> 
+</p>
+<p style="margin-top:25px;">
+	<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/82a6d3e9-e1bc-482f-b051-1c34c2b8f5f9.jpg" alt=""> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">综上，采用基于QQC因子的沪深300指数增强模型样本内外均具有稳定的超额收益能力。我们的模型为了减少权重股收益波动对模型的表现的影响并提高超额收益的稳定性，在QQC因子结合多因子打分的基础上，结合优化器对最终持仓组合的行业暴露、市值暴露和个股权重偏离度进行约束。</span> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;">基于QQC综合质量因子的沪深300增强组合具有稳定的超额收益，组合年化超额收益为10.47%，跟踪误差3.37%，信息比3.11。组合自2011年至今每年度均跑赢沪深300指数，月度胜率接近80%，相对最大回撤仅为3.9%。2020年全年，组合累计收益46.58%，跑赢沪深300指数19.37个百分点，表现相当出色。</span> 
+</p>
+<p style="margin-top:25px;">
+	<strong><span style="font-size:14px;">文章来源</span></strong> 
+</p>
+<p style="margin-top:25px;">
+	<span style="font-size:14px;"><span style="font-size:14px;">本文摘自：2021年1月14日已经发布的《</span><a href="http://research.cicc.com/report/readreportpdf.action?report_id=1052331" target="_blank"><span style="font-size:14px;">量化多因子系列（1）：QQC综合质量因子与指数增强应用</span></a><span style="font-size:14px;">》</span></span> 
+</p></div>
+
+        </div> 
+</div>
+
+<div class="c-content sm-content" style="background-color:#F0F2F5; margin-top:10px;">
+    <!--免责申明-->
+    <div class="clearfix">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="">
+                    <h4 class="text-center sm-title">
+                    	<span id="flsm" style="cursor:pointer;">法律声明</span>
+                    	<i class="glyphicon glyphicon-menu-down"></i>
+                    </h4>
+                    <div class="ct-detail-sm">
+	                        一般声明<br><br>本报告中的信息均来源于我们认为可靠的已公开资料，但中国国际金融股份有限公司及/或其关联机构（以下统称"中金公司"）对这些信息的准确性及完整性不作任何保证。本报告中的信息、意见等均仅供投资者参考之用，不构成所述证券买卖的出价或征价。该等信息、意见并未考虑到获取本报告人员的具体投资目的、财务状况以及特定需求，在任何时候均不构成对任何人的个人推荐。投资者应当对本报告中的信息和意见进行独立评估，并应同时考量各自的投资目的、财务状况和特定需求，必要时就法律、商业、财务、税收等方面咨询专业财务顾问的意见。对依据或者使用本报告所造成的一切后果，中金公司及/或其关联人员均不承担任何法律责任。&nbsp;<br><br>本报告所载的意见、评估及预测仅为本报告出具日的观点和判断。该等意见、评估及预测无需通知即可随时更改。过往的表现亦不应作为日后表现的预示和担保。在不同时期，中金公司可能会发出与本报告所载意见、评估及预测不一致的研究报告。&nbsp;<br><br>中金公司的销售人员、交易人员以及其他专业人士可能会依据不同假设和标准、采用不同的分析方法而口头或书面发表与本报告意见及建议不一致的市场评论和/或交易观点。中金公司没有将此意见及建议向报告所有接收者进行更新的义务。中金公司的资产管理部门、自营部门以及其他投资业务部门可能独立做出与本报告中的意见或建议不一致的投资决策。&nbsp;<br><br>本报告由受香港证券和期货委员会监管的中国国际金融香港证券有限公司于香港提供。香港的投资者若有任何关于中金公司研究报告的问题请直接联系中国国际金融香港证券有限公司的销售交易代表。&nbsp;<br><br>本报告由受新加坡金融管理局监管的中国国际金融（新加坡）有限公司(“中金新加坡”)&nbsp;于新加坡向符合新加坡《证券期货法》及《财务顾问法》定义下的认可投资者及/或机构投资者提供。提供本报告于此类投资者,&nbsp;有关财务顾问将无需根据新加坡之《财务顾问法》第36&nbsp;条就任何利益及/或其代表就任何证券利益进行披露。有关本报告之任何查询，在新加坡获得本报告的人员可向中金新加坡提出。&nbsp;<br><br>本报告由受金融市场行为监管局监管的中国国际金融（英国）有限公司（“中金英国”）于英国提供。本报告有关的投资和服务仅向符合《2000年金融服务和市场法2005年（金融推介）令》第19（5）条、38条、47条以及49条规定的人士提供。本报告并未打算提供给零售客户使用。在其他欧洲经济区国家，本报告向被其本国认定为专业投资者（或相当性质）的人士提供。&nbsp;<br><br>本报告由中国国际金融日本株式会社（“中金日本”）于日本提供，中金日本是在日本关东财务局（日本关东财务局长（金商）第&nbsp;3235号）注册并受日本法律监管的金融机构。本报告有关的投资产品和服务仅向符合日本《金融商品交易法》第2条31项所规定的专业投资者提供。本报告并未打算提供给日本非专业投资者使用。<br>本报告亦由中国国际金融股份有限公司向符合日本《金融商品交易法施行令》第17条第3款第1项及《金融商品交易法》第58条第2款但书前段所规定的日本金融机构提供。在该情形下，本报告有关的投资产品和服务仅向日本受监管的金融机构提供。<br><br>本报告将依据其他国家或地区的法律法规和监管要求于该国家或地区提供。<br><br>特别声明<br><br>在法律许可的情况下，中金公司可能与本报告中提及公司正在建立或争取建立业务关系或服务关系，也可能会持有本报告中提及公司所发行的证券头寸并进行交易。因此，投资者应当考虑到中金公司及/或其相关人员可能存在影响本报告观点客观性的潜在利益冲突。投资者请勿将研究报告或相关信息视为投资或其他决定的信赖依据。<br><br>与本报告所含具体公司相关的披露信息请访https://research.cicc.com/footer/disclosures，亦可参见近期已发布的关于该等公司的具体研究报告。<br><br>中金研究基本评级体系说明：<br><br>分析师采用相对评级体系，股票评级分为跑赢行业、中性、跑输行业（定义见下文）。<br><br>除了股票评级外，中金公司对覆盖行业的未来市场表现提供行业评级观点，行业评级分为超配、标配、低配（定义见下文）。<br><br>我们在此提醒您，中金公司对研究覆盖的股票不提供买入、卖出评级。跑赢行业、跑输行业不等同于买入、卖出。投资者应仔细阅读中金公司研究报告中的所有评级定义。请投资者仔细阅读研究报告全文，以获取比较完整的观点与信息，不应仅仅依靠评级来推断结论。在任何情形下，评级（或研究观点）都不应被视为或作为投资建议。投资者买卖证券或其他金融产品的决定应基于自身实际具体情况（比如当前的持仓结构）及其他需要考虑的因素。<br><br>股票评级定义：<br>i.&nbsp;跑赢行业（OUTPERFORM）：未来6~12个月，分析师预计个股表现超过同期其所属的中金行业指数；<br>ii.&nbsp;中性（NEUTRAL）：未来6~12个月，分析师预计个股表现与同期其所属的中金行业指数相比持平；<br>iii.&nbsp;跑输行业（UNDERPERFORM）：未来6~12个月，分析师预计个股表现不及同期其所属的中金行业指数。<br><br>行业评级定义：<br>i.&nbsp;超配（OVERWEIGHT）：未来6~12个月，分析师预计某行业会跑赢大盘10%以上；<br>ii.&nbsp;标配（EQUAL-WEIGHT）：未来6~12个月，分析师预计某行业表现与大盘的关系在-10%与10%之间；<br>iii.&nbsp;低配（UNDERWEIGHT）：未来6~12个月，分析师预计某行业会跑输大盘10%以上。<br><br>研究报告评级分布可从https://research.cicc.com/footer/disclosures&nbsp;获悉。<br><br>本报告的版权仅为中金公司所有，未经书面许可任何机构和个人不得以任何形式转发、翻版、复制、刊登、发表或引用。&nbsp;<br></div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+  .zm-footer .qrcode-box + .qrcode-box {
+  	margin-left: 2rem;
+  }
+</style>
+  
+  
+<!-- footer -->
+<div class="footer clearfix zm-footer">
+	<div class="footer-content cleafix">
+		<div class="info-us pull-left">
+			<div class="about-us pull-left">
+				<div class="list-item">
+					<dl>
+						<dd><a href="https://research.cicc.com/footer/aboutUs" target="_self">关于我们</a></dd>
+						<dd><a href="https://research.cicc.com/footer/disclaimer" target="_self">免责声明</a></dd>
+						<dd><a href="https://research.cicc.com/footer/helpCenter" target="_self">帮助中心</a></dd>
+						<dd>
+							<a href="https://research.cicc.com/footer/disclosures" target="_self">
+								信息披露</a>
+						</dd>
+						<dd><a href="https://research.cicc.com/footer/termsofuse" target="_self">使用条款</a></dd>
+						</dl>
+				</div>
+			</div>
+		</div>
+		<div class="contact-us pull-left" style="width:auto">
+			<div class="list-item">
+				<dl>
+					<dd>
+						<!-- <a href="http://research.cicc.com/cn/contact.xhtml" target="_blank"> -->
+						联系我们<!-- </a> -->
+					</dd>
+					<dd>地址：中国北京建国门外大街1号国贸写字楼2座28层</dd>
+					<dd>电话：(+86-10) 6505 1166</dd>
+					<dd>传真：(+86-10) 6505 1156&nbsp;</dd>
+					<dd><a href="mailto:research_support@cicc.com.cn" target="_blank">邮箱：research_support@cicc.com.cn</a></dd>
+				</dl>
+			</div>
+		</div>
+
+		<div class="qrcode pull-right">
+				<div class="qrcode-box pull-left">
+					<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/wechat-qrcode.png" alt="">
+					<p>中金点睛</p>
+				</div>
+				<div class="qrcode-box pull-left">
+					<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/applet.png" alt="">
+					<p>小程序</p>
+				</div>
+				<div class="qrcode-box pull-left">
+					<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/service.jpg" alt="">
+					<p>服务号</p>
+				</div>
+				<div class="qrcode-box pull-left">
+					<img src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/qrcode.png" alt="">
+					<p>手机客户端</p>
+				</div>
+			</div>
+		</div>
+	<div class="author">
+			Copyright ©2017-现在 中国国际金融股份有限公司 <a href="https://beian.miit.gov.cn/#/Integrated/index" target="_blank" class="rs-footer-icp-link">京ICP备 07500352号-2</a>
+		</div>
+	<!-- 	<div class="author">©2013-2018 China International Capital Corporation Limited, 京CP备07500352号-2</div> -->
+</div>
+
+<!-- 删除搜索器时的提示 -->
+<div class="modal fade c-modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<span class="close" data-dismiss="modal" aria-label="Close" aria-hidden="true">×</span>
+				<h4 class="modal-title" id="myModalLabel">权限不足</h4>
+			</div>
+			<div class="modal-body text-center">
+				<p>如希望阅读全文/浏览更多，</p>
+				<p>请联系销售人员，</p>
+				<p>或发送邮件至<a href="javascript:void(0)" class="theme-color">research_support@cicc.com.cn</a></p>
+			</div>
+			<div class="modal-footer text-center">
+				<button type="button" class="btn btn-default cus-default " data-dismiss="modal">取消</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div>
+  <ul>
+    <li></li>
+  </ul>
+</div>
+
+<div class="back-top" style="display: block;" id="">
+	<a href="https://research.cicc.com/frontend/recommend/detail?id=1758#top">
+	  <span>回到顶部</span>
+	  <i class="glyphicon glyphicon-menu-up" style="color: rgb(204, 204, 204); opacity: 0.6;"></i>
+	</a>
+</div>
+
+
+<script type="application/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/html5shiv.min.js.download"></script>
+<script type="application/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/respond.min.js.download"></script>
+<!-- <script type="application/javascript" src="/static/front/lib/jquery/jquery-1.11.1.min.js"></script> -->
+<script type="application/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/common.js.download"></script>
+<script type="application/javascript">
+    //设置AJAX的全局默认选项
+    $.ajaxSetup({
+        contentType:"application/x-www-form-urlencoded;charset=utf-8",
+        complete: function(XMLHttpRequest, textStatus) { // 出错时默认的处理函数
+            var status = XMLHttpRequest.status;
+            var res = XMLHttpRequest.responseText;
+            if(textStatus == 'parsererror') { 	//处理解析错误
+                window.location.reload();
+                return;
+            }
+            if (res==undefined) {
+                return;
+            }
+            if(typeof(res) !='object' && res.indexOf('<script type="text/javascript">') !=-1) {
+                window.location.href = ctx  + '/login';
+            }
+            if (res.indexOf("ret") == -1) {
+                return;
+            }
+            try{
+                var data = JSON.parse(res);
+                if(data.ret && data.ret== 300) {		//	处理踢出异常
+                    window.location.href=ctx+"/login?kickout";
+                } else if (data.ret && data.ret== 500) {		// 处理一般异步请求异常
+                    cicc_index.ciccModal({
+                        type:'cicc-modal c-confirm',
+                        content:{
+                            title:'请求出错',
+                            body:data.msg,
+                            suc_opt_text:'确定',
+                            err_opt_text:''
+                        }});
+                } else if (data.ret && data.ret== 310) {	// 账户服务过期
+                    cicc_index.ciccModal({
+                        type:'cicc-modal c-confirm',
+                        content:{
+                            title:'服务过期提醒',
+                            body:data.msg,
+                            suc_opt_text:'确定',
+                            err_opt_text:''
+                        }});
+                }
+            } catch(e){
+            }
+        }
+    });
+</script>
+<script type="application/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/bootstrap.min.js.download"></script>
+<script type="application/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/clamp.min.js.download"></script>
+<script type="application/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/jquery.mCustomScrollbar.js.download"></script>
+<script type="application/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/CiccUtils.js.download"></script>
+<script type="application/javascript">
+    var apiPrefix = ""
+    var customerDeadTime = "";
+    var customerLevel = "";
+    var customerEmail = "";
+    var customerMobile = ""
+
+    $(function() {
+        //校验当前用户是否过期xuyang
+
+        if(customerDeadTime!=null && customerDeadTime!="" && customerLevel=="D") {
+            var currTime=new Date().getTime();
+            if(customerDeadTime < currTime) { //已过期
+                $.post(apiPrefix + "/customer_avalid",function(data) {
+                    if(data.ret == 0) {
+                        //弹出激活窗口
+                        cicc_index.ciccModal({
+                            type:'cicc-modal c-confirm',
+                            content:{
+                                title:'自助注册账号到期提醒',
+                                body: data.msg,
+                                suc_opt_text: '重新激活',
+                                err_opt_text:''
+                            },
+                            suc_opt: function () {
+                                $.post(apiPrefix + "/customer_activate",{
+                                    "email" : customerEmail,
+                                    "mobile": customerMobile
+                                },function(data){
+                                    cicc_index.ciccModal({
+                                        type:'cicc-modal c-confirm',
+                                        content:{
+                                            title:'激活提示',
+                                            body:data.msg,
+                                            suc_opt_text: '确定',
+                                            err_opt_text:''
+                                        }
+                                    });
+                                });
+                            }
+                        }); //激活
+                    }
+                },"json");
+
+            }
+        }
+    })
+</script>
+<style>
+
+    #im-dialog-iframe {
+        height: 513px;
+        border-radius: 0px;
+        position: fixed;
+        right: 100px;
+        bottom: 3px;
+        z-index: 1050;
+    }
+
+</style>
+
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/dragiframe.js.download"></script>
+
+<iframe style="display:none;" id="im-dialog-iframe" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/saved_resource.html" frameborder="0" width="768px" height="513px" scrolling="no"></iframe>
+
+<script type="application/javascript">
+
+    var apiPrefix = ""
+
+    var imRights = $('.info-bell').length == 1;
+    var imStatus = '';
+    var imTip = '';
+    var noticeFlag = imStatus == '1' && imTip == '1' && imRights;
+    var showStatement = '';
+    var customerTipTitle = "在线咨询服务免责声明";
+
+    $(function() {
+
+        var imTimeObj = {
+            showData: null,
+            sendShowTime: function () {
+                var _this = this
+                $.post(apiPrefix + '/operation/imAccess',
+                    function (data) {
+                        if (data.ret == 0) {
+                            _this.showData = data.data
+                        }
+                    },'json')
+            },
+            sendCloseTime: function () {
+                var _this = this
+                if (_this.showData) {
+                    $.post(apiPrefix + '/operation/close',{id:_this.showData},
+                        function (data) {
+                        })
+                }
+            }
+        }
+
+        window.showStatementOrIMDialog = function (currentAuthorId, currentDocumentId) {
+            // 显示合规提示
+            if (showStatement == '1') {
+
+                hideIMDialog()
+
+                var title = customerTipTitle
+                $.ajax({
+                    url: apiPrefix + '/im/statement',
+                    type: 'get',
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.ret == 1) {
+                            var h = '<h4 class="text-dark-red text-center">' + title + '</h4>\n' +
+                                '<div class="disclaimer-content">'+data.data+'</div>'+
+                                '\t\t\t\t\t<div class="clearfix">\n' +
+                                '\t\t\t\t\t\t<label class="fn">\n' +
+                                '\t\t\t\t\t\t\t<input type="checkbox"> 下次不再提示\n' +
+                                '\t\t\t\t\t\t</label>\n' +
+                                '\t\t\t\t\t\t<br>\n' +
+                                '\t\t\t\t\t\t<p class="text-center"><span class="btn btn-primary cus-primary" id="confirm-claimer-bell">我已阅读，并同意</span></p>\n' +
+                                '\t\t\t\t\t</div>\n' +
+                                '\t\t\t\t\n' +
+                                '\t\t\t\t</div>'
+
+                            cicc_index.ciccModal({
+                                type: 'disclaimer-tip',
+                                content: {
+                                    title: '',
+                                    suc_opt_text: '',
+                                    err_opt_text: '',
+                                    body: h
+                                },
+                                initModal: function() {
+                                    // 设置滚动条
+                                    cicc_index.scrollBar('dload', '.disclaimer-content');
+                                    $('#confirm-claimer-bell').on('click', function() {
+                                        var is_checked = $(this).parents('div').find('input[type="checkbox"]').is(':checked');
+                                        $.ajax({
+                                            type: 'post',
+                                            url: apiPrefix + '/im/statement/confirm',
+                                            data: {isChecked: is_checked},
+                                            success: function (data) {
+                                                if (data.ret === 1) {
+                                                    if (is_checked) {
+                                                        showStatement = '0';
+                                                    }
+
+                                                    $('#ciccModal').modal('hide')
+
+                                                    /*
+                                                    $('body').css({"padding-right": "0px"})
+                                                    $('[data-role="cicc-modal"]').modal('show')
+                                                    */
+
+                                                    showIMDialog(currentAuthorId, currentDocumentId)
+                                                }
+                                            }
+                                        })
+                                    })
+                                }
+                            })
+                        }
+                    },
+                    error: function (xhr, desc, err) {
+                    }
+                });
+            } else {
+                //$('[data-role="cicc-modal"]').modal('show')
+
+                window.showOrHideIMDialog(currentAuthorId, currentDocumentId)
+            }
+        }
+
+        // 循环查询未读消息
+        queryUnReadMsg();
+
+        window.showIMDialog = function(currentAuthorId, currentDocumentId) {
+            var url = '';
+            var $imDialogIFrame = jQuery('#im-dialog-iframe')
+            if (currentAuthorId && currentAuthorId != 'undefined' && currentAuthorId != '') {
+            	url = apiPrefix + '/im/start?analyst=' + currentAuthorId;
+            	if (currentDocumentId && currentDocumentId != 'undefined' && currentDocumentId != '') {
+            		url = url + '&id=' + currentDocumentId;
+            	}
+            } else {
+            	url = apiPrefix + '/im/start';
+            }
+            
+            var oldUrl = $imDialogIFrame.attr('src');
+            if (oldUrl != url) {
+                $imDialogIFrame.attr('src', url);
+
+
+            } else {
+                var iframeWindow = document.getElementById('im-dialog-iframe').contentWindow
+                if (iframeWindow.sharedConnection == null) {
+                    iframeWindow.resetConnection()
+                }
+            }
+
+
+            // 记录开始时间
+            imTimeObj.sendShowTime()
+
+            $imDialogIFrame.show()
+			$(".modal-backdrop.fade.in").css("display", "none");
+		
+        }
+
+        window.hideIMDialog = function() {
+
+            var $imDialogIFrame = jQuery('#im-dialog-iframe')
+            $imDialogIFrame.hide()
+            // 记录结束时间
+            imTimeObj.sendCloseTime()
+        }
+
+        window.showOrHideIMDialog = function (currentAuthorId, currentDocumentId) {
+            if (jQuery('#im-dialog-iframe').is(':visible')) {
+                hideIMDialog()
+            } else {
+                showIMDialog(currentAuthorId, currentDocumentId)
+            }
+        }
+
+
+
+
+        //IM消息
+        $('.info-bell').on('click', function() {
+            showStatementOrIMDialog()
+        })
+
+
+        //页面刷新或关闭时记录关闭时间
+        window.onbeforeunload = function(){
+            imTimeObj.sendCloseTime();
+        }
+
+        function setupDragAndMove(listenerEle, movableEle) {
+            function mouseUp() {
+                window.removeEventListener('mousemove', divMove, true);
+            }
+
+            function mouseDown() {
+                window.addEventListener('mousemove', divMove, true);
+            }
+
+            function divMove(e){
+                var div = movableEle
+               // div.style.position = 'fixed';
+                div.style.top = e.clientY + 'px';
+                div.style.left = e.clientX + 'px';
+            }
+
+            listenerEle.addEventListener('mousedown', mouseDown, false);
+            window.addEventListener('mouseup', mouseUp, false);
+
+        }
+    })
+
+    function queryUnReadMsg() {
+        if (noticeFlag) {
+            var hiddenProperty = 'hidden' in document ? 'hidden' : 'webkitHidden' in document ? 'webkitHidden' : 'mozHidden' in document ? 'mozHidden' : null;
+            if (!document[hiddenProperty]) {
+                $.get(apiPrefix + "/im/unReadMsg?timeStamp=" + new Date().getTime(), function(data) {
+                	if(data.ret == undefined) {
+              		  window.location.href = ctx  +'/login';
+              	  	}
+                    if (data.ret == 1) {
+/*                      if (data.data == 0) {
+                            $('.icon-message').hide();
+                        } else {
+                            $('.icon-message').html(data.data);
+                            $('.icon-message').show();
+                        } */
+                      	//是否显示小红点
+                        if (data.data > 0) {
+												$('#bg_im > span').html('新消息：' + data.data)
+                    		$("#bg_im").find(".point").css("display","block");
+                    	} else {
+	                        $('#bg_im > span').html('新消息：' + 0)
+                    		$("#bg_im").find(".point").css("display","none");
+                    	}
+                    }
+                })
+            }
+
+            setTimeout("queryUnReadMsg()", 10000);
+        }
+    }
+</script>
+<script>
+	var ISEN, cnewMsg, cnewComment
+	ISEN = 'cn' == 'en'
+	ISEN ? cnewMsg = 'New message: ': cnewMsg = '新增留言：'
+	ISEN ? cnewComment = 'New comment: ' : cnewComment = '新增评论：'
+
+$(function(){
+	 if ($("#bg_comment").length > 0) {
+		getNewCommentNum();//初始执行一次
+		setInterval(getNewCommentNum, 60 * 1000);//1min刷新一次
+	}
+	if ($("#bg_email").length > 0) {
+		var param = {};
+		param.userRole = $("#bg_email").attr("data-role");
+		getNewMsgNum(param);//初始执行一次
+		setInterval(function(){
+			getNewMsgNum(param);
+		}, 60 * 1000);//1min刷新一次
+	}
+})
+
+//获取登录之后的有权限的客户或分析师（或分析师助理）收到的新增留言--小红点的判断
+function getNewMsgNum(param){
+	$.ajax({
+		type: 'POST',
+        url: "/index/getNewMsgNum",
+        data: param,
+        error: function (result) {
+        },
+        success: function (result) {
+            if (result.ret == 0) {
+            	var newMsgNum = (result.data.newMsgNum == null || result.data.newMsgNum == "") ? 0 : result.data.newMsgNum ;
+            	//是否显示小红点
+            	if(newMsgNum > 0){
+            		$("#bg_email").find(".point").css("display","block");
+            		if(cnewMsg > 99) {
+            			cnewMsg = '99+'
+		            }
+		            $('#bg_email span').html(cnewMsg + newMsgNum)
+            	}else{
+            		$("#bg_email").find(".point").css("display","none");
+		            $('#bg_email span').html(cnewMsg + 0)
+            	}
+            }
+        }
+	});
+}
+//获取登录之后的分析师（或分析师助理）收到的新增评论数量--小红点的判断
+function getNewCommentNum(){
+	$.ajax({
+		type: 'POST',
+        url: "/index/getNewCommentNum",
+        data: {},
+        error: function (result) {
+        },
+        success: function (result) {
+            if (result.ret == 0) {
+            	var newCommentNum = (result.data.newCommentNum == null || result.data.newCommentNum == "") ? 0 : result.data.newCommentNum ;
+            	//是否显示小红点
+            	if(newCommentNum > 0){
+            		$("#bg_comment").find(".point").css("display","block");
+            		if(newCommentNum>99) {
+			            newCommentNum = '99+'
+		            }
+		            $("#bg_comment span").html(cnewComment + newCommentNum)
+            	}else{
+            		$("#bg_comment").find(".point").css("display","none");
+		            $("#bg_comment span").html(cnewComment + 0)
+            	}
+            }
+        }
+	});
+}
+
+ISEN ? $('.back-top').find('span').css('width', '140px') : ''
+var leftNum, blurLeftNum;
+leftNum = ISEN ? '-150px' : '-90px'
+blurLeftNum = ISEN ? '-160px' : '-100px'
+
+$('.back-top i').hover(function () {
+	$(this).parents('.back-top').find('span').css('display', 'block')
+	$(this).parents('.back-top').find('span').stop(true).animate({left: leftNum, opacity: '1'}, 300)
+}, function () {
+	$(this).parents('.back-top').find('span').stop(true).animate({left: blurLeftNum, opacity: '0'}, 200, function () {
+		$(this).parents('.back-top').find('span').css('display', 'none')
+	})
+})
+
+</script><script type="application/javascript">
+
+//处理英文免责声明单词换行切断的问题 
+	if(lang == 'en'){
+		var en_word = $(".ct-detail-sm").html().replace(/&nbsp;/g," ");
+		$(".ct-detail-sm").html(en_word);
+		$(".ct-detail-sm").show();
+	}
+
+    var operationId=0;
+    function access(){
+        if(true){
+            return;
+        }
+        $.post(ctx+"/operation/access",{"detailedid":1758},function(result){
+            operationId=result.data;
+        });
+    }
+    
+    $(".sm-title i").click(function(){
+    	var am = $(this).hasClass("glyphicon-menu-down");
+    	if(am){
+    		$(this).removeClass("glyphicon-menu-down");
+    		$(this).addClass("glyphicon-menu-up");
+    		$(".ct-detail-sm").css("height","auto");
+    		
+    	}else{
+    		$(this).removeClass("glyphicon-menu-up");
+    		$(this).addClass("glyphicon-menu-down");
+    		$(".ct-detail-sm").css("height","79px");
+    	}
+    })
+    
+    $("#flsm").click(function(){
+    	$(".sm-title i").click();
+    })
+    
+    $(function () {
+        
+        unAmericanConfirm();
+        
+        cicc_index.scrollBar('window', '.ct-detail');
+        if (true){
+            access();
+        }
+    })
+    
+    function close(e) {
+    	 if(operationId==0||true){
+             return;
+         }
+    	 $.ajax({
+             url: ctx+"/operation/close",
+             method: 'get',
+             async: false,
+             data: {
+             	id: operationId
+             }
+         });
+    }
+
+    if (true) {
+        if (window.attachEvent) {
+            window.attachEvent('onbeforeunload', close);
+        } else {
+            window.addEventListener('beforeunload', close, false);
+        }
+    }
+    
+</script>
+
+<script type="text/javascript" src="./中金_量化多因子系列（1）：QQC综合质量因子与指数增强应用_files/progress_duration.js.download"></script>
+
+<script type="text/javascript">
+  if (typeof zm_recommend == "undefined") {
+    var zm_recommend = new Object();
+  };
+  !function(window, zm) {
+    let _authors = "范静怡";
+    zm['customer'] = {
+      id: "1758",
+      title: "QQC综合质量因子与指数增强应用",
+      uploadTime: "Fri Jan 15 11:20:39 CST 2021",
+      author: _authors.split(','),
+    };
+  }(window, zm_recommend);
+
+  $(document).ready(function() {
+    if (zm_recommend) {
+      zm_sensors.sensors.track('mrtj_detail_view', {
+        page_name: '每日推荐内容详情页',
+        content_id: zm_recommend.customer.id,
+        content_title: zm_recommend.customer.title,
+        issue_time: zm_public.timeFormat(zm_recommend.customer.uploadTime, 'yyyy-MM-dd HH:mm:ss'),
+        of_author: zm_recommend.customer.author ? zm_recommend.customer.author : []
+      });
+    };
+  });
+  window.onpagehide = function(event){
+    try {
+      let data = {
+        residence_time: Number(getLocal('residence_time')),
+        progress: getLocal('progress'),
+        name: '关闭',
+      }
+      setLocal('onpagehide', data);
+      if (zm_recommend) {
+        zm_sensors.sensors.track('mrtj_detail_view_end', {
+          content_id: zm_recommend.customer.id,
+          content_title: zm_recommend.customer.title,
+          issue_time: zm_public.timeFormat(zm_recommend.customer.uploadTime, 'yyyy-MM-dd HH:mm:ss'),
+          of_author: zm_recommend.customer.author ? zm_recommend.customer.author : [],
+          view_duration: data.residence_time,
+        });
+      }
+    }
+    catch(err) {}
+  }
+</script>
+
+
+<div class="modal fade c-declare" id="ciccModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="visibility: visible; display: none;"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button><h4 class="modal-title" id="myModalLabel">免责声明</h4></div><div class="modal-body"><div class="clearfix"><div class="disclaimer-content mCustomScrollbar _mCS_2 mCS_no_scrollbar" id="disclaimer_content"><div id="mCSB_2" class="mCustomScrollBox mCS-light mCSB_vertical mCSB_inside" style="max-height: none;" tabindex="0"><div id="mCSB_2_container" class="mCSB_container mCS_y_hidden mCS_no_scrollbar_y" style="position:relative; top:0; left:0;" dir="ltr"><div class="ct-detail mCustomScrollbar _mCS_1 mCS_no_scrollbar"><div id="mCSB_1" class="mCustomScrollBox mCS-light mCSB_vertical mCSB_inside" style="max-height: none; height: auto;" tabindex="0"><div id="mCSB_1_container" class="mCSB_container mCS_y_hidden mCS_no_scrollbar_y" style="position:relative; top:0; left:0;" dir="ltr">本人在此不可撤销地确认，本人为非美国1933年证券法定义下的美国人及/或非来自于美国的读者；或者本人是符合美国SEC 15a-6规则下的主要机构投资者（资产或管理的资产超过100万美元）。本人确保前述信息均真实、准确。对于任何虚假确认所引致的一切后果，本人将承担全部责任。<br><br>本人也不会以任何方式（包括但不限于纸质或电子方式）全部或部分地翻版、复制、刊登、发表或引用本网站上的任何内容。<br><br>本人亦同意并确认本人对本网站上的任何内容的获取不构成与中金公司的任何合同或承诺的基础，中金公司也不因本人获取本网站上的任何内容而将本人视为中金公司的客户。本人不会依赖本网站上的信息、观点和结论而取代自身的独立判断。本人会自主做出投资决策并自行承担一切风险，对本人使用本网站所造成的一切后果及风险，中金公司及/或其关联人员均不承担任何责任。</div><div id="mCSB_1_scrollbar_vertical" class="mCSB_scrollTools mCSB_1_scrollbar mCS-light mCSB_scrollTools_vertical" style="display: none;"><div class="mCSB_draggerContainer"><div id="mCSB_1_dragger_vertical" class="mCSB_dragger" style="position: absolute; min-height: 30px; top: 0px; height: 0px;"><div class="mCSB_dragger_bar" style="line-height: 30px;"></div></div><div class="mCSB_draggerRail"></div></div></div></div></div></div><div id="mCSB_2_scrollbar_vertical" class="mCSB_scrollTools mCSB_2_scrollbar mCS-light mCSB_scrollTools_vertical" style="display: none;"><div class="mCSB_draggerContainer"><div id="mCSB_2_dragger_vertical" class="mCSB_dragger" style="position: absolute; min-height: 30px; top: 0px; height: 0px;"><div class="mCSB_dragger_bar" style="line-height: 30px;"></div></div><div class="mCSB_draggerRail"></div></div></div></div></div><div class="clearfix"><p class="text-center c-declare-btn"><span class="btn btn-primary cus-primary" id="confirm-claimer">我已阅读，并同意</span></p></div></div></div></div></div></div></body><grammarly-desktop-integration data-grammarly-shadow-root="true"><template shadowrootmode="open"><style>
+      div.grammarly-desktop-integration {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select:none;
+        user-select:none;
+      }
+
+      div.grammarly-desktop-integration:before {
+        content: attr(data-content);
+      }
+    </style><div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration" data-content="{&quot;mode&quot;:&quot;full&quot;,&quot;isActive&quot;:true,&quot;isUserDisabled&quot;:false}"></div></template></grammarly-desktop-integration></html>

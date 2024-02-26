@@ -1,0 +1,29 @@
+if (typeof zm_i18n == 'undefined') {
+  var zm_i18n = new Object();
+  var i18n_extend = new Object();
+};
+
+!(function(window, fun, zm) {
+  fun.i18n = function(url, ling, options) {
+    fun['zm_' + ling] = {
+      options: options,
+    };
+    for (let i = 0; i < options.length; i++) {
+      let this_url = url + "modules/" + ling + "/" + options[i] + ".json";
+      let xhr;
+      if (window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest();
+      } else {
+        xhr = new ActiveXObject('Microsoft.XMLHTTP');
+      };
+      xhr.open('GET', this_url, true);
+      xhr.send();
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          let scenetree = JSON.parse(xhr.responseText);
+          zm[options[i]] = scenetree;
+        }
+      }
+    };
+  }
+})(window, i18n_extend, zm_i18n);

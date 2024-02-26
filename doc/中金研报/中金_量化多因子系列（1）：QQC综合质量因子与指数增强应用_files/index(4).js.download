@@ -1,0 +1,67 @@
+!function(window, zm) {
+  if (typeof zm == 'undefined') {
+    return console.log(zm)
+  } else if (typeof jQuery === 'undefined') {
+    console.log(zm);
+  } else {
+    zm['validform'] = function(this_DOM, rules) {
+      return $(this_DOM).validate({
+        rules: rules,
+        errorElement: "em",
+        errorPlacement: function(error, element) {
+          error.addClass("help-block");
+          if (element.prop("type") === "checkbox") {
+            element.parents(".checkbox").addClass("has-feedback has-error");
+            error.insertAfter(element.parents(".has-feedback"));
+            if (!element.parents(".checkbox").children().next("i")[0]) {
+              $("<i class='glyphicon glyphicon-remove form-control-feedback'></i>").insertAfter(
+                element.parents(".checkbox").children()
+              );
+            }
+          } else if (element.hasClass('select2')) {
+            element.parent().addClass("has-feedback has-error");
+            error.insertAfter(element.next('span'));
+            if (!element.next("i")[0]) {
+              $("<i class='glyphicon glyphicon-remove form-control-feedback'></i>").insertAfter(element);
+              $(".glyphicon-remove").css({
+                "pointer-events": "auto",
+                "cursor": "pointer",
+              });
+            }
+          } else {
+            element.parent().addClass("has-feedback has-error");
+            error.insertAfter(element);
+          }
+        },
+        success: function(label, element) {
+          if ($(element).prop("type") === "checkbox") {} else {
+            let dom = $(element).parent().children('i.glyphicon').length;
+            if (dom < 1) {
+              $("<i class='glyphicon glyphicon-ok form-control-feedback'></i>").insertAfter($(element));
+            }
+          }
+        },
+        highlight: function(element, errorClass, validClass) {
+          if ($(element).prop("type") === "checkbox") {} else {
+            let dom = $(element).parent().children('i.glyphicon').length;
+            if (dom < 1) {
+              $("<i class='glyphicon glyphicon-remove form-control-feedback'></i>").insertAfter(element);
+              $(".glyphicon-remove").css({
+                "pointer-events": "auto",
+                "cursor": "pointer",
+              });
+            }
+            $(element).parents(".has-feedback").addClass("has-error").removeClass("has-success");
+            $(element).parent().children("i").addClass("glyphicon-remove").removeClass("glyphicon-ok");
+          }
+        },
+        unhighlight: function(element, errorClass, validClass) {
+          if ($(element).prop("type") === "checkbox") {} else {
+            $(element).parents(".has-feedback").addClass("has-success").removeClass("has-error");
+            $(element).parent().children("i").addClass("glyphicon-ok").removeClass("glyphicon-remove");
+          }
+        }
+      });
+    }
+  };
+}(window, zm_public);

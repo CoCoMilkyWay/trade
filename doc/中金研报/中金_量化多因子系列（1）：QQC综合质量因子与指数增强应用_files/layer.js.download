@@ -1,0 +1,11 @@
+!function(window, zm) {
+  'use strict';
+  if (zm) {
+    zm['config'] = {
+      skin: 'zm-modal',
+      offset: '20vh',
+      shadeClose: false,
+      resize: false,
+    };
+  }
+}(window, zm_layer);

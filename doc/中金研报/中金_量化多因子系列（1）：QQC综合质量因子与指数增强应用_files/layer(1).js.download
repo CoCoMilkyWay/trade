@@ -1,0 +1,109 @@
+/**
+ *
+ * 配置
+ * zm : 别名 （防冲突）如 : zm ;
+ * zm + 变量名 : 别名 （防冲突）如 : let zm_A = 0 ;
+ * zm + 方法名 : 别名 （防冲突）如 : zm_Function ;
+ * 
+ * ===Function===
+ * load : loading
+ * 
+ * success : 回调
+ * 
+ * ===Params===
+ * type : 类型
+ * time : 时间
+ * skin : class
+ * 
+ *
+ * Creation time : 2022-02-27 11:03:59 ;
+ * Modification time : ====== ;
+ * Author : zm ;
+ * Modified By: zm ;
+ *
+ **/
+
+!function(window, zm) {
+  'use strict';
+  if (zm) {
+    layui.use(['layer'], function() {
+      let layer = layui.layer;
+      zm['load'] = function(type, time, skin, success) {
+        let dom = '<article class=""></article>';
+        if (type === 0) {
+          dom = '<article class="zm-load-circle-group">' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '</article>';
+        } else if (type === 1) {
+          dom = '<article class="zm-load-cube-group">' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '</article>';
+        } else {
+          dom = '<article class="zm-load-circle-group">' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '<div class="zm-load-group-item"></div>' +
+            '</article>';
+        }
+
+        return layer.open({
+          type: 1,
+          skin: skin ? 'zm-load ' + skin : 'zm-load',
+          shade: 0.1,
+          offset: '40%',
+          title: false,
+          closeBtn: 0,
+          shadeClose: false,
+          time: time ? time : 0,
+          content: dom,
+        });
+      };
+      zm['layer'] = function(dom, time, success) {
+        return layer.load(2, {
+          shade: 0.1,
+          offset: '45%',
+          time: time ? time : 5000,
+        });
+      };
+      zm['confirm'] = function(dom, config, success, cancel) {
+        let this_config = Object.assign({skin: 'zm-confirm'}, config);
+        return layer.confirm(dom, this_config,
+          function(){
+            if (success) {
+              success();
+            } else{
+              console.log('No, success')
+            }
+          },
+          function(){}
+        );
+      };
+      zm['msg'] = function(dom, time, success) {
+        return layer.msg(dom);
+      }
+    });
+  }
+}(window, zm_public);

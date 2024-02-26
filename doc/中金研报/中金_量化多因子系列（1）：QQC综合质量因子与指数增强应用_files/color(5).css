@@ -1,0 +1,21 @@
+/**
+ *
+ * zm : 自定义私有命名 （防冲突）如 : zm ;
+ * zm + class : 自定义私有命名 （防冲突）如 : zm-class ;
+ * Creation time : 2022-3-8 16:14:30 ;
+ * Modification time : ====== ;
+ * Author : zm ;
+ * Modified By: zm ;
+ * Remarks: 
+ *
+ **/
+
+.zm-modal-statement .zm-modal-header,
+.zm-modal-success .zm-modal-header,
+.zm-modal-success .zm-modal-body-header {
+  color: #690000;
+}
+
+.zm-modal-success .zm-modal-header .zm-success-icon {
+  background-image: url(../../../zm-img/success.png);
+}

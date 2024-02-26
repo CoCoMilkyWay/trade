@@ -1,0 +1,24 @@
+/**
+ *
+ * zm : 自定义私有命名 （防冲突）如 : zm ;
+ * zm + class : 自定义私有命名 （防冲突）如 : zm-class ;
+ * Creation time : 2022-3-2 00:35:21 ;
+ * Modification time : ====== ;
+ * Author : zm ;
+ * Modified By: zm ;
+ * Remarks: 
+ *
+ **/
+
+.zm-page input:focus,
+.zm-page select:focus {
+  border-color: #690000 !important;
+}
+
+.zm-page a:hover {
+  color: #690000;
+}
+
+.zm-page .layui-laypage-curr .layui-laypage-em {
+  background-color: #690000;
+}

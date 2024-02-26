@@ -1,0 +1,12 @@
+function getSession(SESSION_KEY) {
+  const ret = sessionStorage.getItem(SESSION_KEY);
+  return JSON.parse(ret);
+}
+
+function setSession(SESSION_KEY, data) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
+}
+
+function removeSession(SESSION_KEY) {
+  sessionStorage.removeItem(SESSION_KEY);
+}

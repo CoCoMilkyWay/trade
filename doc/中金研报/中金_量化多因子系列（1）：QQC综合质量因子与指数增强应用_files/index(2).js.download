@@ -1,0 +1,20 @@
+/**
+ *
+ * 配置
+ * zm : 别名 （防冲突）如 : zm ;
+ * zm + 变量名 : 别名 （防冲突）如 : let zm_A = 0 ;
+ * zm + 方法名 : 别名 （防冲突）如 : zm_Function ;
+ * Creation time : 2021-12-20 17:43:59 ;
+ * Modification time : 2021-12-21 10:56:39 ;
+ * Author : zm ;
+ * Modified By: zm ;
+ *
+ **/
+
+if (typeof zm_config == 'undefined') {
+  var zm_config = new Object();
+};
+
+if (typeof zm_layer == 'undefined') {
+  var zm_layer = new Object();
+};

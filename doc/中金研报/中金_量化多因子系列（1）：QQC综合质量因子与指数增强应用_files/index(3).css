@@ -1,0 +1,37 @@
+/**
+ *
+ * zm : 自定义私有命名 （防冲突）如 : zm ;
+ * zm + class : 自定义私有命名 （防冲突）如 : zm-class ;
+ * Creation time : 2022-02-27 11:03:59 ;
+ * Modification time : ====== ;
+ * Author : zm ;
+ * Modified By: zm ;
+ * Remarks: 
+ *
+ **/
+
+.zm-page {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
+}
+
+.zm-page a,
+.zm-page span,
+.zm-page input {
+  margin: 0 0.25rem;
+  background-color: transparent;
+  border: 0.0625rem solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.25rem;
+}
+
+.zm-page .layui-laypage-spr {
+  margin: 0;
+  border: 0.0625rem solid rgba(0, 0, 0, 0);
+}
+
+.zm-page .layui-laypage-curr .layui-laypage-em {
+  border-radius: 0.25rem;
+}

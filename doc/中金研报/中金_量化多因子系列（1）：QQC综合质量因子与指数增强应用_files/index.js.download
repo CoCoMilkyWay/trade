@@ -1,0 +1,17 @@
+/**
+ * 
+ * zm : 自定义私有命名 （防冲突）如 : zm ;
+ * zm + 方法名 : 自定义私有命名 （防冲突）如 : zmFunction ;
+ * zm_ling : 当前语言 ;
+ * langType : 语言模块 ;
+ * url : 语言文件地址 ;
+ * 
+ */
+
+!function(zm) {
+  let langType = config.langType;
+  let url = ctx + '/static/zm-Js/components/language/';
+  if (zm_lang) {
+    i18n_extend.i18n(url, zm_lang, langType);
+  }
+}(window);

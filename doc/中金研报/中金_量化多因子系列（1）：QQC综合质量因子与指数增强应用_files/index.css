@@ -1,0 +1,187 @@
+/**
+ *
+ * zm : 自定义私有命名 （防冲突）如 : zm ;
+ * zm + class : 自定义私有命名 （防冲突）如 : zm-class ;
+ * Creation time : 2022-02-27 11:03:59 ;
+ * Modification time : ====== ;
+ * Author : zm ;
+ * Modified By: zm ;
+ * Remarks: 
+ *
+ **/
+
+.zm-form {
+  position: relative;
+  padding: 1rem;
+}
+
+.zm-form .form-group {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.zm-form .control-label {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-item-align: baseline;
+  align-self: baseline;
+  text-align: right;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
+  padding: 0.5rem 0;
+  margin-bottom: 0;
+  -ms-flex: 0 0 100px;
+  flex: 0 0 100px;
+  max-width: 100px;
+}
+
+.zm-form .control-label:before,
+.zm-form .control-label:after{
+  display: inline-block;
+  content: "";
+  margin-left: 0.375rem;
+  margin-right: 0.375rem;
+}
+
+.zm-form .control-label:after {
+  content: ":";
+  padding-right: 0.75rem;
+}
+
+.zm-form .control-label-none:before,
+.zm-form .control-label-none:after {
+  content: "" !important;
+}
+
+.zm-form .zm-input-block {
+  position: relative;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  width: 1%;
+  min-width: 0;
+}
+
+.zm-form .zm-input-block .layui-form-select .layui-edge {}
+
+.zm-form .zm-input-block .layui-unselect span {
+  padding-left: 0.75rem;
+}
+
+.zm-form .error {
+  position: absolute;
+  top: 100%;
+  margin-top: 0.0625rem;
+}
+
+.zm-form .glyphicon-ok {
+  display: none;
+}
+
+.zm-form .zm-form-btn {
+  margin-left: 100px;
+}
+
+.zm-form .zm-form-alert-submit {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.zm-form .zm-form-alert-submit .btn {
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: none;
+}
+
+.zm-form .form-group [class*="col-"]{
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.zm-form .form-group .zm-group-spacing {
+  padding: 0 0.5rem;
+}
+
+.zm-form-check .control-label:before {
+  content: "*";
+  -ms-flex-item-align: end;
+  align-self: flex-end;
+  padding-top: 0.1875rem;
+  color: #a94442;
+}
+
+.zm-form.zm-w-1 .control-label {
+  -ms-flex: 0 0 110px;
+  flex: 0 0 110px;
+  max-width: 110px;
+}
+
+.zm-form.zm-w-1 .zm-form-btn {
+  margin-left: 110px;
+}
+
+.zm-form.zm-w-2 .control-label {
+  -ms-flex: 0 0 120px;
+  flex: 0 0 120px;
+  max-width: 120px;
+}
+
+.zm-form.zm-w-2 .zm-form-btn {
+  margin-left: 120px;
+}
+
+.zm-form.zm-w-3 .control-label {
+  -ms-flex: 0 0 130px;
+  flex: 0 0 130px;
+  max-width: 130px;
+}
+
+.zm-form.zm-w-3 .zm-form-btn {
+  margin-left: 130px;
+}
+
+.zm-form.zm-w-4 .control-label {
+  -ms-flex: 0 0 140px;
+  flex: 0 0 140px;
+  max-width: 140px;
+}
+
+.zm-form.zm-w-4 .zm-form-btn {
+  margin-left: 140px;
+}
+
+.zm-form.zm-w-5 .control-label {
+  -ms-flex: 0 0 150px;
+  flex: 0 0 150px;
+  max-width: 150px;
+}
+
+.zm-form.zm-w-5 .zm-form-btn {
+  margin-left: 150px;
+}
+
+div.zm-form .form-group {
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+}
+
+div.zm-form .form-control {
+  border: none;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+div.form-control {
+  border: none;
+  box-shadow: none;
+  background-color: transparent;
+}

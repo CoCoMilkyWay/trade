@@ -1,0 +1,76 @@
+/**
+ *
+ * zm : 自定义私有命名 （防冲突）如 : zm ;
+ * zm + class : 自定义私有命名 （防冲突）如 : zm-class ;
+ * Creation time : ====== ;
+ * Modification time : 2022-3-2 00:20:22 ;
+ * Author : zm ;
+ * Modified By: zm ;
+ * Remarks: 
+ *
+ **/
+
+.zm-table .zm-not-started {
+  color: #BE8C4A;
+}
+
+.zm-table .zm-in-progress {
+  color: #FF0000;
+}
+
+.zm-table .zm-ended {
+  color: #333333;
+}
+
+.zm-table .layui-none {
+  background-color: #FAFAFA;
+}
+
+.zm-table-main a {
+  color: #690000;
+}
+
+.zm-table-list .layui-table tbody tr {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.zm-table-btn .zm-table-join {
+  color: #690000;
+  background-color: #F7E5E5;
+  border-radius: 100px;
+}
+
+.zm-table-btn .zm-table-details {
+  color: #690000;
+  background-color: transparent;
+}
+
+.zm-table-btn .zm-btn-play {
+  color: #690000;
+  background-color: #F7E5E5;
+  border-radius: 100px;
+}
+
+.zm-table-btn .zm-btn-play:before {
+  background-image: url(../../../zm-img/audio/play.svg);
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.zm-table-btn .zm-btn-video:before {
+  background-image: url(../../../zm-img/audio/video.svg);
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.zm-audio-pause .zm-table-btn .zm-btn-play:before {
+  background-image: url(../../../zm-img/audio/pause.svg);
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.zm-audio-pause .zm-table-btn .zm-btn-video:before {
+  background-image: url(../../../zm-img/audio/video.svg);
+  background-repeat: no-repeat;
+  background-size: contain;
+}

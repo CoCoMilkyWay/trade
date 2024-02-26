@@ -1,0 +1,162 @@
+/**
+ *
+ * zm : 自定义私有命名 （防冲突）如 : zm ;
+ * zm + class : 自定义私有命名 （防冲突）如 : zm-class ;
+ * Creation time : 2022-3-8 16:14:30 ;
+ * Modification time : ====== ;
+ * Author : zm ;
+ * Modified By: zm ;
+ * Remarks: 
+ *
+ **/
+
+.zm-modal {
+  position: relative;
+  min-width: 500px;
+}
+
+.zm-modal .zm-modal-header {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 100%;
+  line-height: 1.4;
+  padding: 16px 20px 0 20px;
+}
+
+.zm-modal .zm-modal-title {
+  font-size: 1.25rem;
+}
+
+.zm-modal .layui-layer-title {
+  padding: 0;
+  border-bottom: none;
+}
+
+.zm-modal .layui-layer-content {
+  padding: 30px 20px 20px;
+}
+
+.zm-modal .layui-layer-btn {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  justify-content: center;
+  padding: 0px 20px 20px;
+}
+
+.zm-modal .layui-layer-btn a {
+  height: auto;
+  line-height: 1.4;
+  font-size: 1rem;
+  padding: 10px 18px 10px;
+  margin-top: 0;
+  border-radius: 0.25rem;
+}
+
+.zm-modal .layui-layer-btn a + a {
+  margin-left: 0.375rem;
+}
+
+.zm-modal .layui-layer-btn0 {
+  color: #FFFFFF;
+  background-color: #CF484F;
+  border-color: #CF484F;
+}
+
+.zm-modal .zm-form .control-label {
+  -ms-flex: 0 0 120px;
+  flex: 0 0 120px;
+  max-width: 120px;
+}
+
+.zm-modal-statement,
+.zm-modal-success {
+  width: 700px;
+}
+
+.zm-modal-statement .zm-modal-header {
+  font-weight: bold;
+}
+
+.zm-modal-statement .zm-modal-body {
+  padding: 15px;
+  border-radius: 2px;
+  border: 1px solid #e1e3e5;
+}
+
+.zm-modal-success .zm-modal-header .zm-success-icon {
+  position: relative;
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin-top: -3px;
+  margin-right: 8px;
+}
+
+.zm-modal-success .zm-modal-body-header {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  margin-top: -1rem;
+  margin-bottom: 1.375rem;
+}
+
+.zm-modal-success .zm-modal-body-section {
+  position: relative;
+  display: -ms-flexbox;
+  display: flex;
+  background-color: #f7f1eb;
+}
+
+.zm-modal-success .zm-modal-body-section .zm-form .control-label {
+  position: relative;
+  -ms-flex: 0 0 120px;
+  flex: 0 0 120px;
+  max-width: 120px;
+  text-align: justify;
+  text-align-last: justify;
+}
+
+.zm-modal-success .zm-modal-body-section .zm-left {
+  position: relative;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  width: 1%;
+  min-width: 0;
+}
+
+.zm-modal-success .zm-modal-body-section .zm-right {
+  position: relative;
+  -ms-flex: 0 0 200px;
+  flex: 0 0 200px;
+  max-width: 200px;
+}
+
+.zm-modal-success .zm-modal-body-section .zm-right img {
+  width: 180px;
+  height: 180px;
+  margin-top: 16px;
+  border-radius: 0.375rem;
+  border: none;
+}
+
+.zm-modal-error .layui-layer-content {
+  padding: 40px 20px 20px 20px;
+}
+
+.zm-modal-error .layui-layer-btn0 {
+  color: #999999;
+  background-color: #FFFFFF;
+  border-color: #999999;
+}

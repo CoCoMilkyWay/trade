@@ -1,0 +1,95 @@
+if (typeof zm_sensors == 'undefined') {
+  var zm_sensors = new Object();
+};
+
+!function(window, zm) {
+  const env_locl = JSON.parse(sessionStorage.getItem('ENV')) === '' ? 'rs_portal_prd' : 'rs_portal_qa';
+  const env_log = JSON.parse(sessionStorage.getItem('ENV')) === '' ? false : true;
+  zm.sensors = window['sensorsDataAnalytic201505'];
+  zm.sensors.init({
+    server_url:'https://uba.cicc.com.cn:8001/sa?project=' + env_locl,
+    show_log: env_log,
+    // 单页面配置，默认开启，若页面中有锚点设计，需要将该配置删除，否则触发锚点会多触发 $pageview 事件
+    is_track_single_page:false,
+    use_client_time:true,
+    send_type:'beacon',
+    heatmap: {
+      // 是否开启点击图，default 表示开启，自动采集 $WebClick 事件，可以设置 'not_collect' 表示关闭。
+      clickmap:'default',
+      // 是否开启触达图，not_collect 表示关闭，不会自动采集 $WebStay 事件，可以设置 'default' 表示开启。
+      scroll_notice_map:'not_collect',
+    },
+  });
+  /* zm.sensors.registerPage({
+    is_login: false,
+    platform_type: 'web',
+  });
+  zm.sensors.quick('autoTrack');
+  zm.sensors.use('PageLeave'); */
+  let init = function(type) {
+    console.log(type);
+    zm.sensors.registerPage({
+      is_login: type,
+      platform_type: 'web',
+      languages_type: lang,
+    });
+    zm.sensors.quick('autoTrack');
+    zm.sensors.use('PageLeave');
+  }
+  XMLHttp(init);
+}(window, zm_sensors);
+
+function XMLHttp(init) {
+  let url = ctx + '/login/getCustomerInfo';
+  let xhr;
+  if (window.XMLHttpRequest) {
+    xhr = new XMLHttpRequest();
+  } else {
+    xhr = new ActiveXObject('Microsoft.XMLHTTP');
+  };
+  xhr.open('post', url, true);
+  xhr.send();
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+      let response = JSON.parse(xhr.responseText);
+      let id;
+      let email;
+      let number;
+      let ciccInvestResearch;
+      let agencyType, area, duties;
+      if (response['data']) {
+        init(true);
+        if (response.data['email']) {
+          if (response.data.email != '') {
+            email = response.data.email;
+          }
+        }
+        if (response.data['mobile']) {
+          number = response.data.mobile;
+        }
+        if (response.data['area']) {
+          area = response.data.area;
+        }
+        if (response.data['duties']) {
+          duties = response.data.duties;
+        }
+        if (response.data['agencyType']) {
+          agencyType = response.data.agencyType;
+        }
+        if (response.data['ciccInvestResearch']) {
+          ciccInvestResearch = 'Y';
+        } else {
+          if (!response.data['ciccInvestResearch'] && typeof(response.data['ciccInvestResearch']) == 'undefined' || response.data['ciccInvestResearch'] == null) {
+            ciccInvestResearch = '未知';
+          } else{
+            ciccInvestResearch = 'N';
+          }
+        }
+        id = response.data.id ? response.data.id + 1978 : 1978;
+        zm_sensors.sensors.login(id);
+      } else {
+        init(false);
+      }
+    }
+  }
+};

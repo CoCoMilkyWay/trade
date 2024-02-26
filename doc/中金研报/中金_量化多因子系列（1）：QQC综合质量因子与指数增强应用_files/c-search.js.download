@@ -1,0 +1,522 @@
+/**
+ * @audthor Mona
+ * @date 2017-12-21
+ * @desc 搜索功能
+ */
+
+/**
+ *10000    成功
+ *10001    参数有误
+ *10002    非登录用户
+ *10003    后台报错
+ */
+
+
+$(function () {
+    var ISEN = lang == 'en'
+    var DELETE = ISEN ? 'Delete' : '删除'
+    var CLEANHISTORY = ISEN ? 'Clean History' : '清除历史记录'
+    var SEARCHHISTORY = ISEN ? 'Search History' : '搜索记录'
+    var curKeywordList = {} // 模糊搜索的列表
+    var api = {
+        getAutoCompleteData: function (param, callback) {
+            // param = {query: query_word, language_type: language_type}
+            $.ajax({
+                type: 'get',
+                url: ctx + '/frontend/autocompleteNew',
+                //	contentType:'application/json; charset=utf-8',
+                data: param,
+                async: false,
+                success: function (data) {
+                    $.isFunction(callback) && callback(data)
+                }
+            })
+        }
+    }
+
+    var searchObj = {
+        setStorage: function (keyword, type, id) {
+            var _this = this
+            if (keyword) {
+                var curKeyword = null
+                var hasKeyWord = false
+                var getKeyWord = ISEN ? _this.getStore('keyword_en') : _this.getStore('keyword')
+                if (getKeyWord) { // 如果有存储数据
+                    curKeyword = JSON.parse(getKeyWord)
+                    $.each(curKeyword, function (i, item) {
+                        if (item == keyword) {
+                            hasKeyWord = true
+                            curKeyword.splice(i, 1) // 删除当前位置的值
+                            return false
+                        }
+                    })
+                    curKeyword.splice(0, 0, keyword) // 把刚才的值放到第一个位置上
+                    ISEN ? _this.setStore('keyword_en', JSON.stringify(curKeyword)) : _this.setStore('keyword', JSON.stringify(curKeyword))
+
+                } else { // 如果无存储数据
+                    curKeyword = []
+                    curKeyword.push(keyword)
+                    ISEN ? _this.setStore('keyword_en', JSON.stringify(curKeyword)) : _this.setStore('keyword', JSON.stringify(curKeyword))
+                }
+                if (type) {
+                    var curKeywordType = _this.getStore('curKeywordType') || []
+                    if (curKeywordType.length) {
+                        curKeywordType = JSON.parse(curKeywordType)
+						$.each(curKeywordType, function (i, item) {
+							if (item.keyword == keyword) {
+								curKeywordType.splice(i, 1);
+								return false
+							}
+						});
+                        var isExist = curKeywordType.some(function (data) {
+                            return data.keyword === keyword
+                        })
+                        if (!isExist) curKeywordType.push({type: type, keyword: keyword, id: id || ''})
+                    } else {
+                        curKeywordType.push({type: type, keyword: keyword, id: id || ''})
+                    }
+                    _this.setStore('curKeywordType', JSON.stringify(curKeywordType))
+                }
+                var myKeyword = ''
+                ISEN ? myKeyword = JSON.parse(_this.getStore('keyword_en')) : myKeyword = JSON.parse(_this.getStore('keyword'))
+
+                if (myKeyword.length > 5) {
+                    myKeyword.splice(5, 1)
+                }
+                ISEN ? _this.setStore('curKeyword_en', keyword) : _this.setStore('curKeyword', keyword)
+                ISEN ? _this.setStore('keyword_en', JSON.stringify(myKeyword)) : _this.setStore('keyword', JSON.stringify(myKeyword))
+            }
+        },
+        init: function () {
+            this.docClick()
+        },
+        skipSeachPage: function (query) {
+            if(!query)return;
+            if (level == 'D') {
+                noPermissionAlert(null)
+                return
+            }
+            //跳转至英文搜索页面
+            const url = ISEN ?'https://www.'+location.host+'/en/search?entrance_source=Header-search&queryWord='+encodeURIComponent(query):'https://www.'+location.host+'/data/tSearch?entrance_source=Header-search&query='+encodeURIComponent(query)
+            var a = $('<a href="' + url + '" target="_parent"></a>').get(0);
+            var e = document.createEvent('MouseEvents');
+            e.initEvent('click', true, true);
+            a.dispatchEvent(e);
+
+        },
+        searchFun: function (searchType, keyword) {
+            var _this = this
+            if (keyword) {
+                var type, keywordId;
+                if (curKeywordList.data && curKeywordList.data.length) {
+                    $.each(curKeywordList.data, function (i, item) {
+                        if (curKeywordList.type === "stock" && (keyword.indexOf(item.cNameShort) !== -1 || keyword.indexOf(item.eNameShort) !== -1) && keyword.indexOf(item.code) !== -1) {
+                            type = curKeywordList.type
+                            keywordId = item.id
+                        }
+                        if (curKeywordList.type === "author" && (keyword.indexOf(item.name) !== -1 || keyword.indexOf(item.ename) !== -1)) {
+                            type = curKeywordList.type
+                            keywordId = item.id
+                        }
+                    })
+                }
+                if (!type) {
+                  type = 'keyword';
+                  keywordId = ''
+                }
+                let search_result = {
+                  type: type,
+                  keyword: keyword,
+                  keywordId: keywordId,
+                  searchType: '全局搜索',
+                }
+                setSession('sensorsSearch', search_result);
+                _this.setStorage(keyword, type, keywordId)
+                _this.setStore('searchType', searchType)
+                ISEN ? _this.setStore('curKeyword_en', keyword) : _this.setStore('curKeyword', keyword)
+                ISEN ? (window.localStorage['recentRecord_en'] = keyword):(window.localStorage['recentRecord'] = keyword)
+                _this.skipSeachPage(keyword);
+              //关键字保存
+                var post_url= ctx+"/ckAction/addEntity";
+                var postData={"keywords":keyword};
+                $.post(post_url,postData,function(data){
+                	var temp=data;
+                });
+            } else {
+              zm_public.msg('请输入搜索关键字后再搜索');
+            }
+
+        },
+        setStore: function (key, value) {
+            window.localStorage[key] = value
+        },
+        getStore: function (key) {
+            return window.localStorage[key]
+        },
+        clearStore: function (key) {
+            window.localStorage[key] = ''
+        },
+        loadSearchItem: function () {
+            var _this = this
+            var curKeyword = ISEN ? _this.getStore('keyword_en') : _this.getStore('keyword')
+            if (!curKeyword) return
+            var keyWordList = JSON.parse(curKeyword)
+            $('.search-keyword ul').html("")
+            var h = '<span>' + SEARCHHISTORY + '</span>'
+            $.each(keyWordList, function (i, item) {
+                h += '<li class="clearfix search-result-item search-history"><a href="javascript:void(0)" class="over-ell"> ' + item + '</a><span class="pull-right" data-role="delete-search-item">' + DELETE + '</span></li>'
+            })
+            h += '<p class="clearfix"><a href="javascript:void(0)" class="text-gray" data-role="clear-all-search">' + CLEANHISTORY + '</a></p>'
+            $('.search-keyword ul').html(h)
+            //$('.search-keyword').show()
+        },
+        docClick: function () {
+            $(document).on('click', function (e) {
+                var curDom = e.target
+                var isSearchDom = $(curDom).hasClass('.search-content') || $(curDom).parents('.search-content').length > 0
+                if (!isSearchDom) {
+                    $('.search-keyword').hide()
+                }
+            })
+        }
+    }
+
+    searchObj.init()
+
+    // 回车搜索
+    $('#search-input').keyup(function (e) {
+       sessionStorage.setItem("allReplay",1)
+       sessionStorage.setItem("whetherClick",JSON.stringify({'label':false,'value':1}))
+        var keyCode = e.which
+        var keyword = $.trim($(this).val())
+        if (keyCode == 13) {
+            if (!keyword) return
+            searchObj.searchFun('1', keyword)
+        }
+    })
+
+    // 搜索按钮搜索
+    $('#index-search').on('click', function () {
+           sessionStorage.setItem("allReplay",1)
+          sessionStorage.setItem("whetherClick",JSON.stringify({'label':false,'value':1}))
+        var keyword = $.trim($('#search-input').val())
+        if (!keyword) return
+        searchObj.searchFun('1', keyword)
+    })
+
+
+    var searchTimer = null
+
+    // searchInput 书写搜索条件或获取焦点时
+    $('#search-input').bind('input propertychange focus', function () {
+        // searchTimer ? clearTimeout(searchTimer) : ''
+        $('.search-keyword ul').html("")
+        var query_word = $(this).val().trim()
+        /*var lastChar = query_word.substring(query_word.length - 2);
+        var regex = /[，。、？‘；“”：《》\\~\`\!\@\#\$\%\^\&\*\(\)\-\\+\=\|\\\[\]\{\}\;\:\"\'\<\.\>\/\?]/g*/
+        //if (regex.test(lastChar)) return
+        if (query_word == '') {
+            var curSearchKeyword = ISEN ? searchObj.getStore('keyword_en') : searchObj.getStore('keyword')
+
+            if (curSearchKeyword == '' || !curSearchKeyword) {
+                $('.search-keyword').hide()
+                return
+            }
+          
+            var keyWordLen = JSON.parse(curSearchKeyword)
+            if (!(keyWordLen.length)) return
+            // searchObj.loadSearchItem()
+            return
+        }
+
+
+        // 关键词补全
+        var language_type = "0";
+        ISEN ? language_type = "1" : ''
+        var inputQueryWord = $('#search-input').val().trim()
+        var hasLeftWord = false
+        var leftQueryword = null
+        var queryWord = ''
+        if (inputQueryWord.indexOf(',') != -1) { // 如果有空格
+            hasLeftWord = true
+            var queryArr = inputQueryWord.split(',')
+            // 获取空格前的搜索条件
+            leftQueryword = inputQueryWord.substring(0, inputQueryWord.lastIndexOf(','))
+            queryWord = queryArr[queryArr.length - 1] // 最后一个词作为搜索条件
+        } else {
+            queryWord = inputQueryWord
+        }
+
+        // searchTimer = setTimeout(function () {
+        //     var param = {query: queryWord, language_type: parseInt(language_type) + 1}
+        //     api.getAutoCompleteData(param, function (data) {
+        //         var userAgent = window.navigator.userAgent.toLowerCase()
+        //         if (userAgent.indexOf("firefox") != -1) {
+        //             $('.search-keyword ul').html("");
+        //         }
+        //         var h = ''
+		// 		/*
+		// 		zhao
+		// 		输入框修改
+		// 		*/
+        //         /* if (data.data) {
+        //             $('.search-keyword ul')[0].dataset.typeValue = data.type
+        //             curKeywordList = data
+        //             $.each(data.data, function (i, item) {
+        //                 var showValue = '';
+        //                 if (item.name) {
+        //                     showValue = ISEN ? item.ename : item.name
+        //                 } else if (item.cNameShort) {
+        //                     showValue = ISEN ? (item.eNameShort + '(' + item.code + ')') : (item.cNameShort + '(' + item.code + ')')
+        //                 }
+        //                 if (hasLeftWord) {
+        //                     h += `<li class="search-result-item auto-complete"><a href="javascript:void(0)" class="over-ell" data-keyword-id="${item.id}">${leftQueryword + ',' + showValue}</a></li>`
+        //                 } else {
+        //                     if (i == data.data.length - 1) {
+        //                         h += `<li class="search-result-item auto-complete" style="text-align: left;background-color: #fff"><a href="javascript:void(0)" class="over-ell" data-keyword-id="${item.id}">${showValue}</a></li>`
+        //                     } else {
+        //                         h += `<li class="search-result-item auto-complete"><a href="javascript:void(0)" class="over-ell" data-keyword-id="${item.id}">${showValue}</a></li>`
+        //                     }
+        //                 }
+        //             })
+        //         } else {
+        //             $('.search-keyword ul')[0].dataset.typeValue = ''
+        //             curKeywordList = {}
+        //         } */
+		// 		if (data) {
+		// 		    // $('.search-keyword ul')[0].dataset.typeValue = data.type
+		// 		    curKeywordList = data
+		// 			for (let i = 0; i < curKeywordList.length; i++){
+		// 				for (let j = 0; j < curKeywordList[i].data.length; j++){
+		// 					let item = curKeywordList[i].data[j]
+		// 					let showValue = '';
+		// 					let ascription = '';
+		// 					let showCode = ''
+		// 					let showNameList = ''
+		// 					if (curKeywordList[i].type === 'author') {
+		// 						ascription = ISEN ? 'Analyst' : '分析师'
+		// 					} else if (curKeywordList[i].type === 'stock') {
+		// 						ascription = ISEN ? 'Stock' : '股票'
+		// 					} else if (curKeywordList[i].type === 'industry') {
+		// 						ascription = ISEN ? 'Industry' : '行业'
+		// 					}
+		// 					if (item.name) {
+		// 					  showValue = ISEN ? item.ename : item.name;
+        //         showNameList = ISEN ? item.ename : item.name;
+        //         if (showValue.indexOf('>>') != -1) {
+        //           let fileLength = showValue.lastIndexOf('>>');
+        //           showValue = showValue.substring(fileLength + 2);
+        //         }
+		// 					} else if (item.cNameShort) {
+        //         showValue = ISEN ? item.eNameShort : item.cNameShort
+        //         showNameList = ISEN ? (item.eNameShort + '(' + item.code + ')') : (item.cNameShort + '(' + item.code + ')')
+        //         showCode = item.code
+		// 					}
+		// 					if (hasLeftWord) {
+		// 					    // h += `<li class="search-result-item auto-complete"><a href="javascript:void(0)" class="over-ell zm-search-text" data-keyword-id="${item.id}"><div class="zm-search-text-name">${leftQueryword + ',' + showValue}</div><div>${ascription}</div></span></a></li>`
+		// 						h += '<li class="search-result-item auto-complete">'
+		// 						h += '<a href="javascript:void(0)" class="over-ell zm-search-text" data-keyword-id="'+ item.code +'">'
+		// 						h += '<div class="zm-search-text-name" data-title="'+ leftQueryword + ','+ showValue +'" data-id="'+showCode+'" data-type="'+ curKeywordList[i].type +'">'+ leftQueryword + ',' + showNameList +'</div>'
+		// 						h += '<div class="zm-search-tips">'+ ascription +'</div>'
+		// 						h += '</a>'
+		// 						h += '</li>'
+		// 					} else {
+		// 					  if (curKeywordList[i].type === 'stock') {
+        //           h += '<li class="search-result-item auto-complete">'
+        //           h += '<a href="javascript:void(0)" class="over-ell zm-search-text" data-keyword-id="'+ item.code +'">'
+        //           h += '<div class="zm-search-text-name" data-title="'+showValue+'" data-id="'+showCode+'" data-type="'+ curKeywordList[i].type +'">'+ showNameList +'</div>'
+        //           h += '<div class="zm-search-tips">'+ ascription +'</div>'
+        //           h += '</a>'
+        //           h += '</li>'
+        //         } else if (curKeywordList[i].type === 'industry') {
+		// 					        // h += `<li class="search-result-item auto-complete" style="text-align: left;background-color: #fff"><a href="javascript:void(0)" class="over-ell zm-search-text" data-keyword-id="${item.id}"><div class="zm-search-text-name">${showValue}</div><div>${ascription}</div></a></li>`
+		// 							h += '<li class="search-result-item auto-complete">'
+		// 							h += '<a href="javascript:void(0)" class="over-ell zm-search-text" data-keyword-id="'+ item.id +'">'
+		// 							h += '<div class="zm-search-text-name" data-title="'+showValue+'" data-id="'+item.id+'" data-type="'+ curKeywordList[i].type +'">'+ showNameList +'</div>'
+		// 							h += '<div class="zm-search-tips">'+ ascription +'</div>'
+		// 							h += '</a>'
+		// 							h += '</li>'
+		// 						} else {
+		// 					        // h += `<li class="search-result-item auto-complete"><a href="javascript:void(0)" class="over-ell zm-search-text" data-keyword-id="${item.id}"><div class="zm-search-text-name">${showValue}</div><div>${ascription}</div></a></li>`
+		// 							h += '<li class="search-result-item auto-complete">'
+		// 							h += '<a href="javascript:void(0)" class="over-ell zm-search-text" data-keyword-id="'+ item.code +'">'
+		// 							h += '<div class="zm-search-text-name" data-title="'+showValue+'" data-id="'+showCode+'" data-type="'+ curKeywordList[i].type +'">'+ showNameList +'</div>'
+		// 							h += '<div class="zm-search-tips">'+ ascription +'</div>'
+		// 							h += '</a>'
+		// 							h += '</li>'
+		// 						}
+		// 					}
+		// 				}
+		// 			}
+		// 		} else {
+		// 		    $('.search-keyword ul')[0].dataset.typeValue = ''
+		// 		    curKeywordList = {}
+		// 		}
+        //
+        //         $('.search-keyword ul').html(h)
+        //         $('.search-keyword').show()
+        //     })
+        // }, 500)
+
+    })
+
+    // 删除单个搜索条件
+    $('.search-keyword').on('click', '[data-role="delete-search-item"]', function () {
+        var curKeyword = $(this).parents('li').find('a').text().trim()
+        $(this).parents('li').remove()
+        var curStore = ''
+        ISEN ? curStore = JSON.parse(searchObj.getStore('keyword_en')) : curStore = JSON.parse(searchObj.getStore('keyword'))
+        $.each(curStore, function (i, item) {
+            if (curKeyword == item) {
+                curStore.splice(i, 1)
+                return false
+            }
+        })
+        ISEN ? searchObj.setStore('keyword_en', JSON.stringify(curStore)) : searchObj.setStore('keyword', JSON.stringify(curStore))
+    })
+
+    // 清除所有搜索记录
+    $('.search-keyword').on('click', '[data-role="clear-all-search"]', function () {
+        $(this).parents('ul').html('')
+        ISEN ? searchObj.clearStore('keyword_en') : searchObj.clearStore('keyword')
+        ISEN ? searchObj.clearStore('curKeyword_en') : searchObj.clearStore('curKeyword')
+        searchObj.clearStore('curKeywordType')
+        $('.search-keyword').hide()
+    })
+
+    // 点击自动补全的内容
+    // $('.search-keyword').on('click', '.search-result-item.auto-complete a', function () {
+    //   let dataTitle = false
+    //    let dataList = false
+    //    sessionStorage.setItem("allReplay",1)
+    //  sessionStorage.setItem("whetherClick",JSON.stringify({'label':true,'value':1}))
+    //     // var item = $(this).text().trim(),
+	// 	/* var item = $(this).children('.zm-search-text-name').text().trim(),
+    //         curKeywordType = this.parentNode.parentNode.dataset.typeValue || '',
+    //         keywordId = this.dataset.keywordId || '' */
+    //
+	// 	let str = $(this).children('.zm-search-text-name').text().trim(),
+	// 		curKeywordType = $(this).children('.zm-search-text-name').attr('data-type') || '',
+    //         keywordId = this.dataset.keywordId || '';
+	// 	let item = '';
+    //   let htis_dom = $(this).find('.zm-search-text-name');
+    //   if (htis_dom.attr('data-title') && htis_dom.attr('data-id')) {
+    //     if (htis_dom.attr('data-title').toUpperCase().indexOf($('#search-input').val().trim().toUpperCase()) != -1) {
+    //       dataTitle = true;
+    //       item = htis_dom.attr('data-title');
+    //     }
+    //     if (htis_dom.attr('data-id').toUpperCase().indexOf($('#search-input').val().trim().toUpperCase()) != -1) {
+    //       dataTitle = true;
+    //       item = htis_dom.attr('data-id');
+    //     }
+    //     if (dataTitle && dataList) {
+    //       item = htis_dom.attr('data-id');
+    //     }
+    //     if (!dataTitle && !dataList) {
+    //       item = htis_dom.attr('data-title');
+    //     }
+    //   } else {
+    //     item = htis_dom.text().trim();
+    //   }
+    //
+	// 	/* if (str.indexOf(">>") >= 0) {
+	// 	// 行业
+	// 		item = str.substring(str.indexOf(">>") + 2,str.length)
+	// 	} else{
+	// 	// 股票
+	// 		  if($(this).children('.zm-search-text-name').attr('data-title') !=undefined && $(this).children('.zm-search-text-name').attr('data-list') !=undefined){
+    //                         //   公司名有没有查询匹配
+    //                         if($(this).children('.zm-search-text-name').attr('data-title').toUpperCase().indexOf($('#search-input').val().trim().toUpperCase()) != -1){
+    //                               dataTitle = true
+    //                               item = $(this).children('.zm-search-text-name').attr('data-title')
+    //                         }
+    //                          //   股票码有没有查询匹配
+    //                            if($(this).children('.zm-search-text-name').attr('data-list').toUpperCase().indexOf($('#search-input').val().trim().toUpperCase()) != -1){
+    //                                   dataList = true
+    //                                   item = $(this).children('.zm-search-text-name').attr('data-list')
+    //                           }
+    //                           // 两者都有选取 股票码
+    //                           if(dataTitle && dataList){
+    //                               item = $(this).children('.zm-search-text-name').attr('data-list')
+    //                           }
+    //                           // 两者都没有选取 名字
+    //                           if(!dataTitle && !dataList){
+    //                            item = $(this).children('.zm-search-text-name').attr('data-title')
+    //                           }
+    //                      }
+    //       // 分析师
+    //                      if($(this).children('.zm-search-text-name').attr('data-title') == '' && $(this).children('.zm-search-text-name').attr('data-list') ==''){
+    //                      item = str
+    //                      }
+	// 	} */
+    //   let search_result = {
+    //     type: curKeywordType,
+    //     keyword: item,
+    //     keywordId: keywordId,
+    //     searchWay: '直接输入',
+    //     searchType: '全局搜索',
+    //   }
+    //   setSession('sensorsSearch', search_result);
+    //     searchObj.setStorage(item, curKeywordType, keywordId)
+    //     $('.search-keyword').hide()
+    //     ISEN ? (window.localStorage['recentRecord_en'] = item):(window.localStorage['recentRecord'] = item)
+    //     searchObj.skipSeachPage()
+    // })
+
+    // 点击搜索记录内的内容
+    $('.search-keyword').on('click', '.search-result-item.search-history a', function () {
+        sessionStorage.setItem("allReplay",1)
+      sessionStorage.setItem("whetherClick",JSON.stringify({'label':true,'value':1}))
+        var curTxt = $(this).text().trim();
+      let search_result = {
+        type: '',
+        keyword: curTxt,
+        keywordId: '',
+        searchWay: '点击最近搜索',
+        searchType: '全局搜索',
+      }
+      setSession('sensorsSearch', search_result);
+      searchObj.setStorage(curTxt)
+      $('.search-keyword').hide()
+      searchObj.skipSeachPage(curTxt)
+      ISEN ? (window.localStorage['recentRecord_en'] = curTxt):(window.localStorage['recentRecord'] = curTxt)
+    })
+
+  // 上下键切换
+  var index = -1
+	$('#search-input').keydown(function(event){
+		var lis , kw, text
+		lis = $('.search-keyword ul li')
+		kw = $(this).val()
+		if(lis.length === 0){
+			return
+		}
+
+		if(event.keyCode == 40){
+			index++
+			if(index > lis.length - 1){
+				index = 0
+			}
+			lis.css({'background-color': ''}).eq(index).css('backgroundColor', '#fafafa')
+			// text =  lis.eq(index).find('a').text()
+			// text =  lis.eq(index).find('a>.zm-search-text-name').text()
+			text =  lis.eq(index).find('a>.zm-search-text-name').get(0);
+      let name = text.dataset.title;
+			$(this).val(name);
+		}
+		if(event.keyCode == 38){
+			event.preventDefault()
+			index--
+			if(index < 0) {
+				index = lis.length - 1
+			}
+			lis.css({'background-color': ''}).eq(index).css('backgroundColor', '#fafafa')
+			// text =  lis.eq(index).find('a').text()
+			text =  lis.eq(index).find('a>.zm-search-text-name').get(0);
+      let name = text.dataset.title;
+			$(this).val(name)
+		}
+
+	})
+
+})

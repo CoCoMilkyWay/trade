@@ -1,0 +1,87 @@
+/**
+ *
+ * 配置
+ * zm : 别名 （防冲突）如 : zm ;
+ * zm + 变量名 : 别名 （防冲突）如 : let zm_A = 0 ;
+ * zm + 方法名 : 别名 （防冲突）如 : zm_Function ;
+ * Creation time : 2021-12-20 17:43:59 ;
+ * Modification time : 2021-12-21 10:56:39 ;
+ * Author : zm ;
+ * Modified By: zm ;
+ *
+ * 开始时间
+ * start_time
+ * 结束时间
+ * end_time
+ * 停留时间
+ * residence_time
+ * 间隔时间
+ * interval_time
+ * 格式化时间
+ * format_time
+ * 定时器
+ * timer
+ *
+ *
+ **/
+
+!function(window) {
+  console.log('埋点');
+
+  let start_time = 0;
+  let timer = false;
+  let dom, count;
+  let hiddenProperty = 'hidden' in document ? 'hidden' :
+      'webkitHidden' in document ? 'webkitHidden' :
+      'mozHidden' in document ? 'msHidden' : 'msHidden' in document ? 'msHidden' :
+      null;
+  let visibilityChangeEvent = hiddenProperty.replace(/hidden/i, 'visibilitychange');
+  let onVisibilityChange = function() {
+    if(!document[hiddenProperty]) {
+      if(!timer) {
+        timer = setInterval(function() {
+          let time = start_time++;
+          let residence_time = time * 1000;
+          let format_time = formatTime(residence_time);
+          if (document.getElementById("navigatge")) {
+            if (!count) {
+              dom = document.getElementById("navigatge").contentWindow;
+              count = dom.window.document.getElementById("numPages").innerText;
+            }
+          }
+          if(count) {
+            let total = dom.window.document.getElementById("viewer");
+            let client = dom.window.document.getElementById("viewerContainer");
+            let totalH = total.scrollHeight;
+            let clientH = client.innerHeight || client.clientHeight;
+            let validH = totalH - clientH;
+            let scrollH = client.scrollTop;
+            let result = ((scrollH / validH) * 100).toFixed(1) + '%';
+            setLocal('progress', result);
+          }
+          setLocal('residence_time', time);
+          setLocal('format_time', format_time);
+        },1000);
+      }
+    } else {
+      if(timer) {
+        window.clearInterval(timer);
+        timer = false;
+      }
+    }
+  }
+  window.addEventListener("pageshow", onVisibilityChange);
+  window.addEventListener(visibilityChangeEvent, onVisibilityChange);
+}(window);
+
+function formatTime(time) {
+  let D = Math.floor(time / (1000 * 60 * 60 * 24));
+  let H = Math.floor(time / (1000 * 60 * 60) % 24);
+  let M = Math.floor(time / (1000 * 60) % 60);
+  let S = Math.floor(time / 1000 % 60);
+  let DD = D > 9 ? D : '0' + D ;
+  let HH = H > 9 ? H : '0' + H ;
+  let MM = M > 9 ? M : '0' + M ;
+  let SS = S > 9 ? S : '0' + S ;
+  return DD + ':' + HH + ':' + MM + ':' + SS;
+}
