@@ -8,7 +8,7 @@
 - https://www.kaggle.com/competitions/ubiquant-market-prediction/leaderboard
 - https://www.kaggle.com/competitions/g-research-crypto-forecasting/leaderboardv
 - https://www.kaggle.com/competitions/optiver-realized-volatility-prediction/leaderboard
-
+- https://www.bilibili.com/video/BV18T4m1S7fx/?spm_id_from=333.1007.tianma.1-2-2.click&vd_source=f78f53fd28f7a2e2c81dfd10d4ab858c
 
 # textbook
     beginner:

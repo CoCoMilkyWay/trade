@@ -13,3 +13,6 @@
 [submodule "wtpy"]
 	path = wtpy
 	url = https://github.com/CoCoMilkyWay/wtpy.git
+[submodule "QuantStudio"]
+	path = QuantStudio
+	url = https://github.com/CoCoMilkyWay/QuantStudio.git

@@ -43,6 +43,8 @@ bash Miniforge3-$(uname)-$(uname -m).sh
 # env (check email for personal auth token)
 git clone --recurse-submodules -j8 git://github.com/CoCoMilkyWay/trade.git
 (git clone https://github.com/CoCoMilkyWay/machine-learning-for-trading.git)
+(git submodule add https://github.com/CoCoMilkyWay/QuantStudio.git)
+
 git config pull.rebase false
 git config --global user.name "CoCoMilkyWay"
 git config --global user.email "wangchuyin980321@gmail.com"

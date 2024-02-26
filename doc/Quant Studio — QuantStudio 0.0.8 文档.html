@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)https://qsdoc.readthedocs.io/zh-cn/latest/index.html -->
+<html class=" js flexbox canvas canvastext webgl no-touch geolocation postmessage no-websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers no-applicationcache svg inlinesvg smil svgclippaths" lang="zh-CN" style=""><!--<![endif]--><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script type="text/javascript" async="" src="./Quant Studio — QuantStudio 0.0.8 文档_files/analytics.js.download"></script><script src="chrome-extension://fgddmllnllkalaagkghckoinaemmogpe/scripts/content/gps.js"></script>
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Quant Studio — QuantStudio 0.0.8 文档</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="./Quant Studio — QuantStudio 0.0.8 文档_files/modernizr.min.js.download"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="./Quant Studio — QuantStudio 0.0.8 文档_files/documentation_options.js.download"></script>
+        <script type="text/javascript" src="./Quant Studio — QuantStudio 0.0.8 文档_files/jquery.js.download"></script>
+        <script type="text/javascript" src="./Quant Studio — QuantStudio 0.0.8 文档_files/underscore.js.download"></script>
+        <script type="text/javascript" src="./Quant Studio — QuantStudio 0.0.8 文档_files/doctools.js.download"></script>
+        <script type="text/javascript" src="./Quant Studio — QuantStudio 0.0.8 文档_files/language_data.js.download"></script>
+        <script type="text/javascript" src="./Quant Studio — QuantStudio 0.0.8 文档_files/translations.js.download"></script>
+        <script async="async" type="text/javascript" src="./Quant Studio — QuantStudio 0.0.8 文档_files/latest.js.download"></script>
+        <script async="async" type="text/javascript" src="./Quant Studio — QuantStudio 0.0.8 文档_files/readthedocs-doc-embed.js.download"></script>
+    
+    <script type="text/javascript" src="./Quant Studio — QuantStudio 0.0.8 文档_files/theme.js.download"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="./Quant Studio — QuantStudio 0.0.8 文档_files/theme.css" type="text/css">
+  <link rel="stylesheet" href="./Quant Studio — QuantStudio 0.0.8 文档_files/pygments.css" type="text/css">
+    <link rel="index" title="索引" href="https://qsdoc.readthedocs.io/zh-cn/latest/genindex.html">
+    <link rel="search" title="搜索" href="https://qsdoc.readthedocs.io/zh-cn/latest/search.html">
+    <link rel="next" title="1. 前言" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%89%8D%E8%A8%80.html"> 
+
+<!-- RTD Extra Head -->
+
+<link rel="stylesheet" href="./Quant Studio — QuantStudio 0.0.8 文档_files/readthedocs-doc-embed.css" type="text/css">
+
+<script type="application/json" id="READTHEDOCS_DATA">{"ad_free": false, "api_host": "https://readthedocs.org", "build_date": "2021-02-25T06:04:05Z", "builder": "sphinx", "canonical_url": null, "commit": "b3c861e7", "docroot": "/docs/", "features": {"docsearch_disabled": false}, "global_analytics_code": "UA-17997319-1", "language": "zh_CN", "page": "index", "programming_language": "py", "project": "qsdoc", "proxied_api_host": "/_", "source_suffix": ".rst", "subprojects": {}, "theme": "sphinx_rtd_theme", "user_analytics_code": "", "version": "latest"}</script>
+
+<!--
+Using this variable directly instead of using `JSON.parse` is deprecated.
+The READTHEDOCS_DATA global variable will be removed in the future.
+-->
+<script type="text/javascript">
+READTHEDOCS_DATA = JSON.parse(document.getElementById('READTHEDOCS_DATA').innerHTML);
+</script><script type="text/javascript" async="" src="./Quant Studio — QuantStudio 0.0.8 文档_files/MathJax.js.download"></script><style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 2px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 2px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: 1em}
+.MathJax_MenuRadioCheck.RTL {right: 1em; left: auto}
+.MathJax_MenuLabel {padding: 2px 2em 4px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #CCCCCC; margin: 4px 1px 0px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: Highlight; color: HighlightText}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style>
+
+<script type="text/javascript" src="./Quant Studio — QuantStudio 0.0.8 文档_files/readthedocs-analytics.js.download" async="async"></script>
+
+<!-- end RTD <extrahead> -->
+<script src="./Quant Studio — QuantStudio 0.0.8 文档_files/ethicalads.min.js.download" type="text/javascript" async="" id="ethicaladsjs"></script><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover, .MJXp-munder {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > *, .MJXp-munder > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style><script src="./Quant Studio — QuantStudio 0.0.8 文档_files/js" type="text/javascript" async=""></script></head>
+
+<body class="wy-body-for-nav" data-new-gr-c-s-check-loaded="14.1156.0" data-gr-ext-installed="">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="https://qsdoc.readthedocs.io/zh-cn/latest/index.html#" class="icon icon-home"> QuantStudio
+          
+
+          
+          </a>
+
+          
+            
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="https://qsdoc.readthedocs.io/zh-cn/latest/search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs">
+    <input type="hidden" name="check_keywords" value="yes">
+    <input type="hidden" name="area" value="default">
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%89%8D%E8%A8%80.html">1. 前言</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%AE%89%E8%A3%85.html">2. 安装</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html">3. 快速入门</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html">4. 因子数据库</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html">5. 因子定义</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%95%B0%E6%8D%AE%E5%BA%93.html">6. 风险数据库</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html">7. 风险模型</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html">8. 组合优化</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%9E%E6%B5%8B%E6%A8%A1%E5%9E%8B.html">9. 回测模型</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%88%AA%E9%9D%A2%E6%B5%8B%E8%AF%95.html">10. 因子截面测试</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%97%B6%E9%97%B4%E5%BA%8F%E5%88%97%E6%B5%8B%E8%AF%95.html">11. 因子时间序列测试</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E4%BA%8B%E4%BB%B6%E6%B5%8B%E8%AF%95.html">12. 事件测试</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%AD%96%E7%95%A5%E6%B5%8B%E8%AF%95.html">13. 策略测试</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%A9%E6%95%88%E5%88%86%E6%9E%90.html">14. 绩效分析</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E8%BE%85%E5%8A%A9%E5%87%BD%E6%95%B0.html">15. 辅助函数</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%99%84%E5%BD%95.html">16. 附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html">17. 参考文献</a></li>
+</ul>
+
+            
+          
+        </div>
+      <div id="rtd-sidebar" data-ea-publisher="readthedocs" data-ea-type="readthedocs-sidebar" data-ea-manual="true" class="ethical-rtd ethical-dark-theme" data-ea-keywords="python|readthedocs-project-493292|readthedocs-project-qsdoc" data-ea-campaign-types="community|house|paid"></div></div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="https://qsdoc.readthedocs.io/zh-cn/latest/index.html#">QuantStudio</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="https://qsdoc.readthedocs.io/zh-cn/latest/index.html#">Docs</a> »</li>
+        
+      <li>Quant Studio</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/Scorpi000/QSDoc/blob/master/docs/index.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="quant-studio">
+<h1>Quant Studio<a class="headerlink" href="https://qsdoc.readthedocs.io/zh-cn/latest/index.html#quant-studio" title="永久链接至标题">¶</a></h1>
+<img alt="_images/Logo1.png" class="align-center" src="./Quant Studio — QuantStudio 0.0.8 文档_files/Logo1.png">
+<p>目录:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%89%8D%E8%A8%80.html">1. 前言</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%89%8D%E8%A8%80.html#id2">1.1. 背景</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%89%8D%E8%A8%80.html#id3">1.2. 应用领域</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%89%8D%E8%A8%80.html#id4">1.3. 联系方式</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%AE%89%E8%A3%85.html">2. 安装</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%AE%89%E8%A3%85.html#id3">2.1. 配置文件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%AE%89%E8%A3%85.html#id5">2.2. 其他软件环境要求</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html">3. 快速入门</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html#id3">3.1. 因子数据读取</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html#id4">3.2. 因子数据存储</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html#id5">3.3. 回测模型</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html#id6">3.3.1. 因子截面测试</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html#id8">3.3.2. 策略测试</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html#id9">3.3.3. 绩效分析</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html#id10">3.4. 风险模型</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html#id11">3.4.1. 风险数据读取</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html#id12">3.4.2. 风险数据生成</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html#id13">3.5. 组合优化</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html">4. 因子数据库</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#id3">4.1. 数据管理原则</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#id5">4.2. 数据来源</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#id6">4.3. 因子数据模型</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#id8">4.3.1. 行情因子</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#id9">4.3.2. 财务因子</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#id10">4.3.3. 预期因子</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#id11">4.3.4. 特征因子</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#id12">4.4. 因子数据读取</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#id13">4.5. 因子数据存储</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#api">4.6. API 参考</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#module-FactorDB">4.6.1. 因子库基类</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#module-TushareDB">4.6.2. tushare 因子库</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#module-WindDB">4.6.3. Wind 因子库</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#module-HDF5DB">4.6.4. 本地因子库</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#id16">4.6.5. 因子表</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%95%B0%E6%8D%AE%E5%BA%93.html#id17">4.6.6. 因子</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html">5. 因子定义</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id3">5.1. 因子定义框架</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id5">5.2. 基础因子</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id6">5.3. 衍生因子</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id8">5.3.1. 单点运算</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id9">5.3.2. 时间序列运算</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id10">5.3.3. 横截面运算</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id11">5.3.4. 面板运算</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id12">5.3.5. 聚合运算</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id13">5.4. 内建运算</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id14">5.4.1. 运算符重载</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id15">5.4.2. 基于单点运算实现的内建算子</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id16">5.4.3. 基于时间序列运算实现的内建算子</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id17">5.4.4. 基于截面运算实现的内建算子</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E5%AE%9A%E4%B9%89.html#id22">5.4.5. 基于聚合运算实现的内建算子</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%95%B0%E6%8D%AE%E5%BA%93.html">6. 风险数据库</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%95%B0%E6%8D%AE%E5%BA%93.html#id3">6.1. 风险数据模型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%95%B0%E6%8D%AE%E5%BA%93.html#id4">6.2. 风险数据读取</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%95%B0%E6%8D%AE%E5%BA%93.html#id5">6.3. 风险数据存储</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%95%B0%E6%8D%AE%E5%BA%93.html#api">6.4. API 参考</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%95%B0%E6%8D%AE%E5%BA%93.html#id6">6.4.1. 风险数据库</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%95%B0%E6%8D%AE%E5%BA%93.html#id7">6.4.2. 风险表</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%95%B0%E6%8D%AE%E5%BA%93.html#module-HDF5RDB">6.4.3. 基于 HDF5 文件的风险库</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%95%B0%E6%8D%AE%E5%BA%93.html#module-SQLRDB">6.4.4. 基于关系型数据库的风险库</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html">7. 风险模型</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html#id3">7.1. 风险模型</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html#id4">7.1.1. 符号说明</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html#id5">7.1.2. 多因子模型</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html#id7">7.1.3. 行业因子 </a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html#id8">7.1.4. 风险因子 </a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html#id11">7.1.5. 数据预处理</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html#id12">7.1.6. 因子收益率和特异性收益率的估计</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html#id14">7.1.7. 因子收益率协方差矩阵估计</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html#id19">7.1.8. 特异性风险的估计</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html#id24">7.1.9. 风险模型检验 </a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html#id25">7.2. 风险数据生成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html#api">7.3. API 参考</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%A3%8E%E9%99%A9%E6%A8%A1%E5%9E%8B.html#barra">7.3.1. Barra 风险模型</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html">8. 组合优化</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#id2">8.1. 优化模型</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#id3">8.1.1. 约束条件</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#id5">8.1.2. 均值方差模型</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#black-litterman">8.1.3. Black-Litterman 模型</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#bayes-stein">8.1.4. Bayes-Stein 模型</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#id6">8.1.5. 最大夏普率模型</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#id7">8.1.6. 风险预算模型</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#id8">8.1.7. 最大分散度模型</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#id9">8.1.8. 最大分散权重模型</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#id10">8.2. 组合构建</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#api">8.3. API 参考</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#id11">8.3.1. 约束条件</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#id12">8.3.2. 优化目标</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%84%E5%90%88%E4%BC%98%E5%8C%96.html#id13">8.3.3. 投资组合构造器</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%9E%E6%B5%8B%E6%A8%A1%E5%9E%8B.html">9. 回测模型</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%9E%E6%B5%8B%E6%A8%A1%E5%9E%8B.html#module-BackTestModel">9.1. API 参考</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%88%AA%E9%9D%A2%E6%B5%8B%E8%AF%95.html">10. 因子截面测试</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%88%AA%E9%9D%A2%E6%B5%8B%E8%AF%95.html#id3">10.1. 因子截面测试模型</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%88%AA%E9%9D%A2%E6%B5%8B%E8%AF%95.html#id4">10.1.1. 符号说明</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%88%AA%E9%9D%A2%E6%B5%8B%E8%AF%95.html#id5">10.1.2. 单因子测试</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%88%AA%E9%9D%A2%E6%B5%8B%E8%AF%95.html#id6">10.1.3. 多因子测试</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%88%AA%E9%9D%A2%E6%B5%8B%E8%AF%95.html#id7">10.2. 因子截面测试脚本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%88%AA%E9%9D%A2%E6%B5%8B%E8%AF%95.html#module-IC">10.3. API 参考</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%97%B6%E9%97%B4%E5%BA%8F%E5%88%97%E6%B5%8B%E8%AF%95.html">11. 因子时间序列测试</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%97%B6%E9%97%B4%E5%BA%8F%E5%88%97%E6%B5%8B%E8%AF%95.html#id3">11.1. 时间序列测试模型</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%97%B6%E9%97%B4%E5%BA%8F%E5%88%97%E6%B5%8B%E8%AF%95.html#id4">11.1.1. 符号说明</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%97%B6%E9%97%B4%E5%BA%8F%E5%88%97%E6%B5%8B%E8%AF%95.html#id5">11.1.2. 时间序列相关性</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%97%B6%E9%97%B4%E5%BA%8F%E5%88%97%E6%B5%8B%E8%AF%95.html#id6">11.1.3. 回归分析</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%9B%A0%E5%AD%90%E6%97%B6%E9%97%B4%E5%BA%8F%E5%88%97%E6%B5%8B%E8%AF%95.html#id7">11.1.4. 收益率的差异性</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E4%BA%8B%E4%BB%B6%E6%B5%8B%E8%AF%95.html">12. 事件测试</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E4%BA%8B%E4%BB%B6%E6%B5%8B%E8%AF%95.html#id3">12.1. 事件测试模型</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E4%BA%8B%E4%BB%B6%E6%B5%8B%E8%AF%95.html#id4">12.1.1. 符号说明</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E4%BA%8B%E4%BB%B6%E6%B5%8B%E8%AF%95.html#id5">12.1.2. 正常收益率模型</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E4%BA%8B%E4%BB%B6%E6%B5%8B%E8%AF%95.html#id7">12.1.3. 异常收益率的统计检验</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E4%BA%8B%E4%BB%B6%E6%B5%8B%E8%AF%95.html#module-AbnormalReturn">12.2. API 参考</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%AD%96%E7%95%A5%E6%B5%8B%E8%AF%95.html">13. 策略测试</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%AD%96%E7%95%A5%E6%B5%8B%E8%AF%95.html#id3">13.1. 投资组合策略</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%AD%96%E7%95%A5%E6%B5%8B%E8%AF%95.html#id4">13.1.1. 自定义投资组合策略</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%AD%96%E7%95%A5%E6%B5%8B%E8%AF%95.html#id5">13.1.2. 分层筛选投资组合策略</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%AD%96%E7%95%A5%E6%B5%8B%E8%AF%95.html#id6">13.1.3. 组合优化策略</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%AD%96%E7%95%A5%E6%B5%8B%E8%AF%95.html#id7">13.2. 择时策略</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%AD%96%E7%95%A5%E6%B5%8B%E8%AF%95.html#api">13.3. API 参考</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%AD%96%E7%95%A5%E6%B5%8B%E8%AF%95.html#id8">13.3.1. 证券账户</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%AD%96%E7%95%A5%E6%B5%8B%E8%AF%95.html#id11">13.3.2. 策略</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%AD%96%E7%95%A5%E6%B5%8B%E8%AF%95.html#id12">13.3.3. 投资组合策略</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%AD%96%E7%95%A5%E6%B5%8B%E8%AF%95.html#id13">13.3.4. 择时策略</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%A9%E6%95%88%E5%88%86%E6%9E%90.html">14. 绩效分析</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%A9%E6%95%88%E5%88%86%E6%9E%90.html#brinson">14.1. Brinson 模型</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%A9%E6%95%88%E5%88%86%E6%9E%90.html#id3">14.1.1. 单期 Brinson 模型</a></li>
+<li class="toctree-l3"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%A9%E6%95%88%E5%88%86%E6%9E%90.html#id4">14.1.2. 多期 Brinson 模型</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%A9%E6%95%88%E5%88%86%E6%9E%90.html#id5">14.2. 基于特征因子模拟组合的绩效分析模型</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%A9%E6%95%88%E5%88%86%E6%9E%90.html#id6">14.3. 绩效分析脚本</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E7%BB%A9%E6%95%88%E5%88%86%E6%9E%90.html#module-BrinsonModel">14.4. API 参考</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E8%BE%85%E5%8A%A9%E5%87%BD%E6%95%B0.html">15. 辅助函数</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E8%BE%85%E5%8A%A9%E5%87%BD%E6%95%B0.html#module-DateTime">15.1. 日期时间</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E8%BE%85%E5%8A%A9%E5%87%BD%E6%95%B0.html#module-Math">15.2. 数学函数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E8%BE%85%E5%8A%A9%E5%87%BD%E6%95%B0.html#module-File">15.3. 文件操作</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E8%BE%85%E5%8A%A9%E5%87%BD%E6%95%B0.html#module-Strategy">15.4. 投资策略</a></li>
+<li class="toctree-l2"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E8%BE%85%E5%8A%A9%E5%87%BD%E6%95%B0.html#module-QtGUI">15.5. GUI</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E9%99%84%E5%BD%95.html">16. 附录</a></li>
+<li class="toctree-l1"><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE.html">17. 参考文献</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="id1">
+<h1>索引和表格<a class="headerlink" href="https://qsdoc.readthedocs.io/zh-cn/latest/index.html#id1" title="永久链接至标题">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/genindex.html"><span class="std std-ref">索引</span></a></li>
+<li><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/py-modindex.html"><span class="std std-ref">模块索引</span></a></li>
+<li><a class="reference internal" href="https://qsdoc.readthedocs.io/zh-cn/latest/search.html"><span class="std std-ref">搜索页面</span></a></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="https://qsdoc.readthedocs.io/zh-cn/latest/%E5%89%8D%E8%A8%80.html" class="btn btn-neutral float-right" title="1. 前言" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr>
+
+  <div role="contentinfo">
+    <p>
+        © Copyright 2018, scorpi000
+      
+        <span class="commit">
+          Revision <code>b3c861e7</code>.
+        </span>
+      
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org/">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      <span class="fa fa-book"> Read the Docs</span>
+      v: latest
+      <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions"><!-- Inserted RTD Footer -->
+
+<div class="injected">
+
+  
+
+      
+      
+      
+      <dl>
+        <dt>Versions</dt>
+        
+        <dd class="rtd-current-item">
+          <a href="https://qsdoc.readthedocs.io/zh-cn/latest/">latest</a>
+        </dd>
+        
+      </dl>
+      
+      
+
+      
+      
+      <dl>
+        <dt>Downloads</dt>
+        
+        <dd><a href="https://qsdoc.readthedocs.io/_/downloads/zh-cn/latest/pdf/">PDF</a></dd>
+        
+        <dd><a href="https://qsdoc.readthedocs.io/_/downloads/zh-cn/latest/htmlzip/">HTML</a></dd>
+        
+        <dd><a href="https://qsdoc.readthedocs.io/_/downloads/zh-cn/latest/epub/">Epub</a></dd>
+        
+      </dl>
+      
+      
+
+      
+      <dl>
+        
+        <!-- These are kept as relative links for internal installs that are http -->
+        <dt>On Read the Docs</dt>
+        <dd>
+          <a href="https://readthedocs.org/projects/qsdoc/">Project Home</a>
+        </dd>
+        <dd>
+          <a href="https://readthedocs.org/projects/qsdoc/builds/">Builds</a>
+        </dd>
+        <dd>
+          <a href="https://readthedocs.org/projects/qsdoc/downloads/">Downloads</a>
+        </dd>
+      </dl>
+      
+
+      
+
+      
+      <dl>
+        <dt>On GitHub</dt>
+        <dd>
+          <a href="https://github.com/Scorpi000/QSDoc/blob/master/docs/index.rst">View</a>
+        </dd>
+        
+        <dd>
+          <a href="https://github.com/Scorpi000/QSDoc/edit/master/docs/index.rst">Edit</a>
+        </dd>
+        
+      </dl>
+      
+      
+
+      
+      <dl>
+        <dt>Search</dt>
+        <dd>
+          <div style="padding: 6px;">
+            
+            <form id="flyout-search-form" class="wy-form" target="_blank" action="https://readthedocs.org/projects/qsdoc/search/" method="get">
+              <input type="text" name="q" aria-label="Search docs" placeholder="Search docs">
+              </form>
+          </div>
+        </dd>
+      </dl>
+      
+
+      <hr>
+
+      
+        <small>
+          <span>Hosted by <a href="https://readthedocs.org/">Read the Docs</a></span>
+          <span> · </span>
+          <a href="https://docs.readthedocs.io/page/privacy-policy.html">Privacy Policy</a>
+        </small>
+      
+
+      
+
+</div>
+</div>
+  </div>
+
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+   
+
+
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"><template shadowrootmode="open"><style>
+      div.grammarly-desktop-integration {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select:none;
+        user-select:none;
+      }
+
+      div.grammarly-desktop-integration:before {
+        content: attr(data-content);
+      }
+    </style><div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration" data-content="{&quot;mode&quot;:&quot;full&quot;,&quot;isActive&quot;:true,&quot;isUserDisabled&quot;:false}"></div></template></grammarly-desktop-integration></html>
