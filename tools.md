@@ -5,8 +5,10 @@ alias up="pip install -e /home/chuyin/trade/wtpy"
 sudo snap install mysql-workbench-community
 sudo apt-get install gnome-keyring
 sudo snap connect mysql-workbench-community:password-manager-service :password-manager-service
+snap connect mysql-workbench-community:ssh-keys
 
 sudo systemctl status mysql
+sudo systemctl stop mysql
 sudo systemctl start mysql
 service --status-all
 
@@ -52,4 +54,3 @@ mamba upgrade&update --all
 # ===================================================================================
 # check blocked ip ports by windows
 netsh interface ipv4 show excludedportrange protocol=tcp
-
