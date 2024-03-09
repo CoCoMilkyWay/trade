@@ -1,5 +1,5 @@
 # use root to create root WSL (not user WSL)
-~/.bashrc
+# ~/.bashrc
 export clash_ip="198.18.0.1"
 export http_proxy="http://$clash_ip:7890"
 export https_proxy="http://$clash_ip:7890"
