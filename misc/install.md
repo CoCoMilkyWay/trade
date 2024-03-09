@@ -41,7 +41,7 @@ curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Mi
 bash Miniforge3-$(uname)-$(uname -m).sh
 
 # env (check email for personal auth token)
-git clone --recurse-submodules -j8 git://github.com/CoCoMilkyWay/trade.git
+git clone --recurse-submodules -j8 https://github.com/CoCoMilkyWay/trade.git
 (git clone https://github.com/CoCoMilkyWay/machine-learning-for-trading.git)
 (git submodule add https://github.com/CoCoMilkyWay/QuantStudio.git)
 
