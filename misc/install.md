@@ -13,9 +13,8 @@ alias pip="pip --proxy http://198.18.0.1:7890"
 env | grep -i proxy
 # use WSL IP(dynamic, use ipconfig to check in windows cmd) as display port to external VCXSRV server
 cd /home/work/trade
-export DISPLAY="178.28.240.1:0"
+export DISPLAY=$(ip route list default | awk '{print $3}'):0
 export QUANDL_API_KEY="9Q5bVWxqJE-94HKpntUg"
-("6y7b4GG74vHE4sssJ8Ef")
 # code .
 
 # APT(ubuntu) proxy
@@ -24,8 +23,10 @@ Acquire::http::proxy "http://198.18.0.1:7890";
 Acquire::https::proxy "http://198.18.0.1:7890";
 Acquire::ftp::proxy "http://198.18.0.1:7890";
 
-vim /etc/apt/apt.conf.d/proxy.conf
-- nameserver 8.8.8.8
+sudo apt install resolvconf
+sudo vim /etc/resolvconf/resolv.conf.d/base
+nameserver 8.8.8.8
+sudo resolvconf -u
 
 # you must update (otherwise proxy not work)
 apt upgrade
@@ -69,7 +70,7 @@ mamba env list
 mamba activate py_3p6
 mamba install numpy pandas seaborn pandas-datareader nbconvert mkl-service
 mamba search PKG --info
-mamba install -v --file req.txt
+mamba install -v --file misc/req.txt
 pip install zipline
 mamba uninstall alembic
 pip install alembic
@@ -91,4 +92,4 @@ change to this so that A, B has same dimensions:
     A = A.loc[idx]
     B = B.loc[idx]
 
-# 
+#
