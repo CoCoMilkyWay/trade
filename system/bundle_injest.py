@@ -9,7 +9,6 @@ from tqdm import tqdm
 from zipline.data.bundles import register
 
 API='baostock'
-
 def injest_bundle(
     environ,
     asset_db_writer,
@@ -209,26 +208,27 @@ def auth(api):
         print('tushare已登入')
     return api
 
+api = auth(api=API)
+
 if __name__ == '__main__': # test if called alone
+    
     metadata = parse_api_metadata()
     symbol_map = metadata.loc[:,['symbol','first_traded']]
     parse_api_kline_d1(symbol_map, pd.Timestamp('1900-01-01').date(), datetime.now().date())
     
-    from pathlib import Path
-    idx = pd.IndexSlice
-    data_path = Path('~', 'trade', 'data')
-
-    ZIPLINE_ROOT = os.getenv('ZIPLINE_ROOT')
-    if not ZIPLINE_ROOT:
-        bundle_path = Path('~', '.zipline', 'data', 'A_stock').expanduser()
-    else:
-        bundle_path = Path(ZIPLINE_ROOT, 'data', 'A_stock')
-
-    adj_db_path = bundle_path / 'adjustments.sqlite'
-    equities_db_path = bundle_path / 'assets-7.sqlite'
+    #from pathlib import Path
+    #idx = pd.IndexSlice
+    #data_path = Path('~', 'trade', 'data')
     
-    api = auth(api=API)
-    # edit ~/.zipline/extension.py
+    #if not os.getenv('ZIPLINE_ROOT'):
+    #    bundle_path = Path('~', '.zipline', 'data', 'A_stock').expanduser()
+    #else:
+    #    bundle_path = Path(os.getenv('ZIPLINE_ROOT'), 'data', 'A_stock')
+    
+    #adj_db_path = bundle_path / 'adjustments.sqlite'
+    #equities_db_path = bundle_path / 'assets-7.sqlite'
+    #
+    ## edit ~/.zipline/extension.py
     
     
     
