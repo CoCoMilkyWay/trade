@@ -3,6 +3,9 @@ import numpy as np
 import pandas as pd
 import sys
 
+from pathlib import Path
+sys.path.append(Path('~', '.zipline').expanduser().as_posix()) # in /xx/xx format
+
 from datetime import datetime,time
 import pytz
 
@@ -13,9 +16,6 @@ from zipline.data.bundles import register
 from zipline.utils.memoize import lazyval
 from bundle_injest import injest_bundle
 from pandas.tseries.offsets import CustomBusinessDay
-
-from pathlib import Path
-sys.path.append(Path('~', '.zipline').expanduser().as_posix()) # in /xx/xx format
 
 '''
 国内市场主要包含
@@ -28,6 +28,9 @@ sys.path.append(Path('~', '.zipline').expanduser().as_posix()) # in /xx/xx forma
 郑州商品期货交易所、
 大连商品期货交易所等
 '''
+# pretend UTC is Asia/Shanghai (easy calculation)
+# tz = "Asia/Shanghai"
+tz = "UTC"
 
 # 上交所盘前集合竞价时间
 call_auction_start = time(9, 15)	# 9：15
@@ -38,44 +41,35 @@ lunch_break_end = time(13, 1)		# 13：00
 # 上交所科创板的盘后固定交易时间
 after_close_time = time(15, 30)		# 15：30
 # 上海证券交易所开始正式营业时间
-start_default = pd.Timestamp('1990-12-19', tz='UTC')
-end_default = pd.Timestamp('today', tz='UTC')
+start_default = pd.Timestamp('1990-12-19', tz=tz)
+end_default = pd.Timestamp('today', tz=tz)
 
-class SHSZStockCalendar(trading_calendars.TradingCalendar):
+class SHSZStockCalendar(TradingCalendar):
+    name = "股票白盘"
+    tz = pytz.timezone(tz)
+    open_times = (
+        (None, time(9, 31)),
+    )
+
+    close_times = (
+        (None, time(15, 0)),
+    )
     
-    @property
-    def name(self):
-        return "SHSZ_stock"
-    @property
-    def tz(self):
-        return pytz.timezone("Asia/Shanghai")
-    @property
-    def open_time(self):
-        return time(9, 31)
-    @property
-    def close_time(self):
-        return time(15, 0)
-    @lazyval
-    def day(self):
-        """
-        The days on which our exchange will be open.
-        """
-        weekmask = "Mon Tue Wed Thu Fri"
-        return CustomBusinessDay(
-            weekmask=weekmask
-        )
+    day = CustomBusinessDay(weekmask="Mon Tue Wed Thu Fri")
 
 trading_calendars.register_calendar(
-        'A-stock',
-        SHSZStockCalendar()
+        '股票白盘',
+        SHSZStockCalendar(),
+        force = True
 )
 
 register(
     'A_stock',
     injest_bundle,
     "股票白盘",
-    pd.Timestamp('1900-01-01'),
-    datetime.now()
+    pd.Timestamp('1900-01-01', tz=tz),
+    #pd.Timestamp('2024-01-03', tz=tz),
+    #pd.Timestamp('today', tz=tz)
     )
 
 '''

@@ -4,11 +4,16 @@ import click
 import os
 from datetime import datetime
 import time
+import pytz
 from tqdm import tqdm
 
 from zipline.data.bundles import register
 
+# pretend UTC is Asia/Shanghai (easy calculation)
+# tz = "Asia/Shanghai"
+tz = "UTC"
 API='baostock'
+
 def injest_bundle(
     environ,
     asset_db_writer,
@@ -86,8 +91,8 @@ def parse_api_metadata(show_progress=True, type='equity'):
     row_index = 0
     p_bar = tqdm(range(stock_len))
     while (rs.error_code == '0') & rs.next():
-        # if(row_index>10):
-        #     break
+        if(row_index>10):
+            break
         # 获取一条记录，将记录合并在一起
         # [code code_name ipoDate outDate type status]
         data_row = rs.get_row_data()
@@ -129,7 +134,8 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
     '''
     for sid, itmes in symbol_map.iterrows():
         code = itmes[0]
-        first_traded = itmes[1].date()
+        first_traded = pytz.timezone("Asia/Shanghai").localize(itmes[1], is_dst=None)
+        
         start_date = max(start_session, first_traded).strftime('%Y-%m-%d')
         end_date = end_session.strftime('%Y-%m-%d')
         rs = api.query_history_k_data_plus(code,
@@ -137,13 +143,21 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
             start_date=start_date, end_date=end_date,
             frequency="d", adjustflag="1")
         if(rs.error_code!='0'):
-            print('query_history_k_data_plus respond error_code:'+rs.error_code)
-            print('query_history_k_data_plus respond  error_msg:'+rs.error_msg)
+            click.echo('query_history_k_data_plus respond error_code:'+rs.error_code)
+            click.echo('query_history_k_data_plus respond  error_msg:'+rs.error_msg)
         #### 打印结果集 ####
         data_list = []
         while (rs.error_code == '0') & rs.next():
             # 获取一条记录，将记录合并在一起
-            data_list.append(rs.get_row_data())
+            data_row = rs.get_row_data()
+            data_list.append([
+                datetime.strptime(data_row[0], '%Y-%m-%d').astimezone(pytz.utc),
+                (data_row[1]),
+                (data_row[2]),
+                (data_row[3]),
+                (data_row[4]),
+                (data_row[5]),
+            ])
         kline = pd.DataFrame(data_list, columns=['day','open','high','low','close','volume'])
         yield sid, kline.sort_index()
 
@@ -195,17 +209,17 @@ def auth(api):
         import baostock as bs
         lg = bs.login()
         if(lg.error_code!='0'):
-            print('login respond error_code:'+lg.error_code)
-            print('login respond  error_msg:'+lg.error_msg)
+            click.echo('login respond error_code:'+lg.error_code)
+            click.echo('login respond  error_msg:'+lg.error_msg)
         else:
-            print('证券宝已登入')
+            click.echo('证券宝已登入')
         api = bs
     elif(api=='tushare'):
         import tushare as ts
         pro = ts.pro_api('20231208200557-eb280087-82b0-4ac9-8638-4f96f8f4d14c')
         pro._DataApi__http_url = 'http://tsapi.majors.ltd:7000'
         api = pro
-        print('tushare已登入')
+        click.echo('tushare已登入')
     return api
 
 api = auth(api=API)
@@ -214,7 +228,11 @@ if __name__ == '__main__': # test if called alone
     
     metadata = parse_api_metadata()
     symbol_map = metadata.loc[:,['symbol','first_traded']]
-    parse_api_kline_d1(symbol_map, pd.Timestamp('1900-01-01').date(), datetime.now().date())
+    parse_api_kline_d1(
+        symbol_map, 
+        pd.Timestamp('1900-01-01', tz=tz),
+        pd.Timestamp('today', tz=tz)
+        )
     
     #from pathlib import Path
     #idx = pd.IndexSlice

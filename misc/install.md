@@ -92,4 +92,7 @@ change to this so that A, B has same dimensions:
     A = A.loc[idx]
     B = B.loc[idx]
 
+113: /root/miniforge3/envs/py_3p6/lib/python3.6/site-packages/zipline/data/bcolz_daily_bars.py
+    df.loc[:, "mask"] = df.apply(lambda x: 0, axis=1)
+
 #
