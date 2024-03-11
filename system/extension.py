@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import sys
+import os
 
 from pathlib import Path
 sys.path.append(Path('~', '.zipline').expanduser().as_posix()) # in /xx/xx format
@@ -16,7 +17,6 @@ from zipline.data.bundles import register
 from zipline.utils.memoize import lazyval
 from bundle_injest import injest_bundle, auth, parse_api_tradedate
 from pandas.tseries.offsets import CustomBusinessDay
-
 '''
 国内市场主要包含
 上海证券交易所、
@@ -28,10 +28,12 @@ from pandas.tseries.offsets import CustomBusinessDay
 郑州商品期货交易所、
 大连商品期货交易所等
 '''
+
 # pretend UTC is Asia/Shanghai (easy calculation)
 # tz = "Asia/Shanghai"
 tz = "UTC"
-api = auth()
+bundle_name = 'A_stock'
+os.system(f'rm -rf ./data/{bundle_name}')
 
 # 上交所盘前集合竞价时间
 call_auction_start = time(9, 15)	# 9：15
@@ -49,6 +51,7 @@ after_close_time = time(15, 30)		# 15：30
 start_default = pd.Timestamp('1990-12-19', tz=tz)
 end_default = pd.Timestamp('today', tz=tz)
 
+special_trade_days, special_holiday_days = parse_api_tradedate()
 class SHSZStockCalendar(TradingCalendar):
     name = "股票白盘"
     tz = pytz.timezone(tz)
@@ -66,12 +69,10 @@ class SHSZStockCalendar(TradingCalendar):
         (None, lunch_break_end),
     )
     day = CustomBusinessDay(
-        holidays=self.adhoc_holidays,
-        calendar=self.regular_holidays,
+        holidays=special_holiday_days,
+        #calendar=regular_holidays,
         weekmask="Mon Tue Wed Thu Fri",
     )
-    
-    CustomBusinessDay(weekmask=)
 
 trading_calendars.register_calendar(
         '股票白盘',
@@ -80,7 +81,7 @@ trading_calendars.register_calendar(
 )
 
 register(
-    'A_stock',
+    bundle_name,
     injest_bundle,
     "股票白盘",
     #pd.Timestamp('1900-01-01', tz=tz),

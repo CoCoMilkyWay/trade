@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
 import click
-import os
 from datetime import datetime
 import time
 import pytz
 from tqdm import tqdm
+from decimal import Decimal
 
 from zipline.data.bundles import register
 
@@ -13,6 +13,8 @@ from zipline.data.bundles import register
 # tz = "Asia/Shanghai"
 tz = "UTC"
 API='baostock'
+log = 'logfile.txt'
+max_num_assets = 10000 # 只ingest前n个asset
 
 def injest_bundle(
     environ,
@@ -32,15 +34,19 @@ def injest_bundle(
     terminal run:zipline ingest -b A_stock
     '''
     metadata = parse_api_metadata()
-    symbol_map = metadata.loc[:,['symbol','first_traded']]
-    print(metadata)
+    symbol_map = metadata.loc[:,['symbol','asset_name','first_traded']]
+    print(metadata.iloc[:,:3])
     # 写入股票基础信息
     asset_db_writer.write(metadata)
     
     # 准备写入 dailybar/minutebar(lazzy iterable)
     # ('day'/'min') * ('open','high','low','close','volume')
     # minute_bar_writer.write(parse_api_kline_m5(symbol_map, start_session, end_session), show_progress=show_progress)
-    daily_bar_writer.write(data=parse_api_kline_d1(symbol_map, start_session, end_session), show_progress=show_progress)
+    daily_bar_writer.write(
+        data=parse_api_kline_d1(symbol_map, start_session, end_session), 
+        show_progress=show_progress,
+        invalid_data_behavior = 'raise' #{'warn', 'raise', 'ignore'}
+        )
     
     # split:除权, merge:填权, dividend:除息
     # 用了后复权数据，不需要adjast factor
@@ -91,8 +97,10 @@ def parse_api_metadata(show_progress=True, type='equity'):
     row_index = 0
     p_bar = tqdm(range(stock_len))
     while (rs.error_code == '0') & rs.next():
-        if(row_index>10):
+        if(row_index>max_num_assets): # 只ingest前n个asset
             break
+        # if(row_index<5): # 跳过前n个asset
+        #     continue
         # 获取一条记录，将记录合并在一起
         # [code code_name ipoDate outDate type status]
         data_row = rs.get_row_data()
@@ -134,8 +142,10 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
     '''
     for sid, itmes in symbol_map.iterrows():
         code = itmes[0]
-        first_traded = pytz.timezone("Asia/Shanghai").localize(itmes[1], is_dst=None)
-        
+        asset_name = itmes[1]
+        first_traded = pytz.timezone("Asia/Shanghai").localize(itmes[2], is_dst=None)
+        click.echo(f", {code}, {asset_name}")
+
         start_date = max(start_session, first_traded).strftime('%Y-%m-%d')
         end_date = end_session.strftime('%Y-%m-%d')
         rs = api.query_history_k_data_plus(code,
@@ -156,11 +166,31 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
                 float(data_row[2]),
                 float(data_row[3]),
                 float(data_row[4]),
-                float(data_row[5]),
+                np.nan if data_row[5] == '' else np.uint32(data_row[5]) # may overflow, or null string
             ])
         kline = pd.DataFrame(data_list, columns=['day','open','high','low','close','volume'])
         kline.set_index('day',inplace=True, drop=True)#.sort_index()
-        yield sid, kline
+
+        # TODO
+        #有可能由于bug/公司资产重组等原因，造成缺失日线数据/暂时停牌的问题（zipline会报错，对不上calendar）
+        # 检查索引是否存在 (有乱序风险)
+        search_index = pd.to_datetime('2023-06-30',format='%Y-%m-%d',utc=True)
+        if search_index not in kline.index:
+            kline.loc[search_index] = np.nan
+        kline = kline.sort_index(axis=0)
+        
+        # 使用前一个非空值填充 '' (无乱序风险)
+        kline.replace('', np.nan, inplace=True)
+        kline_filled = kline.fillna(method='ffill')
+        # 打开文件以保存日志信息
+        with open(log, 'a') as f: # append new log
+            for col in kline.columns:
+                for idx, value in kline[col].items():
+                    if pd.isna(value):
+                        prev_value = kline_filled[col].loc[idx]
+                        # 将标准输出重定向到文件
+                        click.echo(f"{code}, {asset_name}: 在{col}列 {idx.strftime('%Y-%m-%d')}行 填充了 {prev_value}", file=f)
+        yield sid, kline_filled
 
 #def parse_api_split_merge_dividend(symbol_map, start_session, end_session):
 #    data_list = []
@@ -196,10 +226,12 @@ def parse_api_tradedate():
     business_days_not_present = []
     for date_str in trade_days:
         date = datetime.strptime(date_str, '%Y-%m-%d')
+        #date = pd.to_datetime(date_str,format= '%Y-%m-%d',utc=True)
         if date.weekday() >= 5: # Saturday=5, Sunday=6
             non_business_days_present.append(date)
     for date_str in non_trade_days:
         date = datetime.strptime(date_str, '%Y-%m-%d')
+        #date = pd.to_datetime(date_str,format= '%Y-%m-%d',utc=True)
         if date.weekday() < 5:
             business_days_not_present.append(date)
     return non_business_days_present, business_days_not_present
@@ -243,7 +275,7 @@ def auth():
             click.echo('login respond error_code:'+lg.error_code)
             click.echo('login respond  error_msg:'+lg.error_msg)
         else:
-            click.echo('证券宝已登入')
+            click.echo('证券宝(Baostock)已登入')
         api = bs
     elif(API=='tushare'):
         import tushare as ts
@@ -253,8 +285,11 @@ def auth():
         click.echo('tushare已登入')
     return api
 
+api = auth()
+with open(log, 'w'): # clear log file
+    pass
+
 if __name__ == '__main__': # test if called alone
-    api = auth()
     metadata = parse_api_metadata()
     symbol_map = metadata.loc[:,['symbol','first_traded']]
     parse_api_kline_d1(
@@ -262,7 +297,7 @@ if __name__ == '__main__': # test if called alone
         pd.Timestamp('1900-01-01', tz=tz),
         pd.Timestamp('today', tz=tz)
         )
-    special_trade_days, special_holiday_days = parse_api_tradedate() # non_business_days_present, business_days_not_present
+    special_trade_days, special_holiday_days = parse_api_tradedate(api) # non_business_days_present, business_days_not_present
     # A-stock has no special_trade_days
     print('special_trade_days: ',special_trade_days)
     print('special_holiday_days: ',special_holiday_days)
