@@ -36,9 +36,13 @@ api = auth()
 # 上交所盘前集合竞价时间
 call_auction_start = time(9, 15)	# 9：15
 call_auction_end = time(9, 25)		# 9：25
+# 上交所open时间
+trade_start = time(9, 31)	        # 9：31
 # 上海证券交易所中午休息时间
 lunch_break_start = time(11, 30)	# 11：30
-lunch_break_end = time(13, 1)		# 13：00
+lunch_break_end = time(13, 0)		# 13：00
+# 上交所close时间
+trade_end = time(15, 0)	            # 15：00
 # 上交所科创板的盘后固定交易时间
 after_close_time = time(15, 30)		# 15：30
 # 上海证券交易所开始正式营业时间
@@ -49,14 +53,25 @@ class SHSZStockCalendar(TradingCalendar):
     name = "股票白盘"
     tz = pytz.timezone(tz)
     open_times = (
-        (None, time(9, 31)),
+        (None, trade_start),
     )
 
     close_times = (
-        (None, time(15, 0)),
+        (None, trade_end),
+    )
+    break_start_times = (
+        (None, lunch_break_start),
+    )
+    break_end_times = (
+        (None, lunch_break_end),
+    )
+    day = CustomBusinessDay(
+        holidays=self.adhoc_holidays,
+        calendar=self.regular_holidays,
+        weekmask="Mon Tue Wed Thu Fri",
     )
     
-    day = CustomBusinessDay(weekmask="Mon Tue Wed Thu Fri")
+    CustomBusinessDay(weekmask=)
 
 trading_calendars.register_calendar(
         '股票白盘',

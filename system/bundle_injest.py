@@ -265,6 +265,7 @@ if __name__ == '__main__': # test if called alone
     special_trade_days, special_holiday_days = parse_api_tradedate() # non_business_days_present, business_days_not_present
     # A-stock has no special_trade_days
     print('special_trade_days: ',special_trade_days)
+    print('special_holiday_days: ',special_holiday_days)
     
     #from pathlib import Path
     #idx = pd.IndexSlice
