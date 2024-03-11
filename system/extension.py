@@ -14,7 +14,7 @@ import trading_calendars
 from trading_calendars import *
 from zipline.data.bundles import register
 from zipline.utils.memoize import lazyval
-from bundle_injest import injest_bundle
+from bundle_injest import injest_bundle, auth, parse_api_tradedate
 from pandas.tseries.offsets import CustomBusinessDay
 
 '''
@@ -31,6 +31,7 @@ from pandas.tseries.offsets import CustomBusinessDay
 # pretend UTC is Asia/Shanghai (easy calculation)
 # tz = "Asia/Shanghai"
 tz = "UTC"
+api = auth()
 
 # 上交所盘前集合竞价时间
 call_auction_start = time(9, 15)	# 9：15
@@ -67,7 +68,7 @@ register(
     'A_stock',
     injest_bundle,
     "股票白盘",
-    pd.Timestamp('1900-01-01', tz=tz),
+    #pd.Timestamp('1900-01-01', tz=tz),
     #pd.Timestamp('2024-01-03', tz=tz),
     #pd.Timestamp('today', tz=tz)
     )
@@ -121,17 +122,17 @@ df_adhoc_holidays ['date'].to_csv('cn_adhoc_holidays.txt', index=False, date_for
         
         
 	def _get_from_file(filename, use_list=False):
-	    with open(filename, 'r') as f:
-	        data = f.readlines()
-	        if use_list:
-	            return [int_to_date(str_to_int(i.rstrip('\n'))) for i in data]
-	        else:
-	            return set([int_to_date(str_to_int(i.rstrip('\n'))) for i in data])
-	    if use_list:
-	        return []
-	    else:
-	        return set([])
-	        
+        with open(filename, 'r') as f:
+            data = f.readlines()
+            if use_list:
+                return [int_to_date(str_to_int(i.rstrip('\n'))) for i in data]
+            else:
+                return set([int_to_date(str_to_int(i.rstrip('\n'))) for i in data])
+        if use_list:
+            return []
+        else:
+            return set([])
+            
     def _get_adhoc_holidays(use_list=False):
         data_file_path = os.path.join(os.path.dirname(__file__), 'cn_adhoc_holidays.txt')
         return _get_from_file(data_file_path, use_list)
@@ -141,12 +142,12 @@ df_adhoc_holidays ['date'].to_csv('cn_adhoc_holidays.txt', index=False, date_for
         return [Timestamp(t, tz=self.tz) for t in _get_adhoc_holidays(use_list=True)]
     @lazyval
     def _minutes_per_session(self):
-    	# 上午的分钟数=午休开始时间-开盘时间
+        # 上午的分钟数=午休开始时间-开盘时间
         diff_am = self.schedule.lunch_break_start- self.schedule.market_open
         diff_am = diff.astype('timedelta64[m]')
 		# diff_am + 1
 		
-    	# 下午的分钟数=收盘时间-午休结束时间
+        # 下午的分钟数=收盘时间-午休结束时间
         diff_pm = self.schedule.market_close - self.schedule.lunch_break_end
         diff_pm = diff.astype('timedelta64[m]')
         # diff_pm + 1

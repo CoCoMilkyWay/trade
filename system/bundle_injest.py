@@ -33,14 +33,14 @@ def injest_bundle(
     '''
     metadata = parse_api_metadata()
     symbol_map = metadata.loc[:,['symbol','first_traded']]
-    
+    print(metadata)
     # 写入股票基础信息
     asset_db_writer.write(metadata)
     
-    # 准备写入minutebar(lazzy iterable)
+    # 准备写入 dailybar/minutebar(lazzy iterable)
+    # ('day'/'min') * ('open','high','low','close','volume')
     # minute_bar_writer.write(parse_api_kline_m5(symbol_map, start_session, end_session), show_progress=show_progress)
-    # 准备写入dailybar(lazzy iterable)
-    daily_bar_writer.write(parse_api_kline_d1(symbol_map, start_session, end_session), show_progress=show_progress)
+    daily_bar_writer.write(data=parse_api_kline_d1(symbol_map, start_session, end_session), show_progress=show_progress)
     
     # split:除权, merge:填权, dividend:除息
     # 用了后复权数据，不需要adjast factor
@@ -151,15 +151,16 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
             # 获取一条记录，将记录合并在一起
             data_row = rs.get_row_data()
             data_list.append([
-                datetime.strptime(data_row[0], '%Y-%m-%d').astimezone(pytz.utc),
-                (data_row[1]),
-                (data_row[2]),
-                (data_row[3]),
-                (data_row[4]),
-                (data_row[5]),
+                pd.to_datetime(data_row[0],format='%Y-%m-%d',utc=True),
+                float(data_row[1]),
+                float(data_row[2]),
+                float(data_row[3]),
+                float(data_row[4]),
+                float(data_row[5]),
             ])
         kline = pd.DataFrame(data_list, columns=['day','open','high','low','close','volume'])
-        yield sid, kline.sort_index()
+        kline.set_index('day',inplace=True, drop=True)#.sort_index()
+        yield sid, kline
 
 #def parse_api_split_merge_dividend(symbol_map, start_session, end_session):
 #    data_list = []
@@ -173,6 +174,36 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
 #                data_row[6], # 除权除息日期 dividOperateDate 
 #            ])
 #        return pd.DataFrame(data_list, columns=data_list.fields)
+
+def parse_api_tradedate():
+    #### 获取交易日信息 ####
+    rs = api.query_trade_dates(start_date="1900-01-01")
+    if(rs.error_code!='0'):
+        click.echo('query_trade_dates respond error_code:'+rs.error_code)
+        click.echo('query_trade_dates respond  error_msg:'+rs.error_msg)
+
+    #### 打印结果集 ####
+    trade_days = []
+    non_trade_days = []
+    while (rs.error_code == '0') & rs.next():
+        # 获取一条记录，将记录合并在一起
+        row_data = rs.get_row_data()
+        if(row_data[1]=='1'): # 'is_trading_day'
+            trade_days.append(row_data[0]) # 'calendar_date'
+        else:
+            non_trade_days.append(row_data[0]) # 'calendar_date'
+    non_business_days_present = []
+    business_days_not_present = []
+    for date_str in trade_days:
+        date = datetime.strptime(date_str, '%Y-%m-%d')
+        if date.weekday() >= 5: # Saturday=5, Sunday=6
+            non_business_days_present.append(date)
+    for date_str in non_trade_days:
+        date = datetime.strptime(date_str, '%Y-%m-%d')
+        if date.weekday() < 5:
+            business_days_not_present.append(date)
+    return non_business_days_present, business_days_not_present
+
 def get_exchange(index):    # sh.xxxxxx sz.xxxxxx
     '''
     主板, 中小板: 10%
@@ -204,8 +235,8 @@ def get_exchange(index):    # sh.xxxxxx sz.xxxxxx
         click.echo(f"Err: 不识别的股票代码：{index}")
     return exchg
 
-def auth(api):
-    if(api=='baostock'):
+def auth():
+    if(API=='baostock'):
         import baostock as bs
         lg = bs.login()
         if(lg.error_code!='0'):
@@ -214,7 +245,7 @@ def auth(api):
         else:
             click.echo('证券宝已登入')
         api = bs
-    elif(api=='tushare'):
+    elif(API=='tushare'):
         import tushare as ts
         pro = ts.pro_api('20231208200557-eb280087-82b0-4ac9-8638-4f96f8f4d14c')
         pro._DataApi__http_url = 'http://tsapi.majors.ltd:7000'
@@ -222,10 +253,8 @@ def auth(api):
         click.echo('tushare已登入')
     return api
 
-api = auth(api=API)
-
 if __name__ == '__main__': # test if called alone
-    
+    api = auth()
     metadata = parse_api_metadata()
     symbol_map = metadata.loc[:,['symbol','first_traded']]
     parse_api_kline_d1(
@@ -233,6 +262,9 @@ if __name__ == '__main__': # test if called alone
         pd.Timestamp('1900-01-01', tz=tz),
         pd.Timestamp('today', tz=tz)
         )
+    special_trade_days, special_holiday_days = parse_api_tradedate() # non_business_days_present, business_days_not_present
+    # A-stock has no special_trade_days
+    print('special_trade_days: ',special_trade_days)
     
     #from pathlib import Path
     #idx = pd.IndexSlice
