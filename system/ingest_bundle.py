@@ -18,6 +18,7 @@ bundle_name = 'A_stock'
 API='baostock'
 log = './system/logfile.txt'
 max_num_assets = 10 # 只ingest前n个asset
+enable_profiling = True
 
 # 国内市场主要包含 上海证券交易所、 深圳证券交易所、 香港证券交易所、 全国中小企业股份转让系统有限公司、 中国金融期货交易所、 上海商品期货交易所、 郑州商品期货交易所、 大连商品期货交易所等 
 # 上交所盘前集合竞价时间
@@ -159,7 +160,8 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
     for sid, itmes in symbol_map.iterrows():
         code = itmes[0]
         asset_name = itmes[1]
-        first_traded = pytz.timezone("Asia/Shanghai").localize(itmes[2], is_dst=None)
+        first_traded_no_tz = itmes[2]
+        first_traded = pytz.timezone(tz).localize(first_traded_no_tz, is_dst=None) # datetime: tz-naive to tz-aware
         start_date = max(start_session, first_traded).strftime('%Y-%m-%d')
         end_date = end_session.strftime('%Y-%m-%d')
         click.echo(f", {code}, {asset_name}")
@@ -188,11 +190,12 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
 
         # 有可能由于bug/公司资产重组等原因，造成缺失日线数据/暂时停牌的问题（zipline会报错，对不上calendar）
         # 检查是否存在数据缺失 (有乱序风险)
-        #for trade_day in trade_days:
-        #    print(trade_day)
-        #    if trade_day not in kline.index:
-        #        kline.loc[trade_day] = np.nan
-        #kline = kline.sort_index(axis=0)
+        asset_trade_days = [dt for dt in trade_days if dt > first_traded_no_tz]
+        missing_tradedays = set(pd.to_datetime(asset_trade_days)) - set(kline.index)
+        print(missing_tradedays)
+        for missing_tradeday in missing_tradedays:
+            kline.loc[missing_tradeday] = np.nan
+        kline = kline.sort_index(axis=0)
         
         # 使用前一个非空值填充 '' (无乱序风险)
         kline.replace('', np.nan, inplace=True)
@@ -314,12 +317,13 @@ if __name__ == '__main__': # register calendar and call zipline ingest
     #print('special_holiday_days: ',special_holiday_days)
 
 else:   # run this script as extension.py
-    # performance profiling
-    import subprocess
-    PID = subprocess.check_output("pgrep 'zipline'", shell=True).decode('utf-8')
-    process = subprocess.Popen(f'sudo py-spy record -o /home/chuyin/work/trade/profile.svg --pid {PID}', stdin=subprocess.PIPE, shell=True)
-    process.stdin.write('bj721006'.encode())
-    process.stdin.flush()
+    if enable_profiling:
+        # performance profiling
+        import subprocess
+        PID = subprocess.check_output("pgrep 'zipline'", shell=True).decode('utf-8')
+        process = subprocess.Popen(f'sudo py-spy record -o /home/chuyin/work/trade/profile.svg --pid {PID}', stdin=subprocess.PIPE, shell=True)
+        process.stdin.write('bj721006'.encode())
+        process.stdin.flush()
 
     # register calendar and data bundle
     api = auth()
