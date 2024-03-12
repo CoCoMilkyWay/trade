@@ -324,7 +324,7 @@ else:   # run this script as extension.py
         # performance profiling
         import subprocess
         PID = subprocess.check_output("pgrep 'zipline'", shell=True).decode('utf-8')
-        process = subprocess.Popen(f'sudo py-spy record -o /home/chuyin/trade/profile.svg --pid {PID}', stdin=subprocess.PIPE, shell=True)
+        process = subprocess.Popen(f'sudo py-spy record -o /home/chuyin/trade/system/profile.svg --pid {PID}', stdin=subprocess.PIPE, shell=True)
         process.stdin.write('bj721006'.encode())
         process.stdin.flush()
 
