@@ -48,6 +48,7 @@ def ingest_bundle(
     symbol_map = metadata.loc[:,['symbol','asset_name','first_traded']]
     # print(metadata.iloc[:,:3])
     # 写入股票基础信息
+    #TODO 
     asset_db_writer.write(metadata)
     
     # 准备写入 dailybar/minutebar(lazzy iterable)
@@ -118,8 +119,8 @@ def parse_csv_metadata(show_progress=True, type='equity'):
         first_traded = start_date.date()
         auto_close_date = end_date + pd.Timedelta(days=1)
         new_row = [
-            row[2], # 'symbol'
-            row[0], # 'asset_name'
+            row[0], # 'symbol'
+            row[2], # 'asset_name'
             start_date, # 'start_date' (ipo date)
             end_date, # 'end_date' (data_end)
             first_traded, # 'first_traded' (data_start)
@@ -131,14 +132,14 @@ def parse_csv_metadata(show_progress=True, type='equity'):
     return metadata, index_info
 
 def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session):
-    progress_bar = tqdm(len(index_info))
+    progress_bar = tqdm(range(len(index_info)))
     for sid, items in symbol_map.iterrows():
-        code = items[0]
+        symbol = items[0]
         asset_name = items[1]
         first_traded = pytz.timezone(tz).localize(items[2]) # datetime.date type
         start_date = max(start_session, first_traded).strftime('%Y-%m-%d')
         end_date = end_session.strftime('%Y-%m-%d')
-        progress_bar.set_description(f'{code}, {asset_name}: ')
+        progress_bar.set_description(f'{symbol}, {asset_name}: ')
         lines_to_skip = [0, 1, index_info[sid][1] - 1]
         lines = pd.read_csv(index_info[sid][0], encoding='gbk', sep='\s+', skiprows=lambda x: x in lines_to_skip, header=None)
         kline_raw = []
@@ -175,7 +176,7 @@ def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session):
                     if pd.isna(value):
                         prev_value = kline_filled[col].loc[idx]
                         # 将标准输出重定向到文件
-                        click.echo(f"{code}, {asset_name}: 在{col}列 {idx.strftime('%Y-%m-%d')}行 填充了 {prev_value}", file=f)
+                        click.echo(f"{symbol}, {asset_name}: 在{col}列 {idx.strftime('%Y-%m-%d')}行 填充了 {prev_value}", file=f)
         # click.echo(f", {code}, {asset_name}; 获取kline: {time1 - time0:.2f}s, proc:{time2 - time1:.2f}s")
         progress_bar.update(1)
         yield sid, kline_filled
