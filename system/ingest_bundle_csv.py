@@ -17,6 +17,15 @@ from zipline.data.bundles import register
 tz = "UTC"
 bundle_name = 'A_stock'
 API='baostock'
+assets_list = [
+    '1沪A_不包括科创板',
+    '2深A_不包括创业板',
+    '3科创板',
+    '4创业板',
+    '5北A_新老三板',
+    # '6上证股指期权',
+    # '7深证股指期权',
+]
 
 proj_path = '/root/work/trade/'
 max_num_assets = 10000 # 只ingest前n个asset
@@ -35,9 +44,9 @@ def ingest_bundle(
     show_progress,
     output_dir):
     '''this script would automatically run by zipline, as extension.py'''
-    metadata = parse_csv_metadata()
+    metadata, index_info = parse_csv_metadata() # index_info = [asset_csv_path, num_lines]
     symbol_map = metadata.loc[:,['symbol','asset_name','first_traded']]
-    print(metadata.iloc[:,:3])
+    # print(metadata.iloc[:,:3])
     # 写入股票基础信息
     asset_db_writer.write(metadata)
     
@@ -45,7 +54,7 @@ def ingest_bundle(
     # ('day'/'min') * ('open','high','low','close','volume')
     # minute_bar_writer.write(parse_api_kline_m5(symbol_map, start_session, end_session), show_progress=show_progress)
     daily_bar_writer.write(
-        data=parse_api_kline_d1(symbol_map, start_session, end_session), 
+        data=parse_csv_kline_d1(symbol_map, index_info, start_session, end_session), 
         show_progress=show_progress,
         invalid_data_behavior = 'raise' #{'warn', 'raise', 'ignore'}
     )
@@ -57,46 +66,37 @@ def ingest_bundle(
     #    dividends=pd.concat(dividends, ignore_index=True),
     #)
     
+csv_path = f'{proj_path}data/'
 if not os.getenv('ZIPLINE_ROOT'):
     zipline_path = Path('~', '.zipline').expanduser()
 else:
     zipline_path = Path(os.getenv('ZIPLINE_ROOT'))
 bundle_path = Path(zipline_path, 'data', bundle_name)
 log = f'{proj_path}system/logfile.txt'
-
+assets_path_list = [csv_path + asset for asset in assets_list]
 # API parsing=================================================================================
 def parse_csv_metadata(show_progress=True, type='equity'):
-    csv_path = f'{proj_path}data/'
-    assets_list = [
-        '1沪A_不包括科创板',
-        '2深A_不包括创业板',
-        '3科创板',
-        '4创业板',
-        '5北A_新老三板',
-        # '6上证股指期权',
-        # '7深证股指期权',
-    ]
-    assets_path_list = [csv_path + asset for asset in assets_list]
     extracted_rows = []
+    index_info = []
     for assets_path in assets_path_list:
         assets = assets_path.split('/')[-1]
         for asset_csv_name in tqdm(os.listdir(assets_path), desc=f'{assets}'):
             if asset_csv_name.endswith('.txt'):
                 asset_csv_path = os.path.join(assets_path, asset_csv_name)
-                lines_to_read = [0, 2]  # 1st and 3rd line
-                line1_3 = pd.read_csv(asset_csv_path, encoding='gbk', sep='\s+', skiprows=lambda x: x not in lines_to_read, header=None)
                 num_lines = sum(1 for line in open(asset_csv_path, encoding='gbk')) # last line
                 if(num_lines<10):
                     continue
-                line_last = pd.read_csv(asset_csv_path, encoding='gbk', sep='\s+', skiprows=num_lines - 2, header=None)
-                if len(line1_3) > 1 and len(line_last) > 0:
-                    extracted_rows.append([                 # line1 = [600000 浦发银行 日线 后复权]
-                        asset_csv_name,                     # 'asset_file_name'
-                        line1_3.iloc[0, 0],                 # 'code' (-> exchange)
-                        line1_3.iloc[0, 1],                 # 'symbol'
-                        line1_3.iloc[1, 0].split(',')[0],   # 'start_date'
-                        line_last.iloc[0, 0].split(',')[0], # 'end_date'
+                lines_to_read = [0, 2, num_lines - 2]  # 1st, 3rd, the 2nd_last line
+                lines = pd.read_csv(asset_csv_path, encoding='gbk', sep='\s+', skiprows=lambda x: x not in lines_to_read, header=None)
+                if len(lines) > 2:
+                    extracted_rows.append([             # line1 = [600000 浦发银行 日线 后复权]
+                        asset_csv_name.split('.')[0],   # 'asset_file_name'
+                        lines.iloc[0, 0],               # 'code' (-> exchange)
+                        lines.iloc[0, 1],               # 'symbol'
+                        lines.iloc[1, 0].split(',')[0], # 'start_date'
+                        lines.iloc[2, 0].split(',')[0], # 'end_date'
                         ])
+                    index_info.append([asset_csv_path, num_lines])
     
     def metadata_frame_equity():
         dtype = [
@@ -128,47 +128,32 @@ def parse_csv_metadata(show_progress=True, type='equity'):
         ]
         metadata.loc[row_index] = new_row
         row_index += 1
-    return metadata
+    return metadata, index_info
 
-def parse_api_kline_d1(symbol_map, start_session, end_session):
-    '''
-    分钟线: date,time,code,open,high,low,close,volume,amount,adjustflag
-    日线:   date,code,open,high,low,close,preclose,volume,amount,adjustflag,turn,
-            tradestatus,pctChg,peTTM,psTTM,pcfNcfTTM,pbMRQ,isST(特殊处理股票)
-    周月线: date,code,open,high,low,close,volume,amount,adjustflag,turn,pctChg
-    adjustflag: 1:后复权; 2:前复权; 3:默认不复权; (涨跌幅复权算法)
-    frequency: d=日k线,w=周,m=月,5=5分钟,15=15分钟,30=30分钟,60=60分钟k线数据
-    '''
-    for sid, itmes in symbol_map.iterrows():
-        code = itmes[0]
-        asset_name = itmes[1]
-        first_traded_no_tz = itmes[2]
-        first_traded = pytz.timezone(tz).localize(first_traded_no_tz, is_dst=None) # datetime: tz-naive to tz-aware
+def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session):
+    progress_bar = tqdm(len(index_info))
+    for sid, items in symbol_map.iterrows():
+        code = items[0]
+        asset_name = items[1]
+        first_traded = pytz.timezone(tz).localize(items[2]) # datetime.date type
         start_date = max(start_session, first_traded).strftime('%Y-%m-%d')
         end_date = end_session.strftime('%Y-%m-%d')
-        time0 = t.time()
-        rs = api.query_history_k_data_plus(code,
-            "date,open,high,low,close,volume",
-            start_date=start_date, end_date=end_date,
-            frequency="d", adjustflag="1")
-        if(rs.error_code!='0'):
-            click.echo('query_history_k_data_plus respond error_code:'+rs.error_code)
-            click.echo('query_history_k_data_plus respond  error_msg:'+rs.error_msg)
-        time1 = t.time()
-        #### 打印结果集 ####
-        data_list = []
-        while (rs.error_code == '0') & rs.next():
-            # 获取一条记录，将记录合并在一起
-            data_row = rs.get_row_data()
-            data_list.append([
-                data_row[0],
-                float(data_row[1]),
-                float(data_row[2]),
-                float(data_row[3]),
-                float(data_row[4]),
-                np.nan if data_row[5] == '' else np.uint32(data_row[5]) # may overflow, or null string
+        progress_bar.set_description(f'{code}, {asset_name}: ')
+        lines_to_skip = [0, 1, index_info[sid][1] - 1]
+        lines = pd.read_csv(index_info[sid][0], encoding='gbk', sep='\s+', skiprows=lambda x: x in lines_to_skip, header=None)
+        kline_raw = []
+        for rid, line in lines.iterrows():
+            line = line[0].split(',')
+            kline_raw.append([
+                line[0],
+                float(line[1]),
+                float(line[2]),
+                float(line[3]),
+                float(line[4]),
+                np.uint32(line[5]),  # use 成交量
+                # np.nan if line[5] == '' else np.uint32(line[5]) # may overflow, or null string
             ])
-        kline = pd.DataFrame(data_list, columns=['day','open','high','low','close','volume'])
+        kline = pd.DataFrame(kline_raw, columns=['day','open','high','low','close','volume'])
         kline['day'] = pd.to_datetime(kline['day'], format='%Y-%m-%d', utc=True)
         kline.set_index('day',inplace=True, drop=True)#.sort_index()
 
@@ -179,7 +164,7 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
         for missing_tradeday in missing_tradedays:
             kline.loc[missing_tradeday] = np.nan
         kline = kline.sort_index(axis=0)
-        
+
         # 使用前一个非空值填充 '' (无乱序风险)
         kline.replace('', np.nan, inplace=True)
         kline_filled = kline.fillna(method='ffill')
@@ -191,8 +176,8 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
                         prev_value = kline_filled[col].loc[idx]
                         # 将标准输出重定向到文件
                         click.echo(f"{code}, {asset_name}: 在{col}列 {idx.strftime('%Y-%m-%d')}行 填充了 {prev_value}", file=f)
-        time2 = t.time()
-        click.echo(f", {code}, {asset_name}; 获取kline: {time1 - time0:.2f}s, proc:{time2 - time1:.2f}s")
+        # click.echo(f", {code}, {asset_name}; 获取kline: {time1 - time0:.2f}s, proc:{time2 - time1:.2f}s")
+        progress_bar.update(1)
         yield sid, kline_filled
 
 #def parse_api_split_merge_dividend(symbol_map, start_session, end_session):
@@ -355,4 +340,4 @@ else:   # run this script as extension.py
         #pd.Timestamp('1900-01-01', tz=tz),
         #pd.Timestamp('today', tz=tz)
         )
-    click.echo('交易日历, 数据parse函数已注册')
+    click.echo('已注册: 交易日历, 数据parse函数')
