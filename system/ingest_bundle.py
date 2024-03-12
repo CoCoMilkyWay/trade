@@ -164,7 +164,7 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
         first_traded = pytz.timezone(tz).localize(first_traded_no_tz, is_dst=None) # datetime: tz-naive to tz-aware
         start_date = max(start_session, first_traded).strftime('%Y-%m-%d')
         end_date = end_session.strftime('%Y-%m-%d')
-        click.echo(f", {code}, {asset_name}")
+        time0 = t.time()
         rs = api.query_history_k_data_plus(code,
             "date,open,high,low,close,volume",
             start_date=start_date, end_date=end_date,
@@ -172,6 +172,7 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
         if(rs.error_code!='0'):
             click.echo('query_history_k_data_plus respond error_code:'+rs.error_code)
             click.echo('query_history_k_data_plus respond  error_msg:'+rs.error_msg)
+        time1 = t.time()
         #### 打印结果集 ####
         data_list = []
         while (rs.error_code == '0') & rs.next():
@@ -190,9 +191,8 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
 
         # 有可能由于bug/公司资产重组等原因，造成缺失日线数据/暂时停牌的问题（zipline会报错，对不上calendar）
         # 检查是否存在数据缺失 (有乱序风险)
-        asset_trade_days = [dt for dt in trade_days if dt > first_traded_no_tz]
-        missing_tradedays = set(pd.to_datetime(asset_trade_days)) - set(kline.index)
-        print(missing_tradedays)
+        asset_trade_days = [dt for dt in trade_days if dt > first_traded]
+        missing_tradedays = set(asset_trade_days) - set(kline.index.tolist())
         for missing_tradeday in missing_tradedays:
             kline.loc[missing_tradeday] = np.nan
         kline = kline.sort_index(axis=0)
@@ -208,6 +208,8 @@ def parse_api_kline_d1(symbol_map, start_session, end_session):
                         prev_value = kline_filled[col].loc[idx]
                         # 将标准输出重定向到文件
                         click.echo(f"{code}, {asset_name}: 在{col}列 {idx.strftime('%Y-%m-%d')}行 填充了 {prev_value}", file=f)
+        time2 = t.time()
+        click.echo(f", {code}, {asset_name}; 获取kline: {time1 - time0:.2f}s, proc:{time2 - time1:.2f}s")
         yield sid, kline_filled
 
 #def parse_api_split_merge_dividend(symbol_map, start_session, end_session):
@@ -270,6 +272,7 @@ def parse_api_tradedate():
         # 获取一条记录，将记录合并在一起
         row_data = rs.get_row_data()
         date = datetime.strptime(row_data[0], '%Y-%m-%d')
+        date = pytz.timezone(tz).localize(date, is_dst=None) # datetime: tz-naive to tz-aware
         if(row_data[1]=='1'): # 'is_trading_day'
             trade_days.append(date) # 'calendar_date'
             if date.weekday() >= 5: # Saturday=5, Sunday=6
@@ -321,7 +324,7 @@ else:   # run this script as extension.py
         # performance profiling
         import subprocess
         PID = subprocess.check_output("pgrep 'zipline'", shell=True).decode('utf-8')
-        process = subprocess.Popen(f'sudo py-spy record -o /home/chuyin/work/trade/profile.svg --pid {PID}', stdin=subprocess.PIPE, shell=True)
+        process = subprocess.Popen(f'sudo py-spy record -o /home/chuyin/trade/profile.svg --pid {PID}', stdin=subprocess.PIPE, shell=True)
         process.stdin.write('bj721006'.encode())
         process.stdin.flush()
 
@@ -361,6 +364,7 @@ else:   # run this script as extension.py
         #pd.Timestamp('1900-01-01', tz=tz),
         #pd.Timestamp('today', tz=tz)
         )
+    click.echo('calendar, data-bundle registered')
 
 '''
 https://github.com/rainx/cn_stock_holidays/tree/main
