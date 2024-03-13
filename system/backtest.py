@@ -18,36 +18,39 @@ import pypfopt
 from zipline.finance import commission, slippage
 from zipline.pipeline import *
 from zipline.pipeline.factors import *
-from zipline.api import (attach_pipeline, 
-                         date_rules, 
-                         time_rules,
-                         get_datetime,
-                         order_target_percent,
-                         pipeline_output, 
-                         record, 
-                         schedule_function, 
-                         get_open_orders, 
-                         calendars,
-                         set_commission, 
-                         set_slippage)
+from zipline.api import (
+    attach_pipeline, 
+    date_rules, 
+    time_rules,
+    get_datetime,
+    order_target_percent,
+    pipeline_output, 
+    record, 
+    schedule_function, 
+    get_open_orders, 
+    calendars,
+    set_commission, 
+    set_slippage)
 from alphalens.utils import get_clean_factor_and_forward_returns
 from alphalens.performance import *
 from alphalens.plotting import *
 from pyfolio.utils import extract_rets_pos_txn_from_zipline
-from pyfolio.plotting import (plot_perf_stats,
-                              show_perf_stats,
-                              plot_rolling_beta,
-                              plot_rolling_returns,
-                              plot_rolling_sharpe,
-                              plot_drawdown_periods,
-                              plot_drawdown_underwater)
+from pyfolio.plotting import (
+    plot_perf_stats,
+    show_perf_stats,
+    plot_rolling_beta,
+    plot_rolling_returns,
+    plot_rolling_sharpe,
+    plot_drawdown_periods,
+    plot_drawdown_underwater)
 from pypfopt.efficient_frontier import EfficientFrontier
 from pypfopt import risk_models, objective_functions
 from pypfopt import expected_returns
 from pypfopt.exceptions import OptimizationError
 import sys
-from logbook import (NestedSetup, NullHandler, Logger, StreamHandler, StderrHandler, 
-                     INFO, WARNING, DEBUG, ERROR)
+from logbook import (
+    NestedSetup, NullHandler, Logger, StreamHandler, StderrHandler, 
+    INFO, WARNING, DEBUG, ERROR)
 from datetime import datetime, timezone
 from pathlib import Path
 warnings.filterwarnings('ignore')
@@ -63,6 +66,8 @@ end = pd.Timestamp('2017-1-1')
 # in/out sample partition
 oos = end - pd.Timedelta('90D') # out-of-sample datetime
 analyze_factor = True; analyze_portfolio = True
+data_bundle_name = 'A_stock' #'quandl'
+
 
 # recent historical_return (normalized by stdev)
 MONTH = 21 # number of market opening days in a month
@@ -83,7 +88,7 @@ strategy_type = 'eq_weight'
 '''
 optimize_type = 'max_sharpe'
 '''
-       historic price/proprietary model 
+        historic price/proprietary model 
     -> expected return/risk model(covariance) 
     -> optimizer(objective:max (weighted)sharpe/min variance/... + constraints)
         Efficient Frontier
@@ -94,29 +99,31 @@ optimize_type = 'max_sharpe'
         Hierarchical Risk Parity(clustering algorithms choose uncorrelated assets)
         Markowitz's critical line algorithm (CLA)
     -> diversified/weight-optimized portfolio
- 
+
     'None':                 None
     'max_sharpe':           M.V.F.
     'max_weighted_sharpe':  M.V.F.
     'min_variance':         M.V.F.
 '''
 #====================================================================
-prefix = f'{strategy_type}_{sys.argv[1]}' # for backtest data storage
+factor_name = 'Factor0_Random' # sys.argv[1]
+prefix = f'{strategy_type}_{factor_name}' # for backtest data storage
 HDF_PATH = Path('results/backtests.h5')
 # python script argument parse (pick the right factor)===============
 import importlib
 module_factor = importlib.import_module('factors')
-class_factor = getattr(module_factor, sys.argv[1])
+class_factor = getattr(module_factor, factor_name)
 instance_factor = class_factor()
 
 simulation_time = pd.DataFrame(
-    data=np.array([start.to_datetime64(), 
-                   end.to_datetime64()]),
+    data=np.array(
+        [start.to_datetime64(), 
+        end.to_datetime64()]),
     index=['start', 'end'])
 
 analysis_factor = False; analysis_portfolio = False
 
-print("factor analysis begin: ", sys.argv[1], datetime.now())
+print("factor analysis begin: ", factor_name, datetime.now())
 print("analysis factor/portfolio: ", f'{analyze_factor}/{analyze_portfolio}')
 print("long-short/group neutral: ", f'{long_short_neutral}/{group_neutral}')
 print("strategy: ", f'{strategy_type}', "optimize: ", f'{optimize_type}')
@@ -124,9 +131,10 @@ print("simulation_time: ", simulation_time)
 
 # setup stdout logging===============================================
 format_string = '[{record.time: %H:%M:%S.%f}]: {record.level_name}: {record.message}'
-zipline_logging = NestedSetup([NullHandler(level=DEBUG),
-                               StreamHandler(sys.stdout, format_string=format_string, level=INFO),
-                               StreamHandler(sys.stderr, level=ERROR)])
+zipline_logging = NestedSetup([
+    NullHandler(level=DEBUG),
+    StreamHandler(sys.stdout, format_string=format_string, level=INFO),
+    StreamHandler(sys.stderr, level=ERROR)])
 zipline_logging.push_application()
 log = Logger('Algorithm')
 
@@ -136,13 +144,14 @@ def compute_factors0():
         rank assets using results
         further filter assets"""
     results = instance_factor
-    filter = AverageDollarVolume(window_length=30)
+    asset_filter = AverageDollarVolume(window_length=30)
     #eq_weight
     strategy_type = 'eq_weight' # global
-    return Pipeline(columns={'longs': results.bottom(N_LONGS),
-                             'shorts': results.top(N_SHORTS),
-                             'ranking': results.rank(ascending=False)},
-                    screen=filter.top(VOL_SCREEN))
+    return Pipeline(columns={
+        'longs': results.bottom(N_LONGS),
+        'shorts': results.top(N_SHORTS),
+        'ranking': results.rank(ascending=False)},
+                    screen=asset_filter.top(VOL_SCREEN))
 
 ## rebalance: order, optimize 
 ## (use: 1.daily pipeline results
@@ -161,10 +170,11 @@ def optimize_weights(prices, short=False):
     cov = risk_models.sample_cov(prices=prices, frequency=252)
 
     # get weights that maximize the Sharpe ratio
-    ef = EfficientFrontier(expected_returns=returns,
-                           cov_matrix=cov,
-                           weight_bounds=(0, 1),
-                           solver='SCS')
+    ef = EfficientFrontier(
+        expected_returns=returns,
+        cov_matrix=cov,
+        weight_bounds=(0, 1),
+        solver='SCS')
     ef.max_sharpe()
     if short:
         return {asset: -weight for asset, weight in ef.clean_weights().items()}
@@ -180,14 +190,15 @@ def rebalance(context, data):
     shorts = assets[factor_data.shorts]
     divest = set(context.portfolio.positions.keys()) - set(longs.union(shorts)) #lower invest, but still hold
 
-    if strategy_type=='eq_weight':
+    if strategy_type == 'eq_weight':
         exec_trades(data, assets=longs, target_percent=1 / N_LONGS)
         exec_trades(data, assets=shorts, target_percent=-1 / N_SHORTS)
-    elif strategy_type=='optimize_weight':
+    elif strategy_type == 'optimize_weight':
         # get price history
-        prices = data.history(assets, fields='price',
-                              bar_count=252+1, # for 1 year of returns 
-                              frequency='1d')
+        prices = data.history(
+            assets, fields='price',
+            bar_count=252+1, # for 1 year of returns 
+            frequency='1d')
 
         # get optimal weights if sufficient candidates
         if len(longs) > MIN_POS and len(shorts) > MIN_POS:
@@ -197,7 +208,7 @@ def rebalance(context, data):
                 exec_trades(data, assets=longs, target_percent=long_weights)
                 exec_trades(data, assets=shorts, target_percent=short_weights)
             except Exception as e: # optimize_weights function error
-                log.warn('{} {}'.format(get_datetime().date(), e))
+                log.warn(f'{get_datetime().date()} {e}')
     log.info('{} | Longs: {:2.0f} | Shorts: {:2.0f} | {:,.2f}'.format(
         get_datetime(),
         len(longs), 
@@ -215,14 +226,17 @@ def initialize(context):
     """Setup: register pipeline, schedule rebalancing,
         and set trading params"""
     attach_pipeline(compute_factors0(), 'pipeline_1')
-    schedule_function(rebalance,
-                      date_rules.week_start(),
-                      time_rules.market_open(),
-                      calendar=calendars.US_EQUITIES)
-    context.set_commission(us_equities=commission.PerShare(cost=0.00075, 
-                                                           min_trade_cost=.01))
-    context.set_slippage(us_equities=slippage.VolumeShareSlippage(volume_limit=0.0025,
-                                                                  price_impact=0.01))
+    schedule_function(
+        rebalance,
+        date_rules.week_start(),
+        time_rules.market_open(),
+        calendar=calendars.US_EQUITIES)
+    context.set_commission(us_equities=commission.PerShare(
+        cost=0.00075, 
+        min_trade_cost=.01))
+    context.set_slippage(us_equities=slippage.VolumeShareSlippage(
+        volume_limit=0.0025,
+        price_impact=0.01))
 
 ## inter-day routine
 ## pipeline 1: compute factors (update to context)
@@ -250,12 +264,13 @@ try:
     start_stored = datetime_check.at['start', 0]
     end_stored = datetime_check.loc['end', 0]
     data_integrity = True #TODO
-    use_storage_data = start_stored <= start and end <= end_stored and data_integrity==True
+    use_storage_data = (
+        start_stored <= start and end <= end_stored and data_integrity
+    )
 except Exception as e:
     use_storage_data = False
-    pass
 print('use_storage_data: ', use_storage_data)
-if use_storage_data == True:
+if use_storage_data:
     analysis_factor = analyze_factor; analysis_portfolio = analyze_portfolio
     # perf_result = store[f'backtest_meta/{prefix}'] # simulation results
     factors = pd.read_hdf(HDF_PATH, f'factors/{prefix}').tz_localize('UTC', level=0) # complex data type loss tz info
@@ -268,15 +283,15 @@ if use_storage_data == True:
 '''
 before use data(e.g. quandl)
 由于股票的几种行为，股价不连续
-      除权(降低股价增加流动性),
-      除息(不影响公司正常运行的情况下，短期无用(甚至手续费)，长期降低股东持股成本)
-      盘前盘后交易,集合竞价(higher slippage):
-          提高流动性(吸引其他市场投资者）
-          缓解突发消息带来的交易系统流动性负担
+    除权(降低股价增加流动性),
+    除息(不影响公司正常运行的情况下，短期无用(甚至手续费)，长期降低股东持股成本)
+    盘前盘后交易,集合竞价(higher slippage):
+        提高流动性(吸引其他市场投资者）
+        缓解突发消息带来的交易系统流动性负担
 前复权：以除权除息后股价为基准(收益率直观显示买入/持仓成本,和当前股价match)
 后复权：以除权除息前股价为基准(收益率更接近实际收益率，量化回测用(无未来信息))
 '''
-if use_storage_data == False:
+if not use_storage_data:
     perf_result = zipline.run_algorithm(
         start=start.tz_localize('UTC'),
         end=end.tz_localize('UTC'),
@@ -286,7 +301,7 @@ if use_storage_data == False:
         analyze=analyze,
         capital_base=capital_base,
         benchmark_returns=benchmark_returns,
-        bundle='quandl',
+        bundle=data_bundle_name,
         data_frequency='daily'
     )
 
@@ -304,12 +319,13 @@ Outliers                              winsorization/ cut-off
 The asymmetric payoff/shorting        option/future(stock index)
 asset to sector dictionary
 '''
-asset_sector_mapping = pd.read_csv('../machine-learning-for-trading/data/us_equities_meta_data.csv',
-                                   header=0,
-                                   usecols=["ticker", "sector"],
-                                   delimiter=','
-                                   ).set_index('ticker')['sector'].to_dict()
-if use_storage_data == False:
+asset_sector_mapping = pd.read_csv(
+    '../machine-learning-for-trading/data/us_equities_meta_data.csv',
+    header=0,
+    usecols=["ticker", "sector"],
+    delimiter=','
+    ).set_index('ticker')['sector'].to_dict()
+if not use_storage_data:
     # wash zipline dumped data to:======================
     #   dataframe:(date,asset)x(factor1,factor2): factor_values
     #   dataframe:(date)x(asset_names): price_values
@@ -346,7 +362,7 @@ factor_data = get_clean_factor_and_forward_returns(
     zero_aware=False, # your signal is centered and zero is the separation between long and short signals
     cumulative_returns=True
     )
-if use_storage_data == False:
+if not use_storage_data:
     # [(datetime):daily_return, (datetime * assets):holdings(percentage/dollar), (datetime):factor_universe_mean_daily_returns]
     pf_returns, pf_positions, pf_benchmark = \
     create_pyfolio_input(
@@ -433,8 +449,8 @@ if use_storage_data == False:
 
 factor analysis options:
     long-short (you want dollar neutral against beta exposure): factor value is relative(not absolute), 
-          it only suggest one asset is better, not necessarily related to returns useful for most strategies
-          (e.g. Beta hedging, Long-Short Equity strategies), disable in few (e.g. long only strategy)
+        it only suggest one asset is better, not necessarily related to returns useful for most strategies
+        (e.g. Beta hedging, Long-Short Equity strategies), disable in few (e.g. long only strategy)
     group-neutral (you want group neutral against sector exposure)
 
 4. portfolio analysis: (as strategy)
@@ -462,8 +478,8 @@ factor analysis options:
         (quantopian only)
 
 risk models: 
-      sector exposures to each sector:
-      style exposures to size, value, quality, momentum, and volatility (betas)
+    sector exposures to each sector:
+    style exposures to size, value, quality, momentum, and volatility (betas)
 tutorial: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/alphalens_tutorial_on_quantopian.ipynb
 factor metrics: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/predictive_vs_non-predictive_factor.ipynb
 '''
@@ -477,7 +493,7 @@ print('   pf_positions: ',    pf_positions.shape)#index                    )
 print('pf_transactions: ', pf_transactions.shape)#index                    )
 print('   pf_benchmark: ',    pf_benchmark.shape)#index                    )
 
-pf_positions.columns = [c for c in pf_positions.columns[:-1]] + ['cash']
+pf_positions.columns = list(pf_positions.columns[:-1]) + ['cash']
 pf_positions.index = pf_positions.index.normalize()
 
 if(analysis_factor):
@@ -527,13 +543,14 @@ if(analysis_portfolio):
                     transactions=pf_transactions, 
                     live_start_date=oos)
     fig, ax_rolling = plt.subplots(figsize=(15, 8))
-    plot_rolling_returns(returns=pf_returns, 
-                         factor_returns=pf_benchmark, 
-                         live_start_date=oos, 
-                         cone_std=(1.0, 1.5, 2.0),
-                         ax=ax_rolling)
+    plot_rolling_returns(
+        returns=pf_returns, 
+        factor_returns=pf_benchmark, 
+        live_start_date=oos, 
+        cone_std=(1.0, 1.5, 2.0),
+        ax=ax_rolling)
     plt.gcf().set_size_inches(14, 8)
-if use_storage_data == False:
+if not use_storage_data:
     with pd.HDFStore(HDF_PATH) as store: # use UTC because some packages would output UTC data anyways
         # store.put(f'backtest_meta/{prefix}', perf) # simulation results
         store.put(f'datetime/{prefix}',             simulation_time) # reuse database
@@ -552,19 +569,19 @@ fig = plt.figure()
 # basic
 ax1 = fig.add_subplot(311)
 perf[['algorithm_period_return',
-      #'benchmark_period_return',
-      'algo_volatility',
-      #'benchmark_volatility',
-      #'returns',
-      #'excess_return'
-      ]].plot(ax=ax1)
+    #'benchmark_period_return',
+    'algo_volatility',
+    #'benchmark_volatility',
+    #'returns',
+    #'excess_return'
+    ]].plot(ax=ax1)
 perf_trans = perf.loc[[t != [] for t in perf.transactions]]
 buys = perf_trans.loc[[t[0]['amount'] > 0 for t in perf_trans.transactions]]
 sells = perf_trans.loc[[t[0]['amount'] < 0 for t in perf_trans.transactions]]
 ax1.plot(buys.index, perf.algorithm_period_return.loc[buys.index],
-         '^', markersize=10, color='m')
+        '^', markersize=10, color='m')
 ax1.plot(sells.index, perf.algorithm_period_return.loc[sells.index],
-         'v', markersize=10, color='k')
+        'v', markersize=10, color='k')
 #ax1.legend(['Cumulative Return', 'Volatility', 'buys', 'sells'])
 ax2 = fig.add_subplot(312)
 # align x axis

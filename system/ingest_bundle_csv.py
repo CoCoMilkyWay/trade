@@ -12,24 +12,28 @@ from pandas.tseries.offsets import CustomBusinessDay
 import trading_calendars
 from zipline.data.bundles import register
 
-# 一边ingest，一边pull API的数据是很蠢的做法，请先准备好本地csv/sql (flow解耦)
+# 很蠢的做法: 一边ingest，一边pull API的数据，请先准备好本地csv/sql (flow解耦)
 # 假装 UTC 就是 Asia/Shanghai (简化计算)，所有datetime默认 tz-naive -> tz-aware
 tz = "UTC"
 bundle_name = 'A_stock'
 API='baostock'
 assets_list = [
-    '1沪A_不包括科创板',
-    '2深A_不包括创业板',
+    #'1沪A_不包括科创板',
+    #'2深A_不包括创业板',
     '3科创板',
-    '4创业板',
-    '5北A_新老三板',
+    #'4创业板',
+    #'5北A_新老三板',
     # '6上证股指期权',
     # '7深证股指期权',
 ]
+data_start = '1900-01-01'
+data_end = '2024-02-19'
 
-proj_path = '/root/work/trade/'
+proj_path = '/home/chuyin/trade/'
+# proj_path = '/root/work/trade/'
+password = True
 max_num_assets = 10000 # 只ingest前n个asset
-enable_profiling = True # 运行分析
+enable_profiling = False # 运行分析
 
 def ingest_bundle(
     environ,
@@ -139,7 +143,7 @@ def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session):
         first_traded = pytz.timezone(tz).localize(items[2]) # datetime.date type
         start_date = max(start_session, first_traded).strftime('%Y-%m-%d')
         end_date = end_session.strftime('%Y-%m-%d')
-        progress_bar.set_description(f'{symbol}, {asset_name}: ')
+        progress_bar.set_description(f'{symbol}, {asset_name} ')
         lines_to_skip = [0, 1, index_info[sid][1] - 1]
         lines = pd.read_csv(index_info[sid][0], encoding='gbk', sep='\s+', skiprows=lambda x: x in lines_to_skip, header=None)
         kline_raw = []
@@ -157,7 +161,6 @@ def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session):
         kline = pd.DataFrame(kline_raw, columns=['day','open','high','low','close','volume'])
         kline['day'] = pd.to_datetime(kline['day'], format='%Y-%m-%d', utc=True)
         kline.set_index('day',inplace=True, drop=True)#.sort_index()
-
         # 有可能由于bug/公司资产重组等原因，造成缺失日线数据/暂时停牌的问题（zipline会报错，对不上calendar）
         # 检查是否存在数据缺失 (有乱序风险)
         asset_trade_days = [dt for dt in trade_days if dt > first_traded]
@@ -165,19 +168,17 @@ def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session):
         for missing_tradeday in missing_tradedays:
             kline.loc[missing_tradeday] = np.nan
         kline = kline.sort_index(axis=0)
-
         # 使用前一个非空值填充 '' (无乱序风险)
         kline.replace('', np.nan, inplace=True)
         kline_filled = kline.fillna(method='ffill')
         # 打开文件以保存日志信息
         with open(log, 'a') as f: # append new log
-            for col in kline.columns:
-                for idx, value in kline[col].items():
-                    if pd.isna(value):
-                        prev_value = kline_filled[col].loc[idx]
-                        # 将标准输出重定向到文件
-                        click.echo(f"{symbol}, {asset_name}: 在{col}列 {idx.strftime('%Y-%m-%d')}行 填充了 {prev_value}", file=f)
-        # click.echo(f", {code}, {asset_name}; 获取kline: {time1 - time0:.2f}s, proc:{time2 - time1:.2f}s")
+            for idx, items in kline.iterrows():
+                NaN_column_list_for_this_row = items.index[items.isna()].tolist()
+                if(NaN_column_list_for_this_row != []):
+                    prev_values = kline_filled.loc[idx, NaN_column_list_for_this_row]
+                    # 将标准输出重定向到文件
+                    click.echo(f"{symbol}, {asset_name}: 在{NaN_column_list_for_this_row}列 {idx.strftime('%Y-%m-%d')}行 填充了 {prev_values.values}", file=f)
         progress_bar.update(1)
         yield sid, kline_filled
 
@@ -227,7 +228,9 @@ def get_exchange(code):    # xxxxxx
 
 def parse_api_tradedate():
     #### 获取交易日信息 ####
-    rs = api.query_trade_dates(start_date="1900-01-01")
+    rs = api.query_trade_dates(
+        start_date=data_start,
+        end_date=data_end)
     if(rs.error_code!='0'):
         click.echo('query_trade_dates respond error_code:'+rs.error_code)
         click.echo('query_trade_dates respond  error_msg:'+rs.error_msg)
@@ -271,7 +274,16 @@ def auth():
     return api
 
 
-# 国内市场主要包含 上海证券交易所、 深圳证券交易所、 香港证券交易所、 全国中小企业股份转让系统有限公司、 中国金融期货交易所、 上海商品期货交易所、 郑州商品期货交易所、 大连商品期货交易所等 
+# 国内市场主要包含: 
+# 上海证券交易所、 
+# 深圳证券交易所、 
+# 香港证券交易所、 
+# 全国中小企业股份转让系统有限公司、 
+# 中国金融期货交易所、 
+# 上海商品期货交易所、 
+# 郑州商品期货交易所、 
+# 大连商品期货交易所等 
+
 # 上交所盘前集合竞价时间
 call_auction_start = time(9, 15)	# 9：15
 call_auction_end = time(9, 25)		# 9：25
@@ -302,8 +314,9 @@ else:   # run this script as extension.py
         PID = subprocess.check_output("pgrep 'zipline'", shell=True).decode('utf-8')
         click.echo(f'Prof: ingest PID = {PID}')
         process = subprocess.Popen(f'sudo py-spy record -o {proj_path}system/profile.svg --pid {PID}', stdin=subprocess.PIPE, shell=True)
-        # process.stdin.write('bj721006'.encode())
-        # process.stdin.flush()
+        if password:
+            process.stdin.write('bj721006'.encode())
+            process.stdin.flush()
     
     # register calendar and data bundle
     api = auth()
@@ -335,10 +348,12 @@ else:   # run this script as extension.py
         force = True
     )
     register(
-        bundle_name,
-        ingest_bundle,
-        "股票白盘",
-        #pd.Timestamp('1900-01-01', tz=tz),
-        #pd.Timestamp('today', tz=tz)
+        name=bundle_name,
+        f=ingest_bundle,
+        calendar_name="股票白盘",
+        start_session=pd.Timestamp(data_start, tz=tz),
+        end_session=pd.Timestamp(data_end, tz=tz),
+        # minutes_per_day=390,
+        # create_writers=True
         )
     click.echo('已注册: 交易日历, 数据parse函数')
