@@ -227,6 +227,7 @@ def get_exchange(code):    # xxxxxx
     return exchg
 
 def parse_api_tradedate():
+    api = auth()
     #### 获取交易日信息 ####
     rs = api.query_trade_dates(
         start_date=data_start,
@@ -234,6 +235,22 @@ def parse_api_tradedate():
     if(rs.error_code!='0'):
         click.echo('query_trade_dates respond error_code:'+rs.error_code)
         click.echo('query_trade_dates respond  error_msg:'+rs.error_msg)
+    data = []
+    while (rs.error_code == '0') & rs.next():
+        # 获取一条记录，将记录合并在一起
+        row_data = rs.get_row_data()
+        data.append(row_data)
+    # Save array to CSV
+    np.savetxt('trade_dates.csv', data, delimiter=',')
+
+    # Load CSV back into array
+    loaded_arr = np.loadtxt('trade_dates.csv', delimiter=',')
+    
+    # Save array to CSV
+    np.savetxt('array.csv', arr, delimiter=',')
+
+    # Load CSV back into array
+    loaded_arr = np.loadtxt('array.csv', delimiter=',')
 
     #### 打印结果集 ####
     trade_days = []
@@ -319,8 +336,7 @@ else:   # run this script as extension.py
             process.stdin.flush()
     
     # register calendar and data bundle
-    api = auth()
-    trade_days, special_trade_days, special_holiday_days = parse_api_tradedate()
+    trade_days, special_trade_days, special_holiday_days = parse_csv_tradedate()
     class SHSZStockCalendar(trading_calendars.TradingCalendar):
         name = "股票白盘"
         tz = pytz.timezone(tz)
