@@ -8,5 +8,5 @@ __pycache__/
 *.h5
 
 # others
-logfile.txt
-profile.svg
+*/logfile.txt
+*/profile.svg
