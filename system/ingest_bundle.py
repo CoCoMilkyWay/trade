@@ -309,7 +309,7 @@ end_default = pd.Timestamp('today', tz=tz)
 if __name__ == '__main__': # register calendar and call zipline ingest
     with open(log, 'w'): pass          # clear log file
     os.system(f'rm -rf {bundle_path}') # clear data file
-    os.system(f'cp -rf {proj_path}system/ingest_bundle_csv.py {zipline_path}/extension.py')
+    os.system(f'cp -rf {proj_path}system/ingest_bundle.py {zipline_path}/extension.py')
     os.system(f'zipline ingest -b {bundle_name}')
     
 else:   # run this script as extension.py
