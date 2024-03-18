@@ -35,6 +35,14 @@ password = True
 max_num_assets = 10000 # 只ingest前n个asset
 enable_profiling = False # 运行分析
 
+from zipline.utils.run_algo import load_extensions # for zipline to work
+load_extensions(
+    default=True,
+    extensions=[],
+    strict=True,
+    environ=os.environ,
+)
+
 def ingest_bundle(
     environ,
     asset_db_writer,
@@ -50,11 +58,17 @@ def ingest_bundle(
     '''this script would automatically run by zipline, as extension.py'''
     metadata, index_info = parse_csv_metadata() # index_info = [asset_csv_path, num_lines]
     symbol_map = metadata.loc[:,['symbol','asset_name','first_traded']]
-    parse_api_split_merge_dividend(symbol_map,)
-    # print(metadata.iloc[:,:3])
+    print(metadata.iloc[:,:3].head(2))
+    
     # 写入股票基础信息
     #TODO 
     asset_db_writer.write(metadata)
+    
+    # split:除权, merge:填权, dividend:除息
+    # 用了后复权数据，不需要adjast factor
+    # adjustment_writer.write(
+    #     splits=parse_csv_split_merge_dividend(symbol_map, start_session, end_session)
+    # )
     
     # 准备写入 dailybar/minutebar(lazzy iterable)
     # ('day'/'min') * ('open','high','low','close','volume')
@@ -64,13 +78,6 @@ def ingest_bundle(
         show_progress=show_progress,
         invalid_data_behavior = 'raise' #{'warn', 'raise', 'ignore'}
     )
-    
-    # split:除权, merge:填权, dividend:除息
-    # 用了后复权数据，不需要adjast factor
-    #adjustment_writer.write(
-    #    splits=pd.concat(splits, ignore_index=True),
-    #    dividends=pd.concat(dividends, ignore_index=True),
-    #)
     
 csv_path = f'{proj_path}data/'
 if not os.getenv('ZIPLINE_ROOT'):
@@ -183,28 +190,31 @@ def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session):
         progress_bar.update(1)
         yield sid, kline_filled
 
-def parse_api_split_merge_dividend(symbol_map, start_session, end_session):
+def parse_csv_split_merge_dividend(symbol_map, start_session, end_session):
     '''
     apply to all data before effective date:
         split: OCHL multiply, volume divide
         merge: OCHL multiply, volume unaffected
         dividend(cash/stock): specify date, calculate on the fly
     '''
-    api = auth()
-    data_list = []
-    for sid, items in symbol_map.iterrows():
-        symbol = items[0]
-        asset_name = items[1]
-        first_traded = pytz.timezone(tz).localize(items[2]) # datetime.date type
-        # 查询每年每股除权除息信息
-        rs = api.query_dividend_data(code=asset_name, year="2017", yearType="operate")
-        while (rs.error_code == '0') & rs.next():
-            data_row = rs.get_row_data()
-            data_list.append([
-                sid,         # list 编号
-                data_row[6], # 除权除息日期 dividOperateDate 
-            ])
-    return pd.DataFrame(data_list, columns=data_list.fields)
+    #api = auth()
+    #data_list = []
+    #for sid, items in symbol_map.iterrows():
+    #    symbol = items[0]
+    #    asset_name = items[1]
+    #    first_traded = pytz.timezone(tz).localize(items[2]) # datetime.date type
+    #    # 查询每年每股除权除息信息
+    #    rs = api.query_dividend_data(code=asset_name, year="2017", yearType="operate")
+    #    while (rs.error_code == '0') & rs.next():
+    #        data_row = rs.get_row_data()
+    #        data_list.append([
+    #            sid,         # list 编号
+    #            data_row[6], # 除权除息日期 dividOperateDate 
+    #        ])
+    #return pd.DataFrame(data_list, columns=data_list.fields)
+    df = pd.DataFrame([[end_session, 1.00, 1]], columns=['effective_date', 'ratio', 'sid'])
+    print(df)
+    return df
 
 def get_exchange(code):    # xxxxxx
     '''
@@ -320,8 +330,8 @@ end_default = pd.Timestamp('today', tz=tz)
 if __name__ == '__main__': # register calendar and call zipline ingest
     with open(log, 'w'): pass          # clear log file
     os.system(f'rm -rf {bundle_path}') # clear data file
-    os.system(f'cp -rf {proj_path}system/ingest_bundle.py {zipline_path}/extension.py')
-    os.system(f'zipline ingest -b {bundle_name}')
+    #os.system(f'cp -rf {proj_path}system/ingest_bundle.py {zipline_path}/extension.py')
+    os.system(f'zipline -e {proj_path}system/ingest_bundle.py ingest -b {bundle_name} ')
     
 else:   # run this script as extension.py
     if enable_profiling:

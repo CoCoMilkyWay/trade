@@ -10,3 +10,12 @@ __pycache__/
 # others
 */logfile.txt
 */profile.svg
+
+# alphas/
+# data_bfq/
+# index/
+# __pycache__/
+# *.csv
+# test*
+# analysis/
+# alphas_*
