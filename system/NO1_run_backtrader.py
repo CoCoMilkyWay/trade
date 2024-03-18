@@ -114,17 +114,16 @@ def runstrat():
     cerebro = bt.Cerebro()
 
     # data-feeds
+    sid = 99
     start_session = pytz.timezone(tz).localize(datetime.strptime(data_start, '%Y-%m-%d'))
     end_session = pytz.timezone(tz).localize(datetime.strptime(data_end, '%Y-%m-%d'))
     trade_days, special_trade_days, special_holiday_days = parse_csv_tradedate()
     metadata, index_info = parse_csv_metadata() # index_info = [asset_csv_path, num_lines]
     symbol_map = metadata.loc[:,['symbol','asset_name','first_traded']]
-    print(metadata.iloc[:,:3].tail(1))
+    print(metadata.iloc[sid,:3])
     # split:除权, merge:填权, dividend:除息
     # 用了后复权数据，不需要adjast factor
     # parse_csv_split_merge_dividend(symbol_map, start_session, end_session)
-    
-    sid = 10
     # (Date) * (Open, High, Low, Close, Volume, OpenInterest)
     kline = parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sid)
 

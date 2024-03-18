@@ -96,8 +96,6 @@ def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, targe
         symbol = items[0]
         asset_name = items[1]
         first_traded = pytz.timezone(tz).localize(items[2]) # datetime.date type
-        print(start_session)
-        print(first_traded)
         start_date = max(start_session, first_traded).strftime('%Y-%m-%d')
         end_date = end_session.strftime('%Y-%m-%d')
         progress_bar.set_description(f'{symbol}, {asset_name} ')
