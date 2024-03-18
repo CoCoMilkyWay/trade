@@ -1,14 +1,22 @@
+# run 'pip install ~/work/trade/backtrader' to update locally-modified package
+
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-
 import argparse
-import sys
 
 import backtrader as bt
-import backtrader.feeds as btfeeds
 import backtrader.indicators as btind
-import backtrader.utils.flushfile
+import numpy as np
+import pandas as pd
+import pytz
+from datetime import datetime
 
+from NO2_csv_data_parse import parse_csv_tradedate, parse_csv_metadata, parse_csv_kline_d1
+
+# 假装 UTC 就是 Asia/Shanghai (简化计算)，所有datetime默认 tz-naive -> tz-aware
+tz = "UTC"
+data_start = '1900-01-01'
+data_end = datetime.now().strftime('%Y-%m-%d')
 
 class TestInd(bt.Indicator):
     lines = ('a', 'b')
@@ -18,10 +26,10 @@ class TestInd(bt.Indicator):
         self.lines.b = btind.SMA(b, period=20)
 
 
-class St(bt.Strategy):
+class Strategy(bt.Strategy):
     params = (
-        ('datalines', False),
-        ('lendetails', False),
+        ('datalines', False),  # Print data lines
+        ('lendetails', False), # Print individual items memory usage
     )
 
     def __init__(self):
@@ -34,11 +42,11 @@ class St(bt.Strategy):
 
     def next(self):
         if self.p.datalines:
-            txt = ','.join(
-                ['%04d' % len(self),
-                 '%04d' % len(self.data0),
-                 self.data.datetime.date(0).isoformat()]
-            )
+            txt = ','.join([
+                '%04d' % len(self),
+                '%04d' % len(self.data0),
+                self.data.datetime.date(0).isoformat()
+            ])
 
             print(txt)
 
@@ -47,7 +55,7 @@ class St(bt.Strategy):
             print(msg)
 
     def stop(self):
-        super(St, self).stop()
+        super(Strategy, self).stop()
 
         tlen = 0
         self.loglendetails('-- Evaluating Datas')
@@ -66,6 +74,7 @@ class St(bt.Strategy):
             tlen += self.rindicator(ind, i, 0)
 
         self.loglendetails('-- Evaluating Observers')
+        logtxt = '---- Observer {} Total Cells {} - Cells per Line {}'
         for i, obs in enumerate(self.getobservers()):
             tobs = 0
             for line in obs.lines:
@@ -73,10 +82,9 @@ class St(bt.Strategy):
                 tline = len(line.array)
 
             tlen += tdata
-            logtxt = '---- Observer {} Total Cells {} - Cells per Line {}'
             self.loglendetails(logtxt.format(i, tobs, tline))
 
-        print('Total memory cells used: {}'.format(tlen))
+        print(f'Total memory cells used: {tlen}')
 
     def rindicator(self, ind, i, deep):
         tind = 0
@@ -86,10 +94,10 @@ class St(bt.Strategy):
 
         thisind = tind
 
-        tsub = 0
-        for j, sind in enumerate(ind.getindicators()):
-            tsub += self.rindicator(sind, j, deep + 1)
-
+        tsub = sum(
+            self.rindicator(sind, j, deep + 1)
+            for j, sind in enumerate(ind.getindicators())
+        )
         iname = ind.__class__.__name__.split('.')[-1]
 
         logtxt = '---- Indicator {}.{} {} Total Cells {} - Cells per line {}'
@@ -104,36 +112,38 @@ def runstrat():
     args = parse_args()
 
     cerebro = bt.Cerebro()
-    data = btfeeds.YahooFinanceCSVData(dataname=args.data)
-    cerebro.adddata(data)
-    cerebro.addstrategy(
-        St, datalines=args.datalines, lendetails=args.lendetails)
 
-    cerebro.run(runonce=False, exactbars=args.save)
-    if args.plot:
-        cerebro.plot(style='bar')
+    # data-feeds
+    start_session = pytz.timezone(tz).localize(datetime.strptime(data_start, '%Y-%m-%d'))
+    end_session = pytz.timezone(tz).localize(datetime.strptime(data_end, '%Y-%m-%d'))
+    trade_days, special_trade_days, special_holiday_days = parse_csv_tradedate()
+    metadata, index_info = parse_csv_metadata() # index_info = [asset_csv_path, num_lines]
+    symbol_map = metadata.loc[:,['symbol','asset_name','first_traded']]
+    print(metadata.iloc[:,:3].tail(1))
+    # split:除权, merge:填权, dividend:除息
+    # 用了后复权数据，不需要adjast factor
+    # parse_csv_split_merge_dividend(symbol_map, start_session, end_session)
+    
+    sid = 10
+    # (Date) * (Open, High, Low, Close, Volume, OpenInterest)
+    kline = parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sid)
+
+    data = bt.feeds.PandasData(dataname=kline)
+
+    cerebro.adddata(data)
+    cerebro.addstrategy(Strategy)
+
+    cerebro.run(runonce=False, exactbars=0) # mem_save: [1, 0, -1, -2]
+    cerebro.plot(style='bar')
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='Check Memory Savings')
-
-    parser.add_argument('--data', required=False,
-                        default='./datas/yhoo-1996-2015.txt',
-                        help='Data to be read in')
-
-    parser.add_argument('--save', required=False, type=int, default=0,
-                        help=('Memory saving level [1, 0, -1, -2]'))
-
-    parser.add_argument('--datalines', required=False, action='store_true',
-                        help=('Print data lines'))
-
-    parser.add_argument('--lendetails', required=False, action='store_true',
-                        help=('Print individual items memory usage'))
-
-    parser.add_argument('--plot', required=False, action='store_true',
-                        help=('Plot the result'))
+    # args.plot
+    # parser.add_argument('--plot', required=False, action='store_true',
+    #                     help=('Plot the result'))
 
     return parser.parse_args()
 

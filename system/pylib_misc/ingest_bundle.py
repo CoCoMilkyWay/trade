@@ -244,7 +244,7 @@ def get_exchange(code):    # xxxxxx
                         # OC(over-the-counter market) -> NQ(2021场内改革)
     else:
         exchg = "???"
-        click.echo(f"Err: 不识别的股票代码：{index}")
+        click.echo(f"Err: 不识别的股票代码：{code}")
     return exchg
 
 def parse_csv_tradedate():
