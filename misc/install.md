@@ -15,6 +15,9 @@ env | grep -i proxy
 cd /home/work/trade
 export DISPLAY=$(ip route list default | awk '{print $3}'):0
 export QUANDL_API_KEY="9Q5bVWxqJE-94HKpntUg"
+alias up_bt="pip install ~/work/trade/backtrader"
+alias up_wt="pip install ~/work/trade/wondertrader"
+
 # code .
 
 # APT(ubuntu) proxy
