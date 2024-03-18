@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import pandas_datareader.data as web
 # regular expression
+import os
 import re
 import zipline
 import alphalens
@@ -67,7 +68,7 @@ end = pd.Timestamp('2017-1-1')
 oos = end - pd.Timedelta('90D') # out-of-sample datetime
 analyze_factor = True; analyze_portfolio = True
 data_bundle_name = 'A_stock' #'quandl'
-
+calendar_name = '股票白盘' 
 
 # recent historical_return (normalized by stdev)
 MONTH = 21 # number of market opening days in a month
@@ -280,18 +281,46 @@ if use_storage_data:
     pf_transactions = pd.read_hdf(HDF_PATH, f'pf_transactions_meta/{prefix}')
     pf_benchmark = pd.read_hdf(HDF_PATH, f'pf_benchmark/{prefix}')
 
-'''
-before use data(e.g. quandl)
-由于股票的几种行为，股价不连续
-    除权(降低股价增加流动性),
-    除息(不影响公司正常运行的情况下，短期无用(甚至手续费)，长期降低股东持股成本)
-    盘前盘后交易,集合竞价(higher slippage):
-        提高流动性(吸引其他市场投资者）
-        缓解突发消息带来的交易系统流动性负担
-前复权：以除权除息后股价为基准(收益率直观显示买入/持仓成本,和当前股价match)
-后复权：以除权除息前股价为基准(收益率更接近实际收益率，量化回测用(无未来信息))
-'''
 if not use_storage_data:
+    '''
+    MM定理(莫迪利安尼-米勒定理(股利政策无关论)): 在'无税收的完美市场'上，分红确实是毫无意义的
+    before use data(e.g. quandl)
+    由于股票的几种行为，股价不连续
+        除权(split/merge) (e.g. 送转分红; tax usually not apply; 降低股价增加流动性,danshi shi shizhixing lihao),
+        除息(dividend)    (e.g. 现金分红; tax apply;     不影响公司正常运行的情况下，短期无用(甚至手续费)，长期降低股东持股成本)
+        apply to all data before effective date:
+            split: OCHL multiply, volume divide
+            merge: OCHL multiply, volume unaffected
+            dividend(cash/stock): specify date, calculate on the fly
+        回购注销 better than 现金分红
+        
+        盘前盘后交易,集合竞价(higher slippage):
+            提高流动性(吸引其他市场投资者）
+            缓解突发消息带来的交易系统流动性负担
+    前复权：以除权除息后股价为基准(收益率直观显示买入/持仓成本,和当前股价match)
+    后复权：以除权除息前股价为基准(收益率更接近实际收益率，量化回测用(无未来信息))
+    '''
+    # register data bundle and calendar
+    from zipline.data.bundles import register
+    import trading_calendars
+    from ingest_bundle import SHSZStockCalendar, ingest_bundle
+
+    trading_calendars.register_calendar(
+        calendar_name,
+        SHSZStockCalendar(),
+        force = True
+    )
+    register(
+        name=data_bundle_name,
+        f=ingest_bundle,
+        calendar_name=calendar_name,
+        start_session=start,
+        end_session=end,
+        # minutes_per_day=390,
+        # create_writers=True
+        )
+
+    # call zipline routine
     perf_result = zipline.run_algorithm(
         start=start.tz_localize('UTC'),
         end=end.tz_localize('UTC'),

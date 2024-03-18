@@ -50,6 +50,7 @@ def ingest_bundle(
     '''this script would automatically run by zipline, as extension.py'''
     metadata, index_info = parse_csv_metadata() # index_info = [asset_csv_path, num_lines]
     symbol_map = metadata.loc[:,['symbol','asset_name','first_traded']]
+    parse_api_split_merge_dividend(symbol_map,)
     # print(metadata.iloc[:,:3])
     # 写入股票基础信息
     #TODO 
@@ -182,18 +183,28 @@ def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session):
         progress_bar.update(1)
         yield sid, kline_filled
 
-#def parse_api_split_merge_dividend(symbol_map, start_session, end_session):
-#    data_list = []
-#    for sid, code, first_traded in symbol_map.iteritems():
-#        # 查询每年每股除权除息信息
-#        rs = api.query_dividend_data(code=code, year="2017", yearType="operate")
-#        while (rs.error_code == '0') & rs.next():
-#            data_row = rs.get_row_data()
-#            data_list.append([
-#                sid,         # list 编号
-#                data_row[6], # 除权除息日期 dividOperateDate 
-#            ])
-#        return pd.DataFrame(data_list, columns=data_list.fields)
+def parse_api_split_merge_dividend(symbol_map, start_session, end_session):
+    '''
+    apply to all data before effective date:
+        split: OCHL multiply, volume divide
+        merge: OCHL multiply, volume unaffected
+        dividend(cash/stock): specify date, calculate on the fly
+    '''
+    api = auth()
+    data_list = []
+    for sid, items in symbol_map.iterrows():
+        symbol = items[0]
+        asset_name = items[1]
+        first_traded = pytz.timezone(tz).localize(items[2]) # datetime.date type
+        # 查询每年每股除权除息信息
+        rs = api.query_dividend_data(code=asset_name, year="2017", yearType="operate")
+        while (rs.error_code == '0') & rs.next():
+            data_row = rs.get_row_data()
+            data_list.append([
+                sid,         # list 编号
+                data_row[6], # 除权除息日期 dividOperateDate 
+            ])
+    return pd.DataFrame(data_list, columns=data_list.fields)
 
 def get_exchange(code):    # xxxxxx
     '''
