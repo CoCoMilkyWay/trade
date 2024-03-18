@@ -16,3 +16,6 @@
 [submodule "QuantStudio"]
 	path = QuantStudio
 	url = https://github.com/CoCoMilkyWay/QuantStudio.git
+[submodule "backtrader"]
+	path = backtrader
+	url = https://github.com/CoCoMilkyWay/backtrader.git
