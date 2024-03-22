@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8; py-indent-offset:4 -*-
 ###############################################################################
+
+
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-
-from . import MovingAverageBase, Average
-
+from ...basicops import MovingAverageBase, Average
 
 class MovingAverageSimple(MovingAverageBase):
     '''
+    MovingAverageSimple, params=dict(period, 30)
     Non-weighted average of the last n periods
 
     Formula:

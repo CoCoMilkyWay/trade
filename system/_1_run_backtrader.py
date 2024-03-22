@@ -12,17 +12,19 @@ from datetime import datetime
 
 from _2_csv_data_parse import parse_csv_tradedate, parse_csv_metadata, parse_csv_kline_d1
 
+from indicators import *
+
 # 假装 UTC 就是 Asia/Shanghai (简化计算)，所有datetime默认 tz-naive -> tz-aware
 tz = "UTC"
 data_start = '1900-01-01'
 data_end = datetime.now().strftime('%Y-%m-%d')
 
-class TestInd(bt.Indicator):
-    lines = ('a', 'b')
-
-    def __init__(self):
-        self.lines.a = b = self.data.close - self.data.high
-        self.lines.b = btind.SMA(b, period=20)
+#class TestInd(bt.Indicator):
+#    lines = ('a', 'b')
+#
+#    def __init__(self):
+#        self.lines.a = b = self.data.close - self.data.high
+#        self.lines.b = btind.SMA(b, period=20)
 
 class Strategy(bt.Strategy):
     params = (
@@ -31,13 +33,8 @@ class Strategy(bt.Strategy):
     )
 
     def __init__(self):
-        self.pp = btind.PivotPoint(self.data1)
-        self.pp.plotinfo.plot = False  # deactivate plotting
-                
-        self.data1.plotinfo.plot = False
+        ind = MovingAverageSimple(params=dict(period,30))
         
-        # TestInd().plotinfo.plot = False
-
     def next(self):
         if self.p.datalines:
             txt = ','.join([
@@ -139,7 +136,6 @@ def runstrat():
         # Do not pass values after this date
         reverse=False)
     cerebro.adddata(data)
-    cerebro.resampledata(data, timeframe=bt.TimeFrame.Months)
     cerebro.addstrategy(Strategy)
 
     cerebro.run(runonce=False, exactbars=0) # mem_save: [1, 0, -1, -2]
