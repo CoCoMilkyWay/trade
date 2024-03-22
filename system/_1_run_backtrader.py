@@ -3,15 +3,14 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import argparse
-
+import os
 import backtrader as bt
 import backtrader.indicators as btind
 import numpy as np
 import pandas as pd
-import pytz
 from datetime import datetime
 
-from NO2_csv_data_parse import parse_csv_tradedate, parse_csv_metadata, parse_csv_kline_d1
+from _2_csv_data_parse import parse_csv_tradedate, parse_csv_metadata, parse_csv_kline_d1
 
 # 假装 UTC 就是 Asia/Shanghai (简化计算)，所有datetime默认 tz-naive -> tz-aware
 tz = "UTC"
@@ -25,7 +24,6 @@ class TestInd(bt.Indicator):
         self.lines.a = b = self.data.close - self.data.high
         self.lines.b = btind.SMA(b, period=20)
 
-
 class Strategy(bt.Strategy):
     params = (
         ('datalines', False),  # Print data lines
@@ -33,12 +31,12 @@ class Strategy(bt.Strategy):
     )
 
     def __init__(self):
-        btind.SMA()
-        btind.Stochastic()
-        btind.RSI()
-        btind.MACD()
-        btind.CCI()
-        TestInd().plotinfo.plot = False
+        self.pp = btind.PivotPoint(self.data1)
+        self.pp.plotinfo.plot = False  # deactivate plotting
+                
+        self.data1.plotinfo.plot = False
+        
+        # TestInd().plotinfo.plot = False
 
     def next(self):
         if self.p.datalines:
@@ -107,34 +105,45 @@ class Strategy(bt.Strategy):
 
         return tind + tsub
 
-
 def runstrat():
     args = parse_args()
 
-    cerebro = bt.Cerebro()
+    cerebro = bt.Cerebro(stdstats=False)
 
-    # data-feeds
-    sid = 99
-    start_session = pytz.timezone(tz).localize(datetime.strptime(data_start, '%Y-%m-%d'))
-    end_session = pytz.timezone(tz).localize(datetime.strptime(data_end, '%Y-%m-%d'))
-    trade_days, special_trade_days, special_holiday_days = parse_csv_tradedate()
-    metadata, index_info = parse_csv_metadata() # index_info = [asset_csv_path, num_lines]
-    symbol_map = metadata.loc[:,['symbol','asset_name','first_traded']]
-    print(metadata.iloc[sid,:3])
-    # split:除权, merge:填权, dividend:除息
-    # 用了后复权数据，不需要adjast factor
-    # parse_csv_split_merge_dividend(symbol_map, start_session, end_session)
-    # (Date) * (Open, High, Low, Close, Volume, OpenInterest)
-    kline = parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sid)
+    # # data-feeds
+    # sids = [1]
+    # start_session = pytz.timezone(tz).localize(datetime.strptime(data_start, '%Y-%m-%d'))
+    # end_session = pytz.timezone(tz).localize(datetime.strptime(data_end, '%Y-%m-%d'))
+    # trade_days, special_trade_days, special_holiday_days = parse_csv_tradedate()
+    # metadata, index_info = parse_csv_metadata() # index_info = [asset_csv_path, num_lines]
+    # symbol_map = metadata.loc[:,['symbol','asset_name','first_traded']]
+    # print(metadata.iloc[0,:3])
+    # # split:除权, merge:填权, dividend:除息
+    # # 用了后复权数据，不需要adjast factor
+    # # parse_csv_split_merge_dividend(symbol_map, start_session, end_session)
+    # # (Date) * (Open, High, Low, Close, Volume, OpenInterest)
+    # for kline in parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sids):
+    #     data = bt.feeds.PandasData(dataname=kline)
+    #     cerebro.adddata(data)
+    # #cerebro.resampledata(data, timeframe=bt.TimeFrame.Weeks)
+    modpath = os.path.dirname(os.path.abspath(os.sys.argv[0]))
+    datapath = os.path.join(modpath, './datas/orcl-1995-2014.txt')
 
-    data = bt.feeds.PandasData(dataname=kline)
-
+    # Create a Data Feed
+    data = bt.feeds.YahooFinanceCSVData(
+        dataname=datapath,
+        # Do not pass values before this date
+        fromdate=datetime(2000, 1, 1),
+        # Do not pass values before this date
+        todate=datetime(2000, 12, 31),
+        # Do not pass values after this date
+        reverse=False)
     cerebro.adddata(data)
+    cerebro.resampledata(data, timeframe=bt.TimeFrame.Months)
     cerebro.addstrategy(Strategy)
 
     cerebro.run(runonce=False, exactbars=0) # mem_save: [1, 0, -1, -2]
     cerebro.plot(style='bar')
-
 
 def parse_args():
     parser = argparse.ArgumentParser(

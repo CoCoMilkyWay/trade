@@ -88,10 +88,11 @@ def parse_csv_metadata(show_progress=True, type='equity'):
         row_index += 1
     return metadata, index_info
 
-def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, target_sid):
-    progress_bar = tqdm(range(len(index_info)))
+def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sids):
+    progress_bar = tqdm(sids)
+    pending_sids = sids
     for sid, items in symbol_map.iterrows():
-        if sid != target_sid:
+        if sid not in pending_sids:
             continue
         symbol = items[0]
         asset_name = items[1]
@@ -139,7 +140,7 @@ def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, targe
         else:
             kline_filled = kline
         progress_bar.update(1)
-    return kline_filled # use yield if call iteratively
+        yield kline_filled # use yield if call iteratively
 
 def parse_csv_split_merge_dividend(symbol_map, start_session, end_session):
     '''
