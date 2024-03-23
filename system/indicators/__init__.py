@@ -19,16 +19,19 @@ from .basicops import *
 
 # moving averages (so envelope and oscillators can be auto-generated)
 from .trends.moving_average._001_sma import *
-#from .trends.moving_average.ema import *
-#from .trends.moving_average.smma import *
-#from .trends.moving_average.wma import *
-#from .trends.moving_average.dema import *
-#from .trends.moving_average.kama import *
-#from .trends.moving_average.zlema import *
-#from .trends.moving_average.hma import *
-#from .trends.moving_average.zlind import *
-#from .trends.moving_average.dma import *
-#from .trends.moving_average.deviation import *
+from .trends.moving_average._002_wma import *
+from .trends.moving_average._003_ema import *
+from .trends.moving_average._004_smma import *
+from .trends.moving_average._005_dema import *
+from .trends.moving_average._006_kama import *
+from .trends.moving_average._007_zlema import *
+from .trends.moving_average._008_hma import *
+from .trends.moving_average._009_frama import * # TODO
+from .trends.moving_average._010_vidya import * # TODO
+from .trends.moving_average._011_zlind import *
+from .trends.moving_average._012_dma import *
+from .trends.moving_average._013_jma import *
+from .trends.moving_average._014_deviation import *
 #
 ## depend on basicops, moving averages and deviations
 #from .trends.moving_average.atr import *

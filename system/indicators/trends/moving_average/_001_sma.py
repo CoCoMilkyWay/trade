@@ -9,7 +9,7 @@ from ...basicops import MovingAverageBase, Average
 
 class MovingAverageSimple(MovingAverageBase):
     '''
-    MovingAverageSimple, params=dict(period, 30)
+    简单均线(period)
     Non-weighted average of the last n periods
 
     Formula:

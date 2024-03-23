@@ -33,8 +33,30 @@ class Strategy(bt.Strategy):
     )
 
     def __init__(self):
-        ind = MovingAverageSimple(params=dict(period,30))
-        
+        # ind0.plotinfo.subplot=True
+        datas = [self.data.close,]
+        for data in datas:
+            
+            # Moving Average (data=close, subplot=Flase)
+            N=30
+            MovingAverageSimple(data, period=N)
+            WeightedMovingAverage(data,period=N)
+            ExponentialMovingAverage(data,period=N)
+            SmoothedMovingAverage(data,period=N)
+            DoubleExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
+            TripleExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
+            AdaptiveMovingAverage(data,period=N, slow=2, fast=30)
+            ZeroLagExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
+            HullMovingAverage(data,period=N,_movav=MovAv.WMA)
+            # FractalAdaptiveMovingAverage(data,period=N) # TODO
+            # VariableIndexDynamicAverage(data,period=N,short,long,smooth) # TODO
+            ZeroLagIndicator(data,gainlimit=50,_movav=MovAv.EMA)
+            DicksonMovingAverage(data,gainlimit=50, hperiod=N, _movav=MovAv.EMA, _hma=MovAv.HMA)
+            # JurikMovingAverage(data,period=N) # TODO
+
+            # MA -> Stdev(subplot=True)
+            StandardDeviation(data,period=N, movav=MovAv.DMA, safepow=True)
+
     def next(self):
         if self.p.datalines:
             txt = ','.join([
