@@ -7,7 +7,7 @@ from __future__ import (absolute_import, division, print_function,
 from ...basicops import (SumN, MovingAverageBase, ExponentialSmoothingDynamic)
 
 
-class AdaptiveMovingAverage(MovingAverageBase):
+class KaufmanMovingAverage(MovingAverageBase):
     '''
     考夫曼自适应均线(period,fast=2,slow=30)
     当价格在一个方向上稳定移动时，它适应快速移动平均线，当市场表现出大量噪音时，它适应缓慢移动平均线
@@ -63,4 +63,4 @@ class AdaptiveMovingAverage(MovingAverageBase):
                                                     period=self.p.period,
                                                     alpha=sc)
 
-        super(AdaptiveMovingAverage, self).__init__()
+        super(KaufmanMovingAverage, self).__init__()

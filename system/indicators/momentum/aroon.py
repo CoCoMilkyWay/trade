@@ -4,7 +4,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from ...basicops import Indicator, FindFirstIndexHighest, FindFirstIndexLowest
+from ..basicops import Indicator, FindFirstIndexHighest, FindFirstIndexLowest
 
 
 class _AroonBase(Indicator):
@@ -137,6 +137,11 @@ class AroonUpDown(AroonUp, AroonDown):
 
 class AroonOscillator(_AroonBase):
     '''
+    阿隆震荡
+    超短线趋势突破，动能消失后的出场指标之一
+    阿隆Up、阿隆Down可以研判一个新趋势的开始: 高于70,表示强势,低于50,趋势正在减弱;
+    两线移近底部，表明即将盘整。
+    阿隆震荡线高于零表示为上升趋势;低于零表示为下降趋势，偏离零线越远，走势越强。
     It is a variation of the AroonUpDown indicator which shows the current
     difference between the AroonUp and AroonDown value, trying to present a
     visualization which indicates which is stronger (greater than 0 -> AroonUp

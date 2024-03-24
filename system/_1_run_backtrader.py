@@ -34,28 +34,37 @@ class Strategy(bt.Strategy):
 
     def __init__(self):
         # ind0.plotinfo.subplot=True
-        datas = [self.data.close,]
+        datas = [self.data.close,] #(self.data.close+self.data.open)/2
         for data in datas:
-            
-            # Moving Average (data=close, subplot=Flase)
-            N=30
-            MovingAverageSimple(data, period=N)
-            WeightedMovingAverage(data,period=N)
-            ExponentialMovingAverage(data,period=N)
-            SmoothedMovingAverage(data,period=N)
-            DoubleExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
-            TripleExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
-            AdaptiveMovingAverage(data,period=N, slow=2, fast=30)
-            ZeroLagExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
-            HullMovingAverage(data,period=N,_movav=MovAv.WMA)
+
+            # Moving Average (subplot=Flase)
+            N=10
+            # SmoothedMovingAverage(data,period=N)
+            # MovingAverageSimple(data, period=N)
+            # ExponentialMovingAverage(data,period=N)
+            # WeightedMovingAverage(data,period=N)
+            # DoubleExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
+            # TripleExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
+            # KaufmanMovingAverage(data,period=N, slow=2, fast=30)
             # FractalAdaptiveMovingAverage(data,period=N) # TODO
             # VariableIndexDynamicAverage(data,period=N,short,long,smooth) # TODO
-            ZeroLagIndicator(data,gainlimit=50,_movav=MovAv.EMA)
-            DicksonMovingAverage(data,gainlimit=50, hperiod=N, _movav=MovAv.EMA, _hma=MovAv.HMA)
+            # ZeroLagIndicator(data,gainlimit=50,_movav=MovAv.EMA)
+            # ZeroLagExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
+            # HullMovingAverage(data,period=N,_movav=MovAv.WMA)
+            # DicksonMovingAverage(data,gainlimit=50, hperiod=N, _movav=MovAv.EMA, _hma=MovAv.HMA)
             # JurikMovingAverage(data,period=N) # TODO
 
-            # MA -> Stdev(subplot=True)
-            StandardDeviation(data,period=N, movav=MovAv.DMA, safepow=True)
+            # volatility(subplot=True)
+            # AverageTrueRange(period=N,movav=MovAv.Smoothed)
+            # BollingerBands(period=N,devfactor=2.,movav=MovAv.Simple)
+
+            # momentum
+            # Aroon_axis = AroonUpDown()
+            # AroonOscillator(plotmaster = Aroon_axis)
+            # CommodityChannelIndex(period=N,factor=0.015,movav=MovAv.Simple,upperband=100,lowerband=100)
+
+            # unclassified
+            CrossOver(subplot=True)
 
     def next(self):
         if self.p.datalines:
@@ -144,11 +153,10 @@ def runstrat():
     # for kline in parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sids):
     #     data = bt.feeds.PandasData(dataname=kline)
     #     cerebro.adddata(data)
-    # #cerebro.resampledata(data, timeframe=bt.TimeFrame.Weeks)
-    modpath = os.path.dirname(os.path.abspath(os.sys.argv[0]))
-    datapath = os.path.join(modpath, './datas/orcl-1995-2014.txt')
 
     # Create a Data Feed
+    modpath = os.path.dirname(os.path.abspath(os.sys.argv[0]))
+    datapath = os.path.join(modpath, './datas/orcl-1995-2014.txt')
     data = bt.feeds.YahooFinanceCSVData(
         dataname=datapath,
         # Do not pass values before this date
@@ -158,6 +166,29 @@ def runstrat():
         # Do not pass values after this date
         reverse=False)
     cerebro.adddata(data)
+    datapath = os.path.join(modpath, './datas/nvda-1999-2014.txt')
+    data = bt.feeds.YahooFinanceCSVData(
+        dataname=datapath,
+        # Do not pass values before this date
+        fromdate=datetime(2000, 1, 1),
+        # Do not pass values before this date
+        todate=datetime(2000, 12, 31),
+        # Do not pass values after this date
+        reverse=False)
+    cerebro.adddata(data)
+
+
+    # datapath = os.path.join(modpath, './datas/2006-01-02-volume-min-001.txt')
+    # data = bt.feeds.BacktraderCSVData(
+    #     dataname=datapath,
+    #     fromdate=datetime(2006, 1, 2),
+    #     todate=datetime(2006, 2, 27),
+    #     reverse=False
+    #     )
+    # cerebro.adddata(data)
+
+    # cerebro.resampledata(data, timeframe=bt.TimeFrame.Weeks)
+
     cerebro.addstrategy(Strategy)
 
     cerebro.run(runonce=False, exactbars=0) # mem_save: [1, 0, -1, -2]

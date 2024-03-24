@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function,
 
 
 from ...basicops import MovingAverageBase, MovAv
-from ._011_zlind import ZeroLagIndicator
+from ._009_zlind import ZeroLagIndicator
 
 
 class DicksonMovingAverage(MovingAverageBase):

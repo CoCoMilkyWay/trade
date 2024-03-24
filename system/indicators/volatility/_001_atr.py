@@ -4,8 +4,8 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from ...basicops import Indicator, Max, Min, MovAv
-
+from ..basicops import Indicator, MovAv
+from backtrader.functions import Max, Min
 
 class TrueHigh(Indicator):
     '''
@@ -78,6 +78,14 @@ class TrueRange(Indicator):
 
 class AverageTrueRange(Indicator):
     '''
+    真实波幅(period=14,movav=Smoothed)
+    根据市场波动性调整其风险敞口,设置止盈止损,判断真假突破:
+    高ATR值可能表明市场处于较高波动性状态,可能不适宜进入市场。
+    (波动性较高的市场或资产,高的ATR值可能是正常的)
+    低ATR值可能表明市场相对稳定,有利于交易。
+
+    波动性的增加通常伴随着趋势的加强。ATR的增加可能意味着趋势持续,而ATR的减少可能预示着趋势的减弱或反转。
+
     Defined by J. Welles Wilder, Jr. in 1978 in his book *"New Concepts in
     Technical Trading Systems"*.
 

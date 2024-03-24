@@ -4,11 +4,17 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from ...basicops import Indicator, Max, MovAv, MeanDev
+from ..basicops import Indicator, MovAv
+from ..basicops_lvl2 import MeanDev
+from backtrader.functions import Max
 
 
 class CommodityChannelIndex(Indicator):
     '''
+    商品路径指标/顺势指标(period=N,factor=0.015,movav=Simple,upperband=100,lowerband=100)
+    研判短线反弹的顶点和短线回调的底部拐点,适用短期内暴涨暴跌的非常态行情
+    CCI指标却是波动于正无穷大到负无穷大之间,因此不会出现指标钝化现象
+    强调价格与固定期间的股价平均区间的偏离程度，股价平均绝对偏差
     Introduced by Donald Lambert in 1980 to measure variations of the
     "typical price" (see below) from its mean to identify extremes and
     reversals
