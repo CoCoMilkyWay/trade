@@ -1,21 +1,3 @@
-[submodule "systematic-trading"]
-    path = systematic-trading
-    url = https://github.com/CoCoMilkyWay/systematic-trading.git
-[submodule "machine-learning-for-trading"]
-    path = machine-learning-for-trading
-    url = https://github.com/CoCoMilkyWay/machine-learning-for-trading.git
-[submodule "vnpy"]
-	path = vnpy
-	url = https://github.com/CoCoMilkyWay/vnpy.git
-[submodule "wondertrader"]
-	path = wondertrader
-	url = https://github.com/CoCoMilkyWay/wondertrader.git
-[submodule "wtpy"]
-	path = wtpy
-	url = https://github.com/CoCoMilkyWay/wtpy.git
-[submodule "QuantStudio"]
-	path = QuantStudio
-	url = https://github.com/CoCoMilkyWay/QuantStudio.git
 [submodule "backtrader"]
 	path = backtrader
 	url = https://github.com/CoCoMilkyWay/backtrader.git

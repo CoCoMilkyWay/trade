@@ -33,38 +33,39 @@ class Strategy(bt.Strategy):
     )
 
     def __init__(self):
-        # ind0.plotinfo.subplot=True
+        bit = False
         datas = [self.data.close,] #(self.data.close+self.data.open)/2
         for data in datas:
+            if bit:
+                # Moving Average (subplot=Flase)
+                N=10
+                SmoothedMovingAverage(data,period=N)
+                MovingAverageSimple(data, period=N)
+                ExponentialMovingAverage(data,period=N)
+                WeightedMovingAverage(data,period=N)
+                DoubleExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
+                TripleExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
+                KaufmanMovingAverage(data,period=N, slow=2, fast=30)
+                FractalAdaptiveMovingAverage(data,period=N) # TODO
+                VariableIndexDynamicAverage(data,period=N,short=0,long=0,smooth=0) # TODO
+                ZeroLagIndicator(data,gainlimit=50,_movav=MovAv.EMA)
+                ZeroLagExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
+                HullMovingAverage(data,period=N,_movav=MovAv.WMA)
+                DicksonMovingAverage(data,gainlimit=50, hperiod=N, _movav=MovAv.EMA, _hma=MovAv.HMA)
+                JurikMovingAverage(data,period=N) # TODO
 
-            # Moving Average (subplot=Flase)
-            N=10
-            # SmoothedMovingAverage(data,period=N)
-            # MovingAverageSimple(data, period=N)
-            # ExponentialMovingAverage(data,period=N)
-            # WeightedMovingAverage(data,period=N)
-            # DoubleExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
-            # TripleExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
-            # KaufmanMovingAverage(data,period=N, slow=2, fast=30)
-            # FractalAdaptiveMovingAverage(data,period=N) # TODO
-            # VariableIndexDynamicAverage(data,period=N,short,long,smooth) # TODO
-            # ZeroLagIndicator(data,gainlimit=50,_movav=MovAv.EMA)
-            # ZeroLagExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
-            # HullMovingAverage(data,period=N,_movav=MovAv.WMA)
-            # DicksonMovingAverage(data,gainlimit=50, hperiod=N, _movav=MovAv.EMA, _hma=MovAv.HMA)
-            # JurikMovingAverage(data,period=N) # TODO
+                # volatility(subplot=True)
+                AverageTrueRange(period=N,movav=MovAv.Smoothed)
+                BollingerBands(period=N,devfactor=2.,movav=MovAv.Simple)
 
-            # volatility(subplot=True)
-            # AverageTrueRange(period=N,movav=MovAv.Smoothed)
-            # BollingerBands(period=N,devfactor=2.,movav=MovAv.Simple)
+                # momentum
+                Aroon_axis = AroonUpDown()
+                AroonOscillator(plotmaster = Aroon_axis)
+                CommodityChannelIndex(period=N,factor=0.015,movav=MovAv.Simple,upperband=100,lowerband=100)
 
-            # momentum
-            # Aroon_axis = AroonUpDown()
-            # AroonOscillator(plotmaster = Aroon_axis)
-            # CommodityChannelIndex(period=N,factor=0.015,movav=MovAv.Simple,upperband=100,lowerband=100)
-
-            # unclassified
-            CrossOver(subplot=True)
+                # unclassified
+            
+            # test
 
     def next(self):
         if self.p.datalines:
