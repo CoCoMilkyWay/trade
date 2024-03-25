@@ -1,3 +1,6 @@
 [submodule "backtrader"]
 	path = backtrader
 	url = https://github.com/CoCoMilkyWay/backtrader.git
+[submodule "vectorbt.pro"]
+	path = vectorbt.pro
+	url = ./vectorbt.pro/
