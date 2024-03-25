@@ -71,3 +71,6 @@ mamba upgrade&update --all
 # ===================================================================================
 # check blocked ip ports by windows
 netsh interface ipv4 show excludedportrange protocol=tcp
+
+# wget
+wget --page-requisites -r --convert-links --no-directories --directory-prefix=output 'https://vectorbt.pro/pvt_321460c7/'
