@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import sys
 
-from ...basicops import Indicator, MovingAverage
+from .basicops import Indicator, MovingAverage
 
 
 class EnvelopeMixIn(object):

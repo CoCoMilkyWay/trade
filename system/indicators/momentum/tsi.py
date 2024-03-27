@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function,
 
 
 import backtrader as bt
-from ...basicops import EMA
+from . import EMA
 
 
 class TrueStrengthIndicator(bt.Indicator):

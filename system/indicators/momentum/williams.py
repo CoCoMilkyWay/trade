@@ -4,9 +4,9 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from ...basicops import (Indicator, Highest, Lowest, If, UpDay, DownDay, Accum, TrueLow,
-               TrueHigh)
-
+from ..basicops import (Indicator, Highest, Lowest, If, Accum)
+from .. import UpDay, DownDay
+from .. import TrueLow, TrueHigh
 
 class WilliamsR(Indicator):
     '''

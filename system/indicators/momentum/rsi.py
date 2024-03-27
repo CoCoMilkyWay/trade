@@ -4,9 +4,8 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from ...basicops import Indicator, Max, MovAv
-from ...basicops import DivZeroByZero
-
+from .basicops import Indicator, MovAv
+from backtrader.functions import Max, DivZeroByZero
 
 class UpDay(Indicator):
     '''

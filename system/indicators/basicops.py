@@ -28,7 +28,7 @@ import operator
 from backtrader.utils.py3 import map, range
 from backtrader.utils.py3 import with_metaclass
 from backtrader.indicator import Indicator
-
+from backtrader.functions import *
 
 class PeriodN(Indicator):
     '''

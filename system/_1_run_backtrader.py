@@ -64,7 +64,7 @@ class Strategy(bt.Strategy):
                 CommodityChannelIndex(period=N,factor=0.015,movav=MovAv.Simple,upperband=100,lowerband=100)
 
                 # unclassified
-            
+                DetrendedPriceOscillator
             # test
 
     def next(self):
