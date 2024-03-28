@@ -2,29 +2,46 @@
 
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-import argparse
+
 import os
-import backtrader as bt
-import backtrader.indicators as btind
+from datetime import datetime
+import pytz
+import argparse
 import numpy as np
 import pandas as pd
-from datetime import datetime
+
+# append module root directory to sys.path
+os.sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import backtrader as bt
+import backtrader.indicators as btind
+from indicators import *
 
 from _2_csv_data_parse import parse_csv_tradedate, parse_csv_metadata, parse_csv_kline_d1
 
-from indicators import *
 
 # 假装 UTC 就是 Asia/Shanghai (简化计算)，所有datetime默认 tz-naive -> tz-aware
-tz = "UTC"
-data_start = '1900-01-01'
-data_end = datetime.now().strftime('%Y-%m-%d')
+TZ = "UTC"
+data_now = datetime.now().strftime('%Y-%m-%d')
+START = '1900-01-01'
+END = data_now
 
-#class TestInd(bt.Indicator):
-#    lines = ('a', 'b')
-#
-#    def __init__(self):
-#        self.lines.a = b = self.data.close - self.data.high
-#        self.lines.b = btind.SMA(b, period=20)
+
+data_sel = 'dummy' # dummy/SSE
+if data_sel == 'SSE':
+    # real SSE data
+    DATAFEED = bt.feeds.PandasData
+    sids = [1]
+elif data_sel == 'dummy':
+    # fast dummy data
+    modpath = os.path.dirname(os.path.abspath(__file__))
+    dataspath = './datas'
+    datafiles = [
+        #'2006-01-02-volume-min-001.txt',
+        '2006-day-001.txt',
+        #'2006-week-001.txt',
+    ]
+
 
 class Strategy(bt.Strategy):
     params = (
@@ -33,40 +50,8 @@ class Strategy(bt.Strategy):
     )
 
     def __init__(self):
-        bit = False
         datas = [self.data.close,] #(self.data.close+self.data.open)/2
-        for data in datas:
-            if bit:
-                # Moving Average (subplot=Flase)
-                N=10
-                SmoothedMovingAverage(data,period=N)
-                MovingAverageSimple(data, period=N)
-                ExponentialMovingAverage(data,period=N)
-                WeightedMovingAverage(data,period=N)
-                DoubleExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
-                TripleExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
-                KaufmanMovingAverage(data,period=N, slow=2, fast=30)
-                FractalAdaptiveMovingAverage(data,period=N) # TODO
-                VariableIndexDynamicAverage(data,period=N,short=0,long=0,smooth=0) # TODO
-                ZeroLagIndicator(data,gainlimit=50,_movav=MovAv.EMA)
-                ZeroLagExponentialMovingAverage(data,period=N,_movav=MovAv.EMA)
-                HullMovingAverage(data,period=N,_movav=MovAv.WMA)
-                DicksonMovingAverage(data,gainlimit=50, hperiod=N, _movav=MovAv.EMA, _hma=MovAv.HMA)
-                JurikMovingAverage(data,period=N) # TODO
-
-                # volatility(subplot=True)
-                AverageTrueRange(period=N,movav=MovAv.Smoothed)
-                BollingerBands(period=N,devfactor=2.,movav=MovAv.Simple)
-
-                # momentum
-                Aroon_axis = AroonUpDown()
-                AroonOscillator(plotmaster = Aroon_axis)
-                CommodityChannelIndex(period=N,factor=0.015,movav=MovAv.Simple,upperband=100,lowerband=100)
-
-                # unclassified
-                DetrendedPriceOscillator
-            # test
-
+        
     def next(self):
         if self.p.datalines:
             txt = ','.join([
@@ -134,77 +119,94 @@ class Strategy(bt.Strategy):
 
         return tind + tsub
 
-def runstrat():
+def runtest(datas,
+            strategy,
+            runonce=None,
+            preload=None,
+            exbar=0,
+            plot=False,
+            optimize=False,
+            maxcpus=None,
+            writer=None,
+            analyzer=None,
+            **kwargs):
+    
     args = parse_args()
 
-    cerebro = bt.Cerebro(stdstats=False)
+    cerebro = bt.Cerebro(
+        runonce=runonce,# runonce: indicator in vectorized mode 
+        preload=preload,# preload: preload datafeed for strategy(strategy/observer always in event mode)
+        maxcpus=maxcpus,
+        exactbars=exbar)# exbars:   1: deactivate preload/runonce/plot
+    if isinstance(datas, bt.LineSeries):
+        datas = [datas]
+    for data in datas:
+        cerebro.adddata(data)
+        #cerebro.resampledata(data, timeframe=bt.TimeFrame.Weeks)
+    if not optimize:
+        cerebro.addstrategy(strategy, **kwargs)
+        if writer:
+            wr = writer[0]
+            wrkwargs = writer[1]
+            cerebro.addwriter(wr, **wrkwargs)
+        if analyzer:
+            al = analyzer[0]
+            alkwargs = analyzer[1]
+            cerebro.addanalyzer(al, **alkwargs)
+    else:
+        cerebro.optstrategy(strategy, **kwargs)
+    cerebro.run()
+    if plot:
+        # plotstyle for OHLC bars: line/bar/candle (on close)
+        cerebro.plot(style='bar')
+    return [cerebro]
+def data_feed_dummy():
+    datas = []
+    for datafile in datafiles:
+        datapath = os.path.join(modpath, f'{dataspath}/{datafile}')
+        #datapath = os.path.join(modpath, './datas/nvda-1999-2014.txt')
+        data = bt.feeds.YahooFinanceCSVData(
+            dataname=datapath,
+            # Do not pass values before this date
+            fromdate=datetime(2000, 1, 1),
+            # Do not pass values before this date
+            todate=datetime(2000, 12, 31),
+            # Do not pass values after this date
+            reverse=False)
+        datas.append(data)
+    return datas
 
-    # # data-feeds
-    # sids = [1]
-    # start_session = pytz.timezone(tz).localize(datetime.strptime(data_start, '%Y-%m-%d'))
-    # end_session = pytz.timezone(tz).localize(datetime.strptime(data_end, '%Y-%m-%d'))
+def data_feed_SSE():
+        # real SSE data
+    datas = []
+    start_session = pytz.timezone(TZ).localize(datetime.strptime(START, '%Y-%m-%d'))
+    end_session = pytz.timezone(TZ).localize(datetime.strptime(END, '%Y-%m-%d'))
     # trade_days, special_trade_days, special_holiday_days = parse_csv_tradedate()
-    # metadata, index_info = parse_csv_metadata() # index_info = [asset_csv_path, num_lines]
-    # symbol_map = metadata.loc[:,['symbol','asset_name','first_traded']]
-    # print(metadata.iloc[0,:3])
-    # # split:除权, merge:填权, dividend:除息
-    # # 用了后复权数据，不需要adjast factor
-    # # parse_csv_split_merge_dividend(symbol_map, start_session, end_session)
-    # # (Date) * (Open, High, Low, Close, Volume, OpenInterest)
-    # for kline in parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sids):
-    #     data = bt.feeds.PandasData(dataname=kline)
-    #     cerebro.adddata(data)
-
-    # Create a Data Feed
-    modpath = os.path.dirname(os.path.abspath(os.sys.argv[0]))
-    datapath = os.path.join(modpath, './datas/orcl-1995-2014.txt')
-    data = bt.feeds.YahooFinanceCSVData(
-        dataname=datapath,
-        # Do not pass values before this date
-        fromdate=datetime(2000, 1, 1),
-        # Do not pass values before this date
-        todate=datetime(2000, 12, 31),
-        # Do not pass values after this date
-        reverse=False)
-    cerebro.adddata(data)
-    datapath = os.path.join(modpath, './datas/nvda-1999-2014.txt')
-    data = bt.feeds.YahooFinanceCSVData(
-        dataname=datapath,
-        # Do not pass values before this date
-        fromdate=datetime(2000, 1, 1),
-        # Do not pass values before this date
-        todate=datetime(2000, 12, 31),
-        # Do not pass values after this date
-        reverse=False)
-    cerebro.adddata(data)
-
-
-    # datapath = os.path.join(modpath, './datas/2006-01-02-volume-min-001.txt')
-    # data = bt.feeds.BacktraderCSVData(
-    #     dataname=datapath,
-    #     fromdate=datetime(2006, 1, 2),
-    #     todate=datetime(2006, 2, 27),
-    #     reverse=False
-    #     )
-    # cerebro.adddata(data)
-
-    # cerebro.resampledata(data, timeframe=bt.TimeFrame.Weeks)
-
-    cerebro.addstrategy(Strategy)
-
-    cerebro.run(runonce=False, exactbars=0) # mem_save: [1, 0, -1, -2]
-    cerebro.plot(style='bar')
+    metadata, index_info = parse_csv_metadata() # index_info = [asset_csv_path, num_lines]
+    symbol_map = metadata.loc[:,['symbol','asset_name','first_traded']]
+    print(metadata.iloc[0,:3])
+        # split:除权, merge:填权, dividend:除息
+        # 用了后复权数据，不需要adjast factor
+        # parse_csv_split_merge_dividend(symbol_map, start_session, end_session)
+        # (Date) * (Open, High, Low, Close, Volume, OpenInterest)
+    for kline in parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sids):
+        data = DATAFEED(dataname=kline)
+        datas.append(data)
+    return datas
 
 def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Check Memory Savings')
-    # args.plot
-    # parser.add_argument('--plot', required=False, action='store_true',
-    #                     help=('Plot the result'))
-
+        description='This is the helper function')
+    parser.add_argument('--plot', required=False, action='store_true',
+                        help=('Plot the result'))
     return parser.parse_args()
 
 
 if __name__ == '__main__':
-    runstrat()
+    if data_sel == 'SSE':
+        datas = data_feed_SSE()
+    elif data_sel == 'dummy':
+        datas = data_feed_dummy()
+
+    runtest(datas=datas,strategy=Strategy)
