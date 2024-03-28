@@ -22,7 +22,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import backtrader as bt
-from .. import AwesomeOscillator
+from ..momentum.awesomeoscillator import AwesomeOscillator
 from ..basicops import MovAv
 
 

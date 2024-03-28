@@ -3,8 +3,9 @@
 ###############################################################################
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-
-from .basicops import Indicator, MovAv
+import contextlib
+import sys
+from .basicops import Indicator, MovAv, MovingAverage, BaseApplyN
 from backtrader.functions import And
 
 class StandardDeviation(Indicator):
@@ -108,7 +109,7 @@ class NonZeroDifference(Indicator):
 
     def next(self):
         d = self.data0[0] - self.data1[0]
-        self.l.nzd[0] = d if d else self.l.nzd[-1]
+        self.l.nzd[0] = d or self.l.nzd[-1]
 
     def oncestart(self, start, end):
         self.line.array[start] = (
@@ -122,7 +123,7 @@ class NonZeroDifference(Indicator):
         prev = larray[start - 1]
         for i in range(start, end):
             d = d0array[i] - d1array[i]
-            larray[i] = prev = d if d else prev
+            larray[i] = prev = d or prev
 
 
 class _CrossBase(Indicator):
@@ -221,11 +222,9 @@ class OscillatorMixIn(Indicator):
     plotlines = dict(_0=dict(_name='osc'))
 
     def _plotinit(self):
-        try:
+        with contextlib.suppress(AttributeError):
             lname = self.lines._getlinealias(0)
-            self.plotlines._0._name = lname + '_osc'
-        except AttributeError:
-            pass
+            self.plotlines._0._name = f'{lname}_osc'
 
     def __init__(self):
         self.lines[0] = self.data - self.lines[0]
@@ -258,11 +257,9 @@ class Oscillator(Indicator):
     plotlines = dict(_0=dict(_name='osc'))
 
     def _plotinit(self):
-        try:
+        with contextlib.suppress(AttributeError):
             lname = self.dataosc._getlinealias(0)
-            self.plotlines._0._name = lname + '_osc'
-        except AttributeError:
-            pass
+            self.plotlines._0._name = f'{lname}_osc'
 
     def __init__(self):
         super(Oscillator, self).__init__()
@@ -279,23 +276,21 @@ class Oscillator(Indicator):
 
 # Automatic creation of Oscillating Lines
 
-for movav in MovingAverage._movavs[1:]:
-    _newclsdoc = '''
+_newclsdoc = '''
     Oscillation of a %s around its data
     '''
+for movav in MovingAverage._movavs[1:]:
     # Skip aliases - they will be created automatically
     if getattr(movav, 'aliased', ''):
         continue
 
     movname = movav.__name__
     linename = movav.lines._getlinealias(0)
-    newclsname = movname + 'Oscillator'
+    newclsname = f'{movname}Oscillator'
 
-    newaliases = [movname + 'Osc']
+    newaliases = [f'{movname}Osc']
     for alias in getattr(movav, 'alias', []):
-        for suffix in ['Oscillator', 'Osc']:
-            newaliases.append(alias + suffix)
-
+        newaliases.extend(alias + suffix for suffix in ['Oscillator', 'Osc'])
     newclsdoc = _newclsdoc % movname
     newclsdct = {'__doc__': newclsdoc,
                  '__module__': OscillatorMixIn.__module__,

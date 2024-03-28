@@ -22,7 +22,8 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import backtrader as bt
-from . import SMA, ROC100
+from ..momentum.momentum import ROC100
+from ..trends.moving_average._002_sma import SMA
 
 
 class KnowSureThing(bt.Indicator):

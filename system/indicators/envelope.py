@@ -69,12 +69,7 @@ class Envelope(_EnvelopeBase, EnvelopeMixIn):
     See also:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes
     '''
-
-
-# Automatic creation of Moving Average Envelope classes
-
-for movav in MovingAverage._movavs[1:]:
-    _newclsdoc = '''
+_newclsdoc = '''
     %s and envelope bands separated "perc" from it
 
     Formula:
@@ -85,19 +80,20 @@ for movav in MovingAverage._movavs[1:]:
     See also:
       - http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_average_envelopes
     '''
+# Automatic creation of Moving Average Envelope classes
+
+for movav in MovingAverage._movavs[1:]:
     # Skip aliases - they will be created automatically
     if getattr(movav, 'aliased', ''):
         continue
 
     movname = movav.__name__
     linename = movav.lines._getlinealias(0)
-    newclsname = movname + 'Envelope'
+    newclsname = f'{movname}Envelope'
 
     newaliases = []
     for alias in getattr(movav, 'alias', []):
-        for suffix in ['Envelope']:
-            newaliases.append(alias + suffix)
-
+        newaliases.extend(alias + suffix for suffix in ['Envelope'])
     newclsdoc = _newclsdoc % (movname, linename, movname, linename, linename)
 
     newclsdct = {'__doc__': newclsdoc,

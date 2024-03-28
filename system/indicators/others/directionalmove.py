@@ -4,9 +4,9 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from .basicops import Indicator
-from .basicops import And, If, MovAv
-from . import ATR
+from ..basicops import Indicator
+from ..basicops import And, If, MovAv
+from ..volatility.atr import ATR
 
 class UpMove(Indicator):
     '''

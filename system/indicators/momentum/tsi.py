@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function,
 
 
 import backtrader as bt
-from . import EMA
+from ..trends.moving_average._003_ema import EMA
 
 
 class TrueStrengthIndicator(bt.Indicator):

@@ -70,9 +70,9 @@ from .volatility.atr import *                      # lag       ; oversell-buy
 # Standard Deviation:
 from .volatility.stddev import *
 from .volatility.bollinger import *                     # lag       ; oversell-buy
-from .volatility.envelope import *
+from .envelope import *
 from .volatility.heikinashi import *
-from .volatility.pivotpoint import *
+from .pivotpoint import *
 from .volatility.psar import *
 from .volatility.dv2 import *
 from .volatility.kst import *
@@ -111,16 +111,16 @@ from .momentum.cci import *                             # coincident; oversell-b
 # MACD (Moving Average Convergence/Divergence)
 # MACDEXT (MACD with controllable MA type)
 # MACDFIX (Moving Average Convergence/Divergence Fix 12/26)
-from momentum.macd import *
+from .momentum.macd import *
 
-from momentum.rmi import *
-from momentum.dpo import *
-from momentum.trix import *
-from momentum.tsi import *
-from momentum.ultimateoscillator import *
-from momentum.awesomeoscillator import *
-from momentum.priceoscillator import *
-from momentum.stochastic import *
+from .momentum.rmi import *
+from .momentum.dpo import *
+from .momentum.trix import *
+from .momentum.tsi import *
+from .momentum.ultimateoscillator import *
+from .momentum.awesomeoscillator import *
+from .momentum.priceoscillator import *
+from .momentum.stochastic import *
 
 ## cycle(vs. trend) (leading >> lagging) based on Hurst theory =======
 # 和分形维数一起使用，不构建策略，做风控

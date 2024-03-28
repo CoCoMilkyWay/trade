@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function,
 
 
 from ..basicops import Indicator, MovAv
-from .. import ATR
+from ..volatility.atr import ATR
 
 
 class PrettyGoodOscillator(Indicator):

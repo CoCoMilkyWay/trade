@@ -23,7 +23,7 @@ from __future__ import (absolute_import, division, print_function,
 
 
 import backtrader as bt
-from . import MovAv
+from ..basicops import MovAv
 
 
 __all__ = ['haDelta', 'haD']

@@ -22,7 +22,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 
-from . import Indicator, SMA, PercentRank
+from .. import Indicator, SMA, PercentRank
 
 
 __all__ = ['DV2']

@@ -4,7 +4,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from .basicops import PeriodN
+from ..basicops import PeriodN
 
 
 __all__ = ['ParabolicSAR', 'PSAR']
