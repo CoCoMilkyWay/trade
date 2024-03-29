@@ -30,7 +30,7 @@ data_sel = 'SSE' # dummy/SSE
 if data_sel == 'SSE':
     # real SSE data
     DATAFEED = bt.feeds.PandasData
-    sids = [0]
+    sids = [0,1,2,3,4,5,6,7,100]
 elif data_sel == 'dummy':
     # fast dummy data
     modpath = os.path.dirname(os.path.abspath(__file__))
@@ -44,7 +44,7 @@ elif data_sel == 'dummy':
 # after a bar is closed, the order is executed as early as the second open price
 # Market (default), Close, Limit, Stop, StopLimit
 exectype = bt.Order.Close # market open usually has higher slippage due to high external volume
-plot = False
+plot = True
 
 # =============================================================================================
 class Strategy(bt.Strategy):
@@ -53,15 +53,21 @@ class Strategy(bt.Strategy):
         datas = [self.data.close,] #(self.data.close+self.data.open)/2
         
     def start(self):
-        self.broker.setcommission(commission=0.0, mult=1.0, margin=0.0)
+        self.broker.setcommission(commission=0.0001, mult=1.0, margin=0.0)
         
     def next(self):
         # if self.orderid:
         #     # if an order is active, no new orders are allowed
         #     return
-        
-        self.orderid = self.close(exectype=exectype)
-        self.orderid = self.buy(exectype=exectype)
+        for data in self.datas:
+            self.orderid = self.close(
+                data=data,
+                size = 1.0,
+                exectype=exectype)
+            self.orderid = self.buy(
+                data=data,
+                size = 1.0,
+                exectype=exectype)
             
 
     def stop(self):
