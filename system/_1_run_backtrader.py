@@ -19,106 +19,86 @@ from indicators import *
 
 from _2_csv_data_parse import parse_csv_tradedate, parse_csv_metadata, parse_csv_kline_d1
 
-
+# =============================================================================================
 # 假装 UTC 就是 Asia/Shanghai (简化计算)，所有datetime默认 tz-naive -> tz-aware
 TZ = "UTC"
 data_now = datetime.now().strftime('%Y-%m-%d')
 START = '1900-01-01'
 END = data_now
 
-
-data_sel = 'dummy' # dummy/SSE
+data_sel = 'SSE' # dummy/SSE
 if data_sel == 'SSE':
     # real SSE data
     DATAFEED = bt.feeds.PandasData
-    sids = [1]
+    sids = [0]
 elif data_sel == 'dummy':
     # fast dummy data
     modpath = os.path.dirname(os.path.abspath(__file__))
     dataspath = './datas'
     datafiles = [
         #'2006-01-02-volume-min-001.txt',
-        '2006-day-001.txt',
+        'nvda-1999-2014.txt',
         #'2006-week-001.txt',
     ]
 
+# after a bar is closed, the order is executed as early as the second open price
+# Market (default), Close, Limit, Stop, StopLimit
+exectype = bt.Order.Close # market open usually has higher slippage due to high external volume
+plot = False
 
+# =============================================================================================
 class Strategy(bt.Strategy):
-    params = (
-        ('datalines', False),  # Print data lines
-        ('lendetails', False), # Print individual items memory usage
-    )
-
     def __init__(self):
+        self.orderid = None
         datas = [self.data.close,] #(self.data.close+self.data.open)/2
         
+    def start(self):
+        self.broker.setcommission(commission=0.0, mult=1.0, margin=0.0)
+        
     def next(self):
-        if self.p.datalines:
-            txt = ','.join([
-                '%04d' % len(self),
-                '%04d' % len(self.data0),
-                self.data.datetime.date(0).isoformat()
-            ])
-
-            print(txt)
-
-    def loglendetails(self, msg):
-        if self.p.lendetails:
-            print(msg)
+        # if self.orderid:
+        #     # if an order is active, no new orders are allowed
+        #     return
+        
+        self.orderid = self.close(exectype=exectype)
+        self.orderid = self.buy(exectype=exectype)
+            
 
     def stop(self):
+        from _2_bt_misc import print_data_size
         super(Strategy, self).stop()
+        print_data_size(self)
 
-        tlen = 0
-        self.loglendetails('-- Evaluating Datas')
-        for i, data in enumerate(self.datas):
-            tdata = 0
-            for line in data.lines:
-                tdata += len(line.array)
-                tline = len(line.array)
-
-            tlen += tdata
-            logtxt = '---- Data {} Total Cells {} - Cells per Line {}'
-            self.loglendetails(logtxt.format(i, tdata, tline))
-
-        self.loglendetails('-- Evaluating Indicators')
-        for i, ind in enumerate(self.getindicators()):
-            tlen += self.rindicator(ind, i, 0)
-
-        self.loglendetails('-- Evaluating Observers')
-        logtxt = '---- Observer {} Total Cells {} - Cells per Line {}'
-        for i, obs in enumerate(self.getobservers()):
-            tobs = 0
-            for line in obs.lines:
-                tobs += len(line.array)
-                tline = len(line.array)
-
-            tlen += tdata
-            self.loglendetails(logtxt.format(i, tobs, tline))
-
-        print(f'Total memory cells used: {tlen}')
-
-    def rindicator(self, ind, i, deep):
-        tind = 0
-        for line in ind.lines:
-            tind += len(line.array)
-            tline = len(line.array)
-
-        thisind = tind
-
-        tsub = sum(
-            self.rindicator(sind, j, deep + 1)
-            for j, sind in enumerate(ind.getindicators())
-        )
-        iname = ind.__class__.__name__.split('.')[-1]
-
-        logtxt = '---- Indicator {}.{} {} Total Cells {} - Cells per line {}'
-        self.loglendetails(logtxt.format(deep, i, iname, tind, tline))
-        logtxt = '---- SubIndicators Total Cells {}'
-        self.loglendetails(logtxt.format(deep, i, iname, tsub))
-
-        return tind + tsub
-
+    def log(self, txt, dt=None, nodate=False):
+        if not nodate:
+            dt = dt or self.data.datetime[0]
+            dt = bt.num2date(dt)
+            print(f'{dt.isoformat()}, {txt}')
+        else:
+            print(f'---------- {txt}')
+        
+    def notify_order(self, order):
+        if order.status in [order.Submitted, order.Accepted]:
+            # Buy/Sell order submitted/accepted to/by broker - Nothing to do
+            self.log('ORDER ACCEPTED/SUBMITTED', dt=order.created.dt)
+            self.order = order
+            return
+        if order.status in [order.Expired]:
+            self.log('BUY EXPIRED')
+        elif order.status in [order.Completed]:
+            if order.isbuy():
+                self.log('BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %(
+                    order.executed.price,
+                    order.executed.value,
+                    order.executed.comm))
+            else:  # Sell
+                self.log('SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %(
+                    order.executed.price,
+                    order.executed.value,
+                    order.executed.comm))
+        # Sentinel to None: new orders allowed
+        self.order = None
+        
 def runtest(datas,
             strategy,
             runonce=None,
@@ -160,39 +140,6 @@ def runtest(datas,
         # plotstyle for OHLC bars: line/bar/candle (on close)
         cerebro.plot(style='bar')
     return [cerebro]
-def data_feed_dummy():
-    datas = []
-    for datafile in datafiles:
-        datapath = os.path.join(modpath, f'{dataspath}/{datafile}')
-        #datapath = os.path.join(modpath, './datas/nvda-1999-2014.txt')
-        data = bt.feeds.YahooFinanceCSVData(
-            dataname=datapath,
-            # Do not pass values before this date
-            fromdate=datetime(2000, 1, 1),
-            # Do not pass values before this date
-            todate=datetime(2000, 12, 31),
-            # Do not pass values after this date
-            reverse=False)
-        datas.append(data)
-    return datas
-
-def data_feed_SSE():
-        # real SSE data
-    datas = []
-    start_session = pytz.timezone(TZ).localize(datetime.strptime(START, '%Y-%m-%d'))
-    end_session = pytz.timezone(TZ).localize(datetime.strptime(END, '%Y-%m-%d'))
-    # trade_days, special_trade_days, special_holiday_days = parse_csv_tradedate()
-    metadata, index_info = parse_csv_metadata() # index_info = [asset_csv_path, num_lines]
-    symbol_map = metadata.loc[:,['symbol','asset_name','first_traded']]
-    print(metadata.iloc[0,:3])
-        # split:除权, merge:填权, dividend:除息
-        # 用了后复权数据，不需要adjast factor
-        # parse_csv_split_merge_dividend(symbol_map, start_session, end_session)
-        # (Date) * (Open, High, Low, Close, Volume, OpenInterest)
-    for kline in parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sids):
-        data = DATAFEED(dataname=kline)
-        datas.append(data)
-    return datas
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -202,11 +149,12 @@ def parse_args():
                         help=('Plot the result'))
     return parser.parse_args()
 
-
 if __name__ == '__main__':
+    from _2_bt_misc import data_feed_dummy, data_feed_SSE
+
     if data_sel == 'SSE':
         datas = data_feed_SSE()
     elif data_sel == 'dummy':
         datas = data_feed_dummy()
 
-    runtest(datas=datas,strategy=Strategy)
+    runtest(datas=datas,strategy=Strategy,plot=plot)
