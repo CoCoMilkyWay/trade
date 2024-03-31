@@ -19,7 +19,7 @@ fill_missing_trade_day_data = False
 API='baostock'
 
 # path========================================================================================
-modpath = os.path.dirname(os.path.abspath(os.sys.argv[0]))
+modpath = os.path.dirname(os.path.abspath(__file__))
 csv_path = f'{modpath}/../data/'
 log = f'{modpath}/logfile.txt'
 assets_path_list = [csv_path + asset for asset in assets_list]

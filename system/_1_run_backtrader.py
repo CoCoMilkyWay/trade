@@ -10,11 +10,8 @@ import pytz
 import argparse
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import random
 warnings.filterwarnings('ignore')
-sns.set_style('whitegrid')
 
 # append module root directory to sys.path
 os.sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -28,7 +25,7 @@ from indicators import *
 # 假装 UTC 就是 Asia/Shanghai (简化计算)，所有datetime默认 tz-naive -> tz-aware
 TZ = "UTC"
 data_now = datetime.now().strftime('%Y-%m-%d')
-START = '1900-01-01'
+START = '2020-07-09'
 END = data_now
 # in/out sample partition
 oos = pd.Timestamp(END) - pd.Timedelta('30D') # out-of-sample datetime
@@ -47,7 +44,7 @@ if data_sel == 'SSE':
         #'6上证股指期权',
         #'7深证股指期权',
     ]
-    sids = [random.randint(0, 568) for _ in range(round(569*0.01))]
+    sids = [random.randint(0, 568) for _ in range(round(569*0.1))]
     NO_SID = len(sids)
 elif data_sel == 'dummy':
     # fast dummy data
@@ -64,8 +61,9 @@ elif data_sel == 'dummy':
 exectype = bt.Order.Close
 enable_log = False
 plot = True
+plot_data = False
 analysis_factor = False
-analysis_portfolio = True
+analysis_portfolio = False
 
 # =============================================================================================
 class Strategy(bt.Strategy):
@@ -144,7 +142,8 @@ def runtest(datas,
             analyzer=None,
             **kwargs):
     
-    args = parse_args()
+    # not work for ipynb
+    # args = parse_args()
 
     cerebro = bt.Cerebro(
         runonce=runonce,# runonce: indicator in vectorized mode 
@@ -156,7 +155,7 @@ def runtest(datas,
     if isinstance(datas, bt.LineSeries):
         datas = [datas]
     for data in datas:
-        data.plotinfo.plot = False
+        data.plotinfo.plot = plot_data
         cerebro.adddata(data)
         #cerebro.resampledata(data, timeframe=bt.TimeFrame.Weeks)
     if not optimize:
@@ -177,60 +176,8 @@ def runtest(datas,
         cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
     results = cerebro.run()
     if analysis_portfolio:
-        strat = results[0]
-        pyfoliozer = strat.analyzers.getbyname('pyfolio')
-        pf_returns, pf_positions, pf_transactions, gross_lev = pyfoliozer.get_pf_items()
-        pf_benchmark = pf_returns
-        print(type(pf_returns))
-        import _001_pyfolio as pf
-        from _001_pyfolio.utils import extract_rets_pos_txn_from_zipline
-        from _001_pyfolio.plotting import (
-            plot_perf_stats,
-            show_perf_stats,
-            plot_rolling_beta,
-            plot_rolling_returns,
-            plot_rolling_sharpe,
-            plot_drawdown_periods,
-            plot_drawdown_underwater)
-        # pf.create_full_tear_sheet(
-        #     returns,
-        #     positions=positions,
-        #     transactions=transactions,
-        #     gross_lev=gross_lev,
-        #     live_start_date=START,
-        #     round_trips=True)
-        pf.tears.create_full_tear_sheet(
-            pf_returns,
-            positions=pf_positions,
-            transactions=pf_transactions,
-            benchmark_rets=pf_benchmark, # factor-universe-mean-daily-return (index benchmark) / daily-return of a particular asset
-            hide_positions=True
-            )
-        fig, ax_heatmap = plt.subplots(figsize=(15, 8))
-        sns.heatmap(pf_positions.replace(0, np.nan).dropna(how='all', axis=1).T, 
-        cmap=sns.diverging_palette(h_neg=20, h_pos=200), ax=ax_heatmap, center=0)
-
-        # special requirements :(
-        data_intersec = pf_returns.index & pf_benchmark.index
-        pf_returns = pf_returns.loc[data_intersec]
-        pf_positions = pf_positions.loc[data_intersec]
-        fig, ax_perf = plt.subplots(figsize=(15, 8))
-        plot_perf_stats(returns=pf_returns, 
-                        factor_returns=pf_benchmark,     
-                        ax=ax_perf)
-        show_perf_stats(returns=pf_returns, 
-                        factor_returns=pf_benchmark, 
-                        positions=pf_positions, 
-                        transactions=pf_transactions, 
-                        live_start_date=oos)
-        fig, ax_rolling = plt.subplots(figsize=(15, 8))
-        plot_rolling_returns(
-            returns=pf_returns, 
-            factor_returns=pf_benchmark, 
-            live_start_date=oos, 
-            cone_std=(1.0, 1.5, 2.0),
-            ax=ax_rolling)
-        plt.gcf().set_size_inches(14, 8)
+        from _2_bt_misc import analyze_portfolio
+        analyze_portfolio(results)
     if plot:
         # plotstyle for OHLC bars: line/bar/candle (on close)
         cerebro.plot(style='bar')
@@ -244,12 +191,13 @@ def parse_args():
                         help=('Plot the result'))
     return parser.parse_args()
 
-if __name__ == '__main__':
+def main():
     from _2_bt_misc import data_feed_dummy, data_feed_SSE
-
     if data_sel == 'SSE':
         datas = data_feed_SSE()
     elif data_sel == 'dummy':
         datas = data_feed_dummy()
-
     runtest(datas=datas,strategy=Strategy,plot=plot)
+
+if __name__ == '__main__':
+    main()
