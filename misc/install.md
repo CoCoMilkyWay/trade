@@ -18,6 +18,9 @@ export QUANDL_API_KEY="9Q5bVWxqJE-94HKpntUg"
 alias up_bt="pip install ~/work/trade/backtrader"
 alias up_wt="pip install ~/work/trade/wondertrader"
 alias up_vb="pip install ~/work/trade/vectorbt.pro"
+# alias up_al="pip install ~/work/trade/system/_000_alphalens"
+# alias up_pf="pip install ~/work/trade/system/_001_pyfolio"
+# alias up_po="pip install ~/work/trade/system/_002_pypfopt"
 pip install matplotlib==3.2.2
 
 # code .
@@ -81,7 +84,7 @@ mamba uninstall alembic
 pip install alembic
 pip install iso3166==2.0.2
 zipline ingest -b quandl
-mamba install alphalens pyfolio PyPortfolioOpt
+#mamba install alphalens pyfolio PyPortfolioOpt
 
 sudo apt-get install sqlitebrowser
 

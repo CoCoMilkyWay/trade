@@ -1,1 +1,0 @@
-{"dtype": "uint32", "cparams": {"clevel": 5, "shuffle": 1, "cname": "lz4", "quantize": 0}, "chunklen": 131072, "expectedlen": 14011773, "dflt": 0}

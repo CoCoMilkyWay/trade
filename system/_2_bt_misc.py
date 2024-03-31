@@ -1,4 +1,5 @@
 from _1_run_backtrader import *
+from _2_csv_data_parse import parse_csv_tradedate, parse_csv_metadata, parse_csv_kline_d1
 
 def data_feed_dummy():
     datas = []

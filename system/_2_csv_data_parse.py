@@ -6,18 +6,10 @@ import os
 import click
 from tqdm import tqdm
 from pandas.tseries.offsets import CustomBusinessDay
+from _1_run_backtrader import *
 
 # 很蠢的做法: 一边ingest，一边pull API的数据，请先准备好本地csv/sql (flow解耦)
 # 假装 UTC 就是 Asia/Shanghai (简化计算)，所有datetime默认 tz-naive -> tz-aware
-assets_list = [
-    #'1沪A_不包括科创板',
-    #'2深A_不包括创业板',
-    '3科创板',
-    #'4创业板',
-    #'5北A_新老三板',
-    #'6上证股指期权',
-    #'7深证股指期权',
-]
 tz = "UTC"
 data_start = '1900-01-01'
 data_end = datetime.now().strftime('%Y-%m-%d') # '2024-02-19'
