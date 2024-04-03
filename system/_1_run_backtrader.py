@@ -11,6 +11,7 @@ import argparse
 import numpy as np
 import pandas as pd
 import random
+random.seed(datetime.now().timestamp())
 warnings.filterwarnings('ignore')
 
 # append module root directory to sys.path
@@ -19,7 +20,6 @@ os.sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))
 import backtrader as bt
 import backtrader.indicators as btind
 from indicators import *
-
 
 # =============================================================================================
 # 假装 UTC 就是 Asia/Shanghai (简化计算)，所有datetime默认 tz-naive -> tz-aware
@@ -44,7 +44,7 @@ if data_sel == 'SSE':
         #'6上证股指期权',
         #'7深证股指期权',
     ]
-    sids = [random.randint(0, 568) for _ in range(round(569*0.1))]
+    sids = [random.randint(0, 568) for _ in range(round(569*0.01))]
     NO_SID = len(sids)
 elif data_sel == 'dummy':
     # fast dummy data
@@ -59,9 +59,9 @@ elif data_sel == 'dummy':
 # Market (default), Close, Limit, Stop, StopLimit
 # market open usually has higher slippage due to high external volume
 exectype = bt.Order.Close
-enable_log = False
+enable_log = True
 plot = True
-plot_data = False
+plot_data = True
 analysis_factor = False
 analysis_portfolio = False
 
@@ -74,18 +74,21 @@ class Strategy(bt.Strategy):
     def start(self):
         self.broker.setcommission(commission=0.000, mult=1.0, margin=0.0)
         
-    def next(self): 
+    def next_open(self): 
         # executed after 1st bar close, but still in the 1st timestamp
         # in the 2nd timestamp, the order is executed
+        # use cerebro = bt.Cerebro(cheat_on_open=True) at day-bar level, it makes sense
+        # next_open, nextstart_open and prenext_open
         portfolio_value = self.broker.get_value()
         portfolio_cash = self.broker.get_cash()
         slipage = 0
         for data in self.datas:
             self.orderid = self.close(
                 data=data,
+                size=self.getposition(data=data).size,
                 exectype=exectype)
         for data in self.datas:
-            size = round(portfolio_value/NO_SID/(data.close[0] * (1+slipage)))
+            size = round(portfolio_value/NO_SID/(data.open[0] * (1+slipage)))
             self.orderid = self.buy(
                 data=data,
                 size = size,
@@ -122,9 +125,10 @@ class Strategy(bt.Strategy):
                     order.executed.size,
                     order.executed.comm))
             else:  # Sell
-                self.log('SELL EXECUTED, Price: %.2f, Cash+: %.1f( %.2f), Comm %.2f' %(
+                self.log('SELL EXECUTED, Price: %.2f, Cash+: %.1f( %.2f), pnl:%.2f, Comm %.2f' %(
                     order.executed.price,
                     -1*order.executed.price * order.executed.size,
+                    order.executed.size,
                     order.executed.pnl/order.executed.value*100,
                     order.executed.comm))
         # Sentinel to None: new orders allowed
@@ -144,13 +148,14 @@ def runtest(datas,
     
     # not work for ipynb
     # args = parse_args()
-
+    
     cerebro = bt.Cerebro(
         runonce=runonce,# runonce: indicator in vectorized mode 
         preload=preload,# preload: preload datafeed for strategy(strategy/observer always in event mode)
         maxcpus=maxcpus,
         exactbars=exbar,# exbars:   1: deactivate preload/runonce/plot
         stdstats=True,
+        cheat_on_open=True,
     )
     if isinstance(datas, bt.LineSeries):
         datas = [datas]
