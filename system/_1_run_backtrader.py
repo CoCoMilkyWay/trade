@@ -45,7 +45,7 @@ if data_sel == 'SSE':
         #'6上证股指期权',
         #'7深证股指期权',
     ]
-    sids = [random.randint(0, 568) for _ in range(round(569*0.1))]
+    sids = [5, 10] # [random.randint(0, 568) for _ in range(round(569*0.1))]
     NO_SID = len(sids)
 elif data_sel == 'dummy':
     # fast dummy data
