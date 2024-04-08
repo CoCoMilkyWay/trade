@@ -10,6 +10,7 @@ import pytz
 import argparse
 import numpy as np
 import pandas as pd
+import math
 import random
 random.seed(datetime.now().timestamp())
 warnings.filterwarnings('ignore')
@@ -44,7 +45,7 @@ if data_sel == 'SSE':
         #'6上证股指期权',
         #'7深证股指期权',
     ]
-    sids = [random.randint(0, 568) for _ in range(round(569*0.01))]
+    sids = [random.randint(0, 568) for _ in range(round(569*0.1))]
     NO_SID = len(sids)
 elif data_sel == 'dummy':
     # fast dummy data
@@ -87,17 +88,22 @@ class Strategy(bt.Strategy):
         # in the 2nd timestamp, the order is executed
         # use cerebro = bt.Cerebro(cheat_on_open=True) at day-bar level, it makes sense
         # next_open, nextstart_open and prenext_open
-        portfolio_value = self.broker.get_value()
-        portfolio_cash = self.broker.get_cash()
+        portfolio_value = self.broker.get_value() # last close value (share only) when called
+        portfolio_cash = self.broker.get_cash() # cash at last close when called
+        total_value_now = portfolio_cash
+        # current price = data.open[0]
+        for data in self.datas:
+            total_value_now += self.getposition(data=data).size*data.open[0]
         slipage = 0
         for data in self.datas:
+            print(data.open[0],data.close[0],data.open[-1],data.close[-1])
             self.orderid = self.close(
                 data=data,
                 size=self.getposition(data=data).size,
                 exectype=exectype)
         for data in self.datas:
-            size = round(portfolio_value/NO_SID/(data.open[0] * (1+slipage)))
-            print(data.open[0])
+            size = math.floor(total_value_now/NO_SID/(data.open[0] * (1+slipage)))
+            # print((data.open[0]-data.close[-1])/data.close[-1])
             self.orderid = self.buy(
                 data=data,
                 size = size,
@@ -127,15 +133,15 @@ class Strategy(bt.Strategy):
         if order.status in [order.Expired]:
             self.log('BUY EXPIRED')
         elif order.status in [order.Completed]:
+            print(self.broker.get_cash())
             if order.isbuy():
-                self.log('BUY EXECUTED, Price: %.2f, Cash-: %.1f(%.1f shares), Comm %.2f' %(
+                self.log('BUY EXECUTED, Price: %.2f, Cash-: %.1f(%.0f shares), Comm %.2f' %(
                     order.executed.price,
                     order.executed.value,
                     order.executed.size,
                     order.executed.comm))
-                print(self.broker.get_cash())
             else:  # Sell
-                self.log('SELL EXECUTED, Price: %.2f, Cash+: %.1f( %.1f shares), pnl:%.2f %%, Comm %.2f' %(
+                self.log('SELL EXECUTED, Price: %.2f, Cash+: %.1f( %.0f shares), pnl:%.2f %%, Comm %.2f' %(
                     order.executed.price,
                     -1*order.executed.price * order.executed.size,
                     order.executed.size,
@@ -167,8 +173,8 @@ def runtest(datas,
         stdstats=True,
         cheat_on_open=True,
     )
-    if isinstance(datas, bt.LineSeries):
-        datas = [datas]
+    # if isinstance(datas, bt.LineSeries):
+    #     datas = [datas]
     for data in datas:
         data.plotinfo.plot = plot_data
         cerebro.adddata(data)
