@@ -58,23 +58,31 @@ elif data_sel == 'dummy':
 
 # Market (default), Close, Limit, Stop, StopLimit
 # market open usually has higher slippage due to high external volume
-exectype = bt.Order.Close
+cheat_on_open = True # not necessarily cheating, especially for longer period like day bar
+exectype = bt.Order.Market # use Market if set cheat_on_open
 enable_log = True
 plot = True
-plot_data = True
+plot_data = False
 analysis_factor = False
 analysis_portfolio = False
-
 # =============================================================================================
 class Strategy(bt.Strategy):
     def __init__(self):
+        if cheat_on_open:
+            self.cheating = self.cerebro.p.cheat_on_open
         self.orderid = None
         datas = [self.data.close,] #(self.data.close+self.data.open)/2
         
     def start(self):
         self.broker.setcommission(commission=0.000, mult=1.0, margin=0.0)
-        
-    def next_open(self): 
+
+    def next(self):
+        if not self.cheating:
+            self.operate()
+    def next_open(self):
+        if self.cheating:
+            self.operate()
+    def operate(self):
         # executed after 1st bar close, but still in the 1st timestamp
         # in the 2nd timestamp, the order is executed
         # use cerebro = bt.Cerebro(cheat_on_open=True) at day-bar level, it makes sense
@@ -89,6 +97,7 @@ class Strategy(bt.Strategy):
                 exectype=exectype)
         for data in self.datas:
             size = round(portfolio_value/NO_SID/(data.open[0] * (1+slipage)))
+            print(data.open[0])
             self.orderid = self.buy(
                 data=data,
                 size = size,
@@ -119,13 +128,14 @@ class Strategy(bt.Strategy):
             self.log('BUY EXPIRED')
         elif order.status in [order.Completed]:
             if order.isbuy():
-                self.log('BUY EXECUTED, Price: %.2f, Cash-: %.1f(%.1f), Comm %.2f' %(
+                self.log('BUY EXECUTED, Price: %.2f, Cash-: %.1f(%.1f shares), Comm %.2f' %(
                     order.executed.price,
                     order.executed.value,
                     order.executed.size,
                     order.executed.comm))
+                print(self.broker.get_cash())
             else:  # Sell
-                self.log('SELL EXECUTED, Price: %.2f, Cash+: %.1f( %.2f), pnl:%.2f, Comm %.2f' %(
+                self.log('SELL EXECUTED, Price: %.2f, Cash+: %.1f( %.1f shares), pnl:%.2f %%, Comm %.2f' %(
                     order.executed.price,
                     -1*order.executed.price * order.executed.size,
                     order.executed.size,
