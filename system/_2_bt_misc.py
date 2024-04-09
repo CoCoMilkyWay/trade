@@ -29,9 +29,13 @@ def data_feed_SSE():
         # 用了后复权数据，不需要adjast factor
         # parse_csv_split_merge_dividend(symbol_map, start_session, end_session)
         # (Date) * (Open, High, Low, Close, Volume, OpenInterest)
-    for kline in parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sids):
+    sids = stock_pool()
+    for kline, pending_sids in parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sids):
         data = DATAFEED(dataname=kline)
         datas.append(data)
+    if pending_sids:
+        print('missing sids: ',pending_sids)
+        exit()
     return datas
 
 def print_data_size(self):

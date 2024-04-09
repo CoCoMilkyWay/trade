@@ -86,6 +86,7 @@ def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sids)
     for sid, items in symbol_map.iterrows():
         if sid not in pending_sids:
             continue
+        pending_sids.remove(sid)
         symbol = items[0]
         asset_name = items[1]
         first_traded = pytz.timezone(tz).localize(items[2]) # datetime.date type
@@ -132,7 +133,7 @@ def parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sids)
         else:
             kline_filled = kline
         progress_bar.update(1)
-        yield kline_filled # use yield if call iteratively
+        yield kline_filled, pending_sids # use yield if call iteratively
 
 def parse_csv_split_merge_dividend(symbol_map, start_session, end_session):
     '''

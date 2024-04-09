@@ -31,7 +31,6 @@ END = data_now
 # in/out sample partition
 oos = pd.Timestamp(END) - pd.Timedelta('30D') # out-of-sample datetime
 CASH = 500000.0
-
 data_sel = 'SSE' # dummy/SSE
 if data_sel == 'SSE':
     # real SSE data
@@ -45,8 +44,11 @@ if data_sel == 'SSE':
         #'6上证股指期权',
         #'7深证股指期权',
     ]
-    sids = [5, 10] # [random.randint(0, 568) for _ in range(round(569*0.1))]
-    NO_SID = len(sids)
+    NO_SID = 100
+    def stock_pool(): # this should only be init-ed once
+        sids = random.sample(range(569+1), NO_SID)
+        print(sids)
+        return sids
 elif data_sel == 'dummy':
     # fast dummy data
     modpath = os.path.dirname(os.path.abspath(__file__))
@@ -56,7 +58,6 @@ elif data_sel == 'dummy':
         'nvda-1999-2014.txt',
         #'2006-week-001.txt',
     ]
-
 # Market (default), Close, Limit, Stop, StopLimit
 # market open usually has higher slippage due to high external volume
 cheat_on_open = True # not necessarily cheating, especially for longer period like day bar
@@ -66,6 +67,7 @@ plot = True
 plot_data = False
 analysis_factor = False
 analysis_portfolio = False
+
 # =============================================================================================
 class Strategy(bt.Strategy):
     def __init__(self):
