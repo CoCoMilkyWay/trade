@@ -44,7 +44,7 @@ if data_sel == 'SSE':
         #'6上证股指期权',
         #'7深证股指期权',
     ]
-    NO_SID = 100
+    NO_SID = 10
     def stock_pool(): # this should only be init-ed once
         sids = random.sample(range(569+1), NO_SID)
         print(sids)
@@ -58,10 +58,13 @@ elif data_sel == 'dummy':
         'nvda-1999-2014.txt',
         #'2006-week-001.txt',
     ]
-# Market (default), Close, Limit, Stop, StopLimit
+
+# not necessarily cheating, especially for longer period like day bar
+cheat_on_open = False
 # market open usually has higher slippage due to high external volume
-cheat_on_open = True # not necessarily cheating, especially for longer period like day bar
-exectype = bt.Order.Market # use Market if set cheat_on_open
+cheat_on_close = True
+# Market (default), Close, Limit, Stop, StopLimit
+exectype = bt.Order.Market # use Market if set cheat_on_xxxx
 enable_log = True
 plot = True
 plot_data = False
@@ -73,6 +76,8 @@ class Strategy(bt.Strategy):
     def __init__(self):
         if cheat_on_open:
             self.cheating = self.cerebro.p.cheat_on_open
+        if cheat_on_close:
+            self.cheating = self.cerebro.p.cheat_on_close
         self.orderid = None
         datas = [self.data.close,] #(self.data.close+self.data.open)/2
         
@@ -83,7 +88,10 @@ class Strategy(bt.Strategy):
         if not self.cheating:
             self.operate()
     def next_open(self):
-        if self.cheating:
+        if self.cerebro.p.cheat_on_open:
+            self.operate()
+    def next_close(self):
+        if self.cerebro.p.cheat_on_close:
             self.operate()
     def operate(self):
         # executed after 1st bar close, but still in the 1st timestamp
@@ -93,22 +101,23 @@ class Strategy(bt.Strategy):
         portfolio_value = self.broker.get_value() # last close value (share only) when called
         portfolio_cash = self.broker.get_cash() # cash at last close when called
         total_value_now = portfolio_cash
-        # current price = data.open[0]
+        def current_price(data):
+            return data.close[0]
         for data in self.datas:
-            total_value_now += self.getposition(data=data).size*data.open[0]
+            total_value_now += self.getposition(data=data).size*current_price(data)
         slipage = 0
         for data in self.datas:
-            print(data.open[0],data.close[0],data.open[-1],data.close[-1])
+            print('open today: ', data.open[0],' close today: ', data.close[0])
             self.orderid = self.close(
                 data=data,
                 size=self.getposition(data=data).size,
                 exectype=exectype)
         for data in self.datas:
-            size = math.floor(total_value_now/NO_SID/(data.open[0] * (1+slipage)))
+            size = math.floor(total_value_now/NO_SID/(current_price(data) * (1+slipage)))
             # print((data.open[0]-data.close[-1])/data.close[-1])
             self.orderid = self.buy(
                 data=data,
-                size = size,
+                size=size,
                 exectype=exectype)            
 
     def stop(self):
@@ -135,7 +144,6 @@ class Strategy(bt.Strategy):
         if order.status in [order.Expired]:
             self.log('BUY EXPIRED')
         elif order.status in [order.Completed]:
-            print(self.broker.get_cash())
             if order.isbuy():
                 self.log('BUY EXECUTED, Price: %.2f, Cash-: %.1f(%.0f shares), Comm %.2f' %(
                     order.executed.price,
@@ -173,7 +181,8 @@ def runtest(datas,
         maxcpus=maxcpus,
         exactbars=exbar,# exbars:   1: deactivate preload/runonce/plot
         stdstats=True,
-        cheat_on_open=True,
+        cheat_on_open=cheat_on_open,
+        cheat_on_close=cheat_on_close,
     )
     # if isinstance(datas, bt.LineSeries):
     #     datas = [datas]
