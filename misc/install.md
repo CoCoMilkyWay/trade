@@ -63,6 +63,9 @@ conda config --set proxy_servers.http http://198.18.0.1:7890
 conda config --set proxy_servers.https http://198.18.0.1:7890
 conda config --set ssl_verify false
 
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+
 # successful flow installing zipline+alphalens+pyfolio
 
 # ta-lib
