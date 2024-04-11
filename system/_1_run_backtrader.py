@@ -44,7 +44,7 @@ if data_sel == 'SSE':
         #'6上证股指期权',
         #'7深证股指期权',
     ]
-    NO_SID = 10
+    NO_SID = 569
     def stock_pool(): # this should only be init-ed once
         sids = random.sample(range(569+1), NO_SID)
         print(sids)
@@ -65,8 +65,8 @@ cheat_on_open = False
 cheat_on_close = True
 # Market (default), Close, Limit, Stop, StopLimit
 exectype = bt.Order.Market # use Market if set cheat_on_xxxx
-enable_log = True
-plot = True
+enable_log = False
+plot = False
 plot_data = False
 analysis_factor = False
 analysis_portfolio = False
@@ -107,14 +107,14 @@ class Strategy(bt.Strategy):
             total_value_now += self.getposition(data=data).size*current_price(data)
         slipage = 0
         for data in self.datas:
-            print('open today: ', data.open[0],' close today: ', data.close[0])
+            # print('open today: ', data.open[0],' close today: ', data.close[0])
+            print(data.close[0]/data.open[0])
             self.orderid = self.close(
                 data=data,
                 size=self.getposition(data=data).size,
                 exectype=exectype)
         for data in self.datas:
             size = math.floor(total_value_now/NO_SID/(current_price(data) * (1+slipage)))
-            # print((data.open[0]-data.close[-1])/data.close[-1])
             self.orderid = self.buy(
                 data=data,
                 size=size,

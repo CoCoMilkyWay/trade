@@ -35,7 +35,7 @@ def data_feed_SSE():
         datas.append(data)
     if pending_sids:
         print('missing sids: ',pending_sids)
-        exit()
+        # exit()
     return datas
 
 def print_data_size(self):
