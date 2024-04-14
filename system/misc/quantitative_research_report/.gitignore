@@ -1,0 +1,17 @@
+# Config
+config.ini
+
+# Local Data
+data/*.h5
+data/*.txt
+
+# research report
+research_report/*
+
+# Python:
+*.py[cod]
+*.so
+*.egg
+*.egg-info
+dist
+build
