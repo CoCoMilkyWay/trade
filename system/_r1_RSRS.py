@@ -84,7 +84,7 @@ class Strategy(bt.Strategy):
             self.cheating = self.cerebro.p.cheat_on_close
         self.orderid = None
         datas = [self.data.close,] #(self.data.close+self.data.open)/2
-        
+
     def start(self):
         self.broker.setcommission(commission=0.000, mult=1.0, margin=0.0)
 
@@ -132,7 +132,7 @@ class Strategy(bt.Strategy):
             print(f'{dt.isoformat()}, {txt}')
         else:
             print(f'---------- {txt}')
-        
+
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
@@ -157,7 +157,7 @@ class Strategy(bt.Strategy):
                     order.executed.comm))
         # Sentinel to None: new orders allowed
         self.order = None
-        
+
 def runtest(datas,
             strategy,
             runonce=None,
@@ -169,10 +169,10 @@ def runtest(datas,
             writer=None,
             analyzer=None,
             **kwargs):
-    
+
     # not work for ipynb
     # args = parse_args()
-    
+
     cerebro = bt.Cerebro(
         runonce=runonce,# runonce: indicator in vectorized mode 
         preload=preload,# preload: preload datafeed for strategy(strategy/observer always in event mode)
