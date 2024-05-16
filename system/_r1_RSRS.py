@@ -31,7 +31,7 @@ END = date_now
 # in/out sample partition
 oos = pd.Timestamp(END) - pd.Timedelta('30D') # out-of-sample datetime
 CASH = 500000.0
-data_sel = 'SSE' # dummy/SSE
+data_sel = 'dummy' # dummy/SSE
 if data_sel == 'SSE':
     # real SSE data
     DATAFEED = bt.feeds.PandasData
@@ -44,7 +44,7 @@ if data_sel == 'SSE':
         #'6上证股指期权',
         #'7深证股指期权',
     ]
-    NO_SID = 569
+    NO_SID = 5
     def stock_pool(): # this should only be init-ed once
         sids = random.sample(range(569+1), NO_SID)
         print(sids)
@@ -69,9 +69,9 @@ cheat_on_open = False
 cheat_on_close = True
 # Market (default), Close, Limit, Stop, StopLimit
 exectype = bt.Order.Market # use Market if set cheat_on_xxxx
-enable_log = False
-plot = False
-plot_data = False
+enable_log = True
+plot = True # plot default observers (portfolio)
+plot_assets = False # plot assets price/buy/sells
 analysis_factor = False
 analysis_portfolio = False
 
@@ -105,19 +105,17 @@ class Strategy(bt.Strategy):
             return data.close[0]
         for data in self.datas:
             total_value_now += self.getposition(data=data).size*current_price(data)
-        slipage = 0
         for data in self.datas:
             # print('open today: ', data.open[0],' close today: ', data.close[0])
-            print(data.close[0]/data.open[0])
             self.orderid = self.close(
                 data=data,
                 size=self.getposition(data=data).size,
                 exectype=exectype)
         for data in self.datas:
-            size = math.floor(total_value_now/NO_SID/(current_price(data) * (1+slipage)))
+            size = math.floor(total_value_now)
             self.orderid = self.buy(
                 data=data,
-                size=size,
+                # size=portfolio_cash,
                 exectype=exectype)            
 
     def stop(self):
@@ -187,7 +185,7 @@ def runtest(datas,
     # if isinstance(datas, bt.LineSeries):
     #     datas = [datas]
     for data in datas:
-        data.plotinfo.plot = plot_data
+        data.plotinfo.plot = plot_assets
         cerebro.adddata(data)
         #cerebro.resampledata(data, timeframe=bt.TimeFrame.Weeks)
     if not optimize:

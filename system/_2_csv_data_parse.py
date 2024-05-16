@@ -6,7 +6,6 @@ import os
 import click
 from tqdm import tqdm
 from pandas.tseries.offsets import CustomBusinessDay
-from _1_run_backtrader import *
 
 # 很蠢的做法: 一边ingest，一边pull API的数据，请先准备好本地csv/sql (flow解耦)
 # 假装 UTC 就是 Asia/Shanghai (简化计算)，所有datetime默认 tz-naive -> tz-aware
@@ -22,12 +21,12 @@ API='baostock'
 modpath = os.path.dirname(os.path.abspath(__file__))
 csv_path = f'{modpath}/../data/'
 log = f'{modpath}/logfile.txt'
-assets_path_list = [csv_path + asset for asset in assets_list]
 
 # API parsing=================================================================================
-def parse_csv_metadata(show_progress=True, type='equity'):
+def parse_csv_metadata(cfg, show_progress=True, type='equity'):
     extracted_rows = []
     index_info = []
+    assets_path_list = [csv_path + asset for asset in cfg.assets_list]
     for assets_path in assets_path_list:
         assets = assets_path.split('/')[-1]
         for asset_csv_name in tqdm(os.listdir(assets_path), desc=f'{assets}'):

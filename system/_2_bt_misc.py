@@ -1,10 +1,22 @@
-from _1_run_backtrader import *
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+import os
+import warnings
+from datetime import datetime
+import pytz
+import numpy as np
+import pandas as pd
+import random
+random.seed(datetime.now().timestamp())
+warnings.filterwarnings('ignore')
+import backtrader as bt
+
 from _2_csv_data_parse import parse_csv_tradedate, parse_csv_metadata, parse_csv_kline_d1
 
-def data_feed_dummy():
+def data_feed_dummy(cfg):
     datas = []
-    for datafile in datafiles:
-        datapath = os.path.join(modpath, f'{dataspath}/{datafile}')
+    for datafile in cfg.datafiles:
+        datapath = os.path.join(cfg.modpath, f'{cfg.dataspath}/{datafile}')
         data = bt.feeds.YahooFinanceCSVData(
             dataname=datapath,
             # Do not pass values before this date
@@ -16,22 +28,22 @@ def data_feed_dummy():
         datas.append(data)
     return datas
 
-def data_feed_SSE():
+def data_feed_SSE(cfg):
         # real SSE data
     datas = []
-    start_session = pytz.timezone(TZ).localize(datetime.strptime(START, '%Y-%m-%d'))
-    end_session = pytz.timezone(TZ).localize(datetime.strptime(END, '%Y-%m-%d'))
+    start_session = pytz.timezone(cfg.TZ).localize(datetime.strptime(cfg.START, '%Y-%m-%d'))
+    end_session = pytz.timezone(cfg.TZ).localize(datetime.strptime(cfg.END, '%Y-%m-%d'))
     # trade_days, special_trade_days, special_holiday_days = parse_csv_tradedate()
-    metadata, index_info = parse_csv_metadata() # index_info = [asset_csv_path, num_lines]
+    metadata, index_info = parse_csv_metadata(cfg) # index_info = [asset_csv_path, num_lines]
     symbol_map = metadata.loc[:,['symbol','asset_name','first_traded']]
     print(metadata.iloc[0,:3])
         # split:除权, merge:填权, dividend:除息
         # 用了后复权数据，不需要adjast factor
         # parse_csv_split_merge_dividend(symbol_map, start_session, end_session)
         # (Date) * (Open, High, Low, Close, Volume, OpenInterest)
-    sids = stock_pool()
+    sids = cfg.stock_pool()
     for kline, pending_sids in parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sids):
-        data = DATAFEED(dataname=kline)
+        data = cfg.DATAFEED(dataname=kline)
         datas.append(data)
     if pending_sids:
         print('missing sids: ',pending_sids)
@@ -153,7 +165,7 @@ tutorial: https://github.com/quantopian/alphalens/blob/master/alphalens/examples
 factor metrics: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/predictive_vs_non-predictive_factor.ipynb
 '''
 
-def analyze_portfolio(results):
+def analyze_portfolio(results, cfg):
     strat = results[0]
     pyfoliozer = strat.analyzers.getbyname('pyfolio')
     pf_returns, pf_positions, pf_transactions, gross_lev = pyfoliozer.get_pf_items()
@@ -194,12 +206,12 @@ def analyze_portfolio(results):
                     factor_returns=pf_benchmark, 
                     positions=pf_positions, 
                     transactions=pf_transactions, 
-                    live_start_date=oos)
+                    live_start_date=cfg.oos)
     fig, ax_rolling = plt.subplots(figsize=(15, 8))
     plot_rolling_returns(
         returns=pf_returns, 
         factor_returns=pf_benchmark, 
-        live_start_date=oos, 
+        live_start_date=cfg.oos, 
         cone_std=(1.0, 1.5, 2.0),
         ax=ax_rolling)
     plt.gcf().set_size_inches(14, 8)

@@ -1,6 +1,6 @@
 # use root to create root WSL (not user WSL)
 # ~/.bashrc
-export clash_ip="198.18.0.1"
+export clash_ip="127.0.0.1"
 export http_proxy="http://$clash_ip:7890"
 export https_proxy="http://$clash_ip:7890"
 export ftp_proxy="http://$clash_ip:7890"
@@ -9,7 +9,7 @@ export httpsProxy="http://$clash_ip:7890"
 export ftpProxy="http://$clash_ip:7890"
 export HTTP_PROXY="http://$clash_ip:7890"
 export HTTPS_PROXY="http://$clash_ip:7890"
-alias pip="pip --proxy http://198.18.0.1:7890"
+alias pip="pip --proxy http://$clash_ip:7890"
 env | grep -i proxy
 # use WSL IP(dynamic, use ipconfig to check in windows cmd) as display port to external VCXSRV server
 cd /home/work/trade
@@ -27,9 +27,9 @@ pip install matplotlib==3.2.2
 
 # APT(ubuntu) proxy
 /etc/apt/apt.conf
-Acquire::http::proxy "http://198.18.0.1:7890";
-Acquire::https::proxy "http://198.18.0.1:7890";
-Acquire::ftp::proxy "http://198.18.0.1:7890";
+Acquire::http::proxy "http://$clash_ip:7890";
+Acquire::https::proxy "http://$clash_ip:7890";
+Acquire::ftp::proxy "http://$clash_ip:7890";
 
 sudo apt install resolvconf
 sudo vim /etc/resolvconf/resolv.conf.d/base
@@ -57,10 +57,10 @@ git clone --recurse-submodules -j8 https://github.com/CoCoMilkyWay/trade.git
 git config pull.rebase false
 git config --global user.name "CoCoMilkyWay"
 git config --global user.email "wangchuyin980321@gmail.com"
-git config --global http.proxy http://198.18.0.1:7890
-git config --global https.proxy http://198.18.0.1:7890
-conda config --set proxy_servers.http http://198.18.0.1:7890
-conda config --set proxy_servers.https http://198.18.0.1:7890
+git config --global http.proxy http://$clash_ip:7890
+git config --global https.proxy http://$clash_ip:7890
+conda config --set proxy_servers.http http://$clash_ip:7890
+conda config --set proxy_servers.https http://$clash_ip:7890
 conda config --set ssl_verify false
 
 git config --global --unset http.proxy
