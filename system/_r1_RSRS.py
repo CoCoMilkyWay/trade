@@ -9,8 +9,10 @@ from datetime import datetime
 import argparse
 import numpy as np
 import pandas as pd
+import statsmodels.api as sm
 import math
 import random
+import matplotlib.pyplot as plt
 random.seed(datetime.now().timestamp())
 warnings.filterwarnings('ignore')
 
@@ -69,7 +71,7 @@ cheat_on_close = True
 # Market (default), Close, Limit, Stop, StopLimit
 exectype = bt.Order.Market # use Market if set cheat_on_xxxx
 enable_log = True
-plot = True # plot default observers (portfolio)
+plot = False # plot default observers (portfolio)
 plot_assets = False # plot assets price/buy/sells
 analysis_factor = False
 analysis_portfolio = False
@@ -82,7 +84,12 @@ class Strategy(bt.Strategy):
         if cheat_on_close:
             self.cheating = self.cerebro.p.cheat_on_close
         self.orderid = None
-        datas = [self.data.close,] #(self.data.close+self.data.open)/2
+        # datas = [self.data.close,] #(self.data.close+self.data.open)/2
+        self.num_bins = 100
+        self.min_edge = 0.5
+        self.max_edge = 1.5
+        self.bin_edges = np.linspace(self.min_edge, self.max_edge, self.num_bins + 1)
+        self.histo = [0] * self.num_bins
 
     def start(self):
         self.broker.setcommission(commission=0.000, mult=1.0, margin=0.0)
@@ -96,31 +103,69 @@ class Strategy(bt.Strategy):
     def next_close(self): # avaliable only at day-bar level
         if self.cerebro.p.cheat_on_close:
             self.operate()
+    def OLS_fit(self, y, x):
+        # Add constant for intercept
+        # x = sm.add_constant(np.arange(len(y)))
+        # Fit OLS model
+        model = sm.OLS(y, x).fit() # y = param[0] + param[1]*x + residue
+        # endog(y, dependent variable)
+        # exog(x, independent variable)
+        
+        # Get OLS parameters
+        ols_params = model.params
+        # Calculate R-squared (pseudo-R-squared)
+        ssr = model.ssr
+        sst = np.sum((y - np.mean(y))**2)
+        # R^2=1  : every points lies on OLS(perfect fit)
+        # R^2=0.8: 80% of the variance is explained
+        r_squared = 1 - (ssr / sst)
+        return ols_params, r_squared
     def operate(self):
-        portfolio_value = self.broker.get_value() # last close value (share only) when called
-        portfolio_cash = self.broker.get_cash() # cash at last close when called
-        total_value_now = portfolio_cash
-        def current_price(data):
-            return data.close[0]
+        size = 10 # n previous days = n+1 days in total
         for data in self.datas:
-            total_value_now += self.getposition(data=data).size*current_price(data)
-        for data in self.datas:
-            # print('open today: ', data.open[0],' close today: ', data.close[0])
-            self.orderid = self.close(
-                data=data,
-                size=self.getposition(data=data).size,
-                exectype=exectype)
-        for data in self.datas:
-            size = math.floor(total_value_now)
-            self.orderid = self.buy(
-                data=data,
-                # size=portfolio_cash,
-                exectype=exectype)            
+            high = np.array(data.high.get(ago=0, size=size), dtype=float)
+            low = np.array(data.low.get(ago=0, size=size), dtype=float)
+            # high[1:]/high[:-1]
+            if(len(high)<size):
+                break
+            [slope_RSRS], RSRS_r2 = self.OLS_fit(high,low)
+            print(RSRS_r2)
+            for i in range(self.num_bins):
+                if self.bin_edges[i] <= slope_RSRS < self.bin_edges[i + 1]:
+                    # print(i, slope_high)
+                    self.histo[i] += 1
+                    break
+        # portfolio_value = self.broker.get_value() # last close value (share only) when called
+        # portfolio_cash = self.broker.get_cash() # cash at last close when called
+        # total_value_now = portfolio_cash
+        # def current_price(data):
+        #     return data.close[0]
+        # for data in self.datas:
+        #     total_value_now += self.getposition(data=data).size*current_price(data)
+        # for data in self.datas:
+        #     # print('open today: ', data.open[0],' close today: ', data.close[0])
+        #     self.orderid = self.close(
+        #         data=data,
+        #         size=self.getposition(data=data).size,
+        #         exectype=exectype)
+        # for data in self.datas:
+        #     size = math.floor(total_value_now)
+        #     self.orderid = self.buy(
+        #         data=data,
+        #         # size=portfolio_cash,
+        #         exectype=exectype)            
 
     def stop(self):
         from _2_bt_misc import print_data_size
         super(Strategy, self).stop()
         print_data_size(self)
+        # Plot histogram
+        plt.bar(self.bin_edges[:-1], self.histo, width=self.bin_edges[1] - self.bin_edges[0], align='edge')
+        plt.xlabel('Bins')
+        plt.ylabel('Frequency')
+        plt.title('Histogram')
+        plt.grid(True)
+        plt.show()
 
     def log(self, txt, dt=None, nodate=False):
         if not enable_log:
