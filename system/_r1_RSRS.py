@@ -10,9 +10,11 @@ import argparse
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+from statsmodels.sandbox.regression.predstd import wls_prediction_std
 import math
 import random
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 random.seed(datetime.now().timestamp())
 warnings.filterwarnings('ignore')
 
@@ -32,7 +34,7 @@ END = date_now
 # in/out sample partition
 oos = pd.Timestamp(END) - pd.Timedelta('30D') # out-of-sample datetime
 CASH = 500000.0
-data_sel = 'dummy' # dummy/SSE
+data_sel = 'SSE' # dummy/SSE
 if data_sel == 'SSE':
     # real SSE data
     DATAFEED = bt.feeds.PandasData
@@ -45,7 +47,7 @@ if data_sel == 'SSE':
         #'6上证股指期权',
         #'7深证股指期权',
     ]
-    NO_SID = 5
+    NO_SID = 3
     def stock_pool(): # this should only be init-ed once
         sids = random.sample(range(569+1), NO_SID)
         print(sids)
@@ -71,29 +73,43 @@ cheat_on_close = True
 # Market (default), Close, Limit, Stop, StopLimit
 exectype = bt.Order.Market # use Market if set cheat_on_xxxx
 enable_log = True
-plot = False # plot default observers (portfolio)
-plot_assets = False # plot assets price/buy/sells
+plot = True # plot default observers (portfolio)
+plot_assets = True # plot assets price/buy/sells
 analysis_factor = False
 analysis_portfolio = False
-
+hist_plot = False
+num_bins = 50
+min_edge = 0.5
+max_edge = 1.5
 # =============================================================================================
+class variable_observer(bt.observer.Observer):
+    alias = ('variables',)
+    lines = ('rsrs',)
+    
+    plotinfo = dict(plot=True, subplot=True)
+    
+    # when accessing other method, make sure they exist as time of access
+    def next(self): # executed after 'next' method
+        self.lines.rsrs[0] = self._owner.slope_RSRS # self._owner = Strategy
 class Strategy(bt.Strategy):
     def __init__(self):
+        self.iter = 0
         if cheat_on_open:
             self.cheating = self.cerebro.p.cheat_on_open
         if cheat_on_close:
             self.cheating = self.cerebro.p.cheat_on_close
         self.orderid = None
-        # datas = [self.data.close,] #(self.data.close+self.data.open)/2
-        self.num_bins = 100
-        self.min_edge = 0.5
-        self.max_edge = 1.5
-        self.bin_edges = np.linspace(self.min_edge, self.max_edge, self.num_bins + 1)
-        self.histo = [0] * self.num_bins
-
+        self.days = 0
+        self.dtlast = 0
+        self.slope_RSRS = 0
+        # self.datas = [self.data.close,] #(self.data.close+self.data.open)/2
+        if(hist_plot):
+            self.bin_edges = np.linspace(min_edge, max_edge, num_bins + 1)
+            self.bin_histo = [0] * num_bins
+            self.bin_centers = 0.5 * (self.bin_edges[:-1] + self.bin_edges[1:])
+            self.bin_colors = [0] * num_bins
     def start(self):
         self.broker.setcommission(commission=0.000, mult=1.0, margin=0.0)
-
     def next(self):
         if not self.cheating:
             self.operate()
@@ -103,38 +119,54 @@ class Strategy(bt.Strategy):
     def next_close(self): # avaliable only at day-bar level
         if self.cerebro.p.cheat_on_close:
             self.operate()
+    def dtime_dt(self, dt):
+        return math.trunc(dt)
+    def dtime_tm(self, dt):
+        return math.modf(dt)[0]
+    def _daycount(self):
+        dt = self.dtime_dt(self.data.datetime[0])
+        if dt > self.dtlast:
+            self.days += 1
+            self.dtlast = dt
     def OLS_fit(self, y, x):
-        # Add constant for intercept
-        # x = sm.add_constant(np.arange(len(y)))
+        # OLS, WLS, GLS work on functionals:
+        #       y = a + b*f1 + c*f2 + residue, 
+        #       solve for a,b,c that minimize residue
+        # (functional)basis of the model
+        X = np.column_stack((np.ones(len(x)), x))
         # Fit OLS model
-        model = sm.OLS(y, x).fit() # y = param[0] + param[1]*x + residue
+        model = sm.OLS(y, X).fit()
         # endog(y, dependent variable)
         # exog(x, independent variable)
+        # Calculate "adjusted R-square" to measure 
+        r_squared = model.rsquared # model explains (how much) variability
+        adjusted_r_squared = model.rsquared_adj # (better)goodness of fit
         
-        # Get OLS parameters
-        ols_params = model.params
-        # Calculate R-squared (pseudo-R-squared)
-        ssr = model.ssr
-        sst = np.sum((y - np.mean(y))**2)
-        # R^2=1  : every points lies on OLS(perfect fit)
-        # R^2=0.8: 80% of the variance is explained
-        r_squared = 1 - (ssr / sst)
-        return ols_params, r_squared
+        # if(r_squared<0.6):# see OLS effect
+        #     _, iv_l, iv_u = wls_prediction_std(model)
+        #     plt.plot(x, y, 'o', label="data")
+        #     plt.plot(x, model.fittedvalues, 'r--.', label="OLS")
+        #     plt.plot(x, iv_u, 'r--')
+        #     plt.plot(x, iv_l, 'r--')
+        #     plt.legend(loc='best')
+        #     print(model.params)
+        return model.params, adjusted_r_squared
     def operate(self):
+        self._daycount()
         size = 10 # n previous days = n+1 days in total
         for data in self.datas:
             high = np.array(data.high.get(ago=0, size=size), dtype=float)
             low = np.array(data.low.get(ago=0, size=size), dtype=float)
             # high[1:]/high[:-1]
-            if(len(high)<size):
+            if(self.days<size):
                 break
-            [slope_RSRS], RSRS_r2 = self.OLS_fit(high,low)
-            print(RSRS_r2)
-            for i in range(self.num_bins):
-                if self.bin_edges[i] <= slope_RSRS < self.bin_edges[i + 1]:
-                    # print(i, slope_high)
-                    self.histo[i] += 1
-                    break
+            [_, self.slope_RSRS], RSRS_r2 = self.OLS_fit(high,low)
+            if(hist_plot):
+                for i in range(num_bins):
+                    if self.bin_edges[i] <= self.slope_RSRS < self.bin_edges[i + 1]:
+                        self.bin_histo[i] += 1
+                        self.bin_colors[i] += RSRS_r2
+                        break
         # portfolio_value = self.broker.get_value() # last close value (share only) when called
         # portfolio_cash = self.broker.get_cash() # cash at last close when called
         # total_value_now = portfolio_cash
@@ -153,19 +185,36 @@ class Strategy(bt.Strategy):
         #     self.orderid = self.buy(
         #         data=data,
         #         # size=portfolio_cash,
-        #         exectype=exectype)            
-
+        #         exectype=exectype)
     def stop(self):
         from _2_bt_misc import print_data_size
         super(Strategy, self).stop()
+        print(f'{self.days} days simulated')
         print_data_size(self)
-        # Plot histogram
-        plt.bar(self.bin_edges[:-1], self.histo, width=self.bin_edges[1] - self.bin_edges[0], align='edge')
-        plt.xlabel('Bins')
-        plt.ylabel('Frequency')
-        plt.title('Histogram')
-        plt.grid(True)
-        plt.show()
+        if(hist_plot):
+            colors = []
+            upper_bound = 1
+            lower_bound = 0
+            bound_thd = 0.8
+            for i, center in enumerate(self.bin_centers):
+                if(self.bin_histo[i]==0):
+                    colors.append(mcolors.to_rgba('white'))
+                    continue
+                R_sqr = self.bin_colors[i]/self.bin_histo[i]
+                if R_sqr > bound_thd:
+                    alpha = min(1.0, (R_sqr - bound_thd) / (upper_bound-bound_thd))
+                    color = mcolors.to_rgba('red', alpha=alpha)
+                else:
+                    alpha = min(1.0, (bound_thd - R_sqr) / (bound_thd-lower_bound))
+                    color = mcolors.to_rgba('blue', alpha=alpha)
+                colors.append(color)
+            for i in range(num_bins):
+                plt.bar(self.bin_centers[i], self.bin_histo[i], width=self.bin_edges[i+1] - self.bin_edges[i], color=colors[i], edgecolor='black')
+            plt.xlabel('Bins(RSRS)')
+            plt.ylabel('Frequency')
+            plt.title('RSRS(Red=better fit)')
+            plt.grid(True)
+            plt.show()
 
     def log(self, txt, dt=None, nodate=False):
         if not enable_log:
@@ -232,6 +281,8 @@ def runtest(datas,
         data.plotinfo.plot = plot_assets
         cerebro.adddata(data)
         #cerebro.resampledata(data, timeframe=bt.TimeFrame.Weeks)
+    # execution order: 'indicator' -> 'next' -> 'observer'
+    cerebro.addobserver(variable_observer)
     if not optimize:
         cerebro_idx = cerebro.addstrategy(strategy, **kwargs)
         if writer:
