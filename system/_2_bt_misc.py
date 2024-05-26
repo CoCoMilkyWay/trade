@@ -50,11 +50,16 @@ def data_feed_SSE(cfg):
         if pending_sids:
             print('missing sids: ',pending_sids)
             # exit()
-    kline_index = parse_api_kline_d1(start_session, end_session)
-    print(kline_index)
+    return datas
+
+def data_feed_index(cfg):
+    # real SSE data
+    datas = []
+    start_session = pytz.timezone(cfg.TZ).localize(datetime.strptime(cfg.START, '%Y-%m-%d'))
+    end_session = pytz.timezone(cfg.TZ).localize(datetime.strptime(cfg.END, '%Y-%m-%d'))
+    kline_index = parse_api_kline_d1(start_session, end_session, cfg.index)
     data_index = cfg.DATAFEED(dataname=kline_index)
     datas.append(data_index)
-    print(data_index)
     return datas
 
 def print_data_size(self):

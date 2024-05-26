@@ -38,8 +38,17 @@ END = date_now
 # in/out sample partition
 oos = pd.Timestamp(END) - pd.Timedelta('30D') # out-of-sample datetime
 CASH = 500000.0
-data_sel = 'SSE' # dummy/SSE
-if data_sel == 'SSE':
+data_sel = 'dummy' # dummy/SSE/index
+if data_sel == 'dummy':
+    # fast dummy data
+    modpath = os.path.dirname(os.path.abspath(__file__))
+    dataspath = './datas'
+    datafiles = [
+        #'2006-01-02-volume-min-001.txt',
+        'nvda-1999-2014.txt',
+        #'2006-week-001.txt',
+    ]
+elif data_sel == 'SSE':
     # real SSE data
     DATAFEED = bt.feeds.PandasData
     assets_list = [
@@ -56,19 +65,20 @@ if data_sel == 'SSE':
         sids = random.sample(range(569+1), NO_SID)
         print(sids)
         return sids
-elif data_sel == 'dummy':
-    # fast dummy data
-    modpath = os.path.dirname(os.path.abspath(__file__))
-    dataspath = './datas'
-    datafiles = [
-        #'2006-01-02-volume-min-001.txt',
-        'nvda-1999-2014.txt',
-        #'2006-week-001.txt',
-    ]
+elif data_sel == 'index':
+    index = ['sh.000300']
+    DATAFEED = bt.feeds.PandasData
+
 class CFG:
     def __init__(self, globals_dict):
         self.__dict__.update(globals_dict)
 cfg = CFG(globals())
+
+plot_observer = False
+plot_assets = False
+analysis_factor = False
+analysis_portfolio = False
+hist_plot = False
 
 # not necessarily cheating, especially for longer period like day bar
 cheat_on_open = False
@@ -76,15 +86,31 @@ cheat_on_open = False
 cheat_on_close = True
 # Market (default), Close, Limit, Stop, StopLimit
 exectype = bt.Order.Market # use Market if set cheat_on_xxxx
-enable_log = True
-plot = True # plot default observers (portfolio)
-plot_assets = True # plot assets price/buy/sells
-analysis_factor = False
-analysis_portfolio = False
-hist_plot = False
-num_bins = 50
-min_edge = 0.5
-max_edge = 1.5
+enable_log = False
+ind_stats = False
+# select among 'normal(single strat)', 'multi_strat(customer analyzer)' mode
+mode = 'multi_strat' # normal/multi_strat
+if mode=='normal': # run single strategy with analysis
+    plot = True
+    plot_observer = True # plot default observers (cash/value; trades; orders)
+    plot_assets = True # plot assets price/buy/sells
+    analysis_factor = False
+    analysis_portfolio = False
+    optimize = False
+    hist_plot = False
+    num_bins = 50
+    min_edge = 0.5
+    max_edge = 1.5
+elif mode=='multi_strat': # use opt to run multiple strategies
+    plot = True
+    optimize = True
+    optimize_method = bt.analyzers.LogReturnsRolling
+    Strats = [
+        'period=5',
+        'period=10',
+        'period=15',
+        'period=20',
+    ]
 
 # =============================================================================================
 class variable_observer(bt.observer.Observer):
@@ -97,7 +123,12 @@ class variable_observer(bt.observer.Observer):
     def next(self): # executed after 'next' method
         self.lines.rsrs[0] = self._owner.rsrs # self._owner = Strategy
 class Strategy(bt.Strategy):
-    def __init__(self):
+    def __init__(self, **kwargs):
+        # self.param = param
+        for key, value in kwargs.items():
+            #setattr(self, key, value)
+            period = value
+            print(key, value)
         self.iter = 0
         if cheat_on_open:
             self.cheating = self.cerebro.p.cheat_on_open
@@ -107,7 +138,12 @@ class Strategy(bt.Strategy):
         self.days = 0
         self.dtlast = 0
         
-        # indicators
+        # indicators (canonical)
+        for data in self.datas:
+            data.sma = bt.ind.SMA(period=period)
+            data.buy_sig = bt.And(data.close < data.sma)
+            data.sell_sig = bt.And(data.close > data.sma)
+        # custome indicators (non-canonical)
         self.rsrs = 0
         self.df_rsrs = [0]
         
@@ -162,6 +198,16 @@ class Strategy(bt.Strategy):
         return model.params, adjusted_r_squared
     def operate(self):
         self._daycount()
+        
+        # portfolio management
+        portfolio_value = self.broker.get_value() # last close value (share only) when called
+        portfolio_cash = self.broker.get_cash() # cash at last close when called
+        total_value_now = portfolio_cash
+        def current_price(data):
+            return data.close[0]
+        for data in self.datas:
+            total_value_now += self.getposition(data=data).size*current_price(data)
+        
         size = 10
         for data in self.datas:
             high = np.array(data.high.get(ago=0, size=size), dtype=float)
@@ -169,40 +215,39 @@ class Strategy(bt.Strategy):
             # high[1:]/high[:-1]
             if(self.days<size):# skip N days preparing indicator
                 break
+            
+            # indicators
             [_, self.rsrs], rsrs_r2 = self.OLS_fit(high,low)
             self.df_rsrs.append(self.rsrs)
+            
+            # execution
+            if data.buy_sig:
+                self.orderid = self.buy(
+                data=data,
+                size=portfolio_cash/20,
+                exectype=exectype)
+            if data.sell_sig:
+                self.orderid = self.close(
+                data=data,
+                size=self.getposition(data=data).size,
+                exectype=exectype)
+            
+            # analysis
             if(hist_plot):
                 for i in range(num_bins):
                     if self.bin_edges[i] <= self.rsrs < self.bin_edges[i + 1]:
                         self.bin_histo[i] += 1
                         self.bin_colors[i] += rsrs_r2
                         break
-        # portfolio_value = self.broker.get_value() # last close value (share only) when called
-        # portfolio_cash = self.broker.get_cash() # cash at last close when called
-        # total_value_now = portfolio_cash
-        # def current_price(data):
-        #     return data.close[0]
-        # for data in self.datas:
-        #     total_value_now += self.getposition(data=data).size*current_price(data)
-        # for data in self.datas:
-        #     # print('open today: ', data.open[0],' close today: ', data.close[0])
-        #     self.orderid = self.close(
-        #         data=data,
-        #         size=self.getposition(data=data).size,
-        #         exectype=exectype)
-        # for data in self.datas:
-        #     size = math.floor(total_value_now)
-        #     self.orderid = self.buy(
-        #         data=data,
-        #         # size=portfolio_cash,
-        #         exectype=exectype)
     def stop(self):
         super(Strategy, self).stop()
-        from _2_bt_misc import stat_depict
-        stat_depict(self.df_rsrs)
-        from _2_bt_misc import print_data_size
-        print(f'{self.days} days simulated')
-        print_data_size(self)
+        if ind_stats:
+            from _2_bt_misc import stat_depict
+            stat_depict(self.df_rsrs)
+        if enable_log:
+            from _2_bt_misc import print_data_size
+            print(f'{self.days} days simulated')
+            print_data_size(self)
         if(hist_plot):
             colors = []
             upper_bound = 1
@@ -263,13 +308,24 @@ class Strategy(bt.Strategy):
         # Sentinel to None: new orders allowed
         self.order = None
 
+class StFetcher(object):
+    _STRATS = []
+    for item in Strats:
+        _STRATS.append(Strategy)
+    def __new__(cls, *args, **kwargs):
+        idx = kwargs.pop('idx')
+        param_name, value = Strats[idx].split('=')
+        value = int(value)
+        param = {param_name: value}
+        obj = cls._STRATS[idx](*args, **kwargs, **param)
+        return obj
 def runtest(datas,
             strategy,
             runonce=None,
             preload=None,
             exbar=0,
             plot=False,
-            optimize=False,
+            optimize=optimize,
             maxcpus=None,
             writer=None,
             analyzer=None,
@@ -283,7 +339,7 @@ def runtest(datas,
         preload=preload,# preload: preload datafeed for strategy(strategy/observer always in event mode)
         maxcpus=maxcpus,
         exactbars=exbar,# exbars:   1: deactivate preload/runonce/plot
-        stdstats=True,
+        stdstats=plot_observer,
         cheat_on_open=cheat_on_open,
         cheat_on_close=cheat_on_close,
     )
@@ -294,7 +350,7 @@ def runtest(datas,
         cerebro.adddata(data)
         #cerebro.resampledata(data, timeframe=bt.TimeFrame.Weeks)
     # execution order: 'indicator' -> 'next' -> 'observer'
-    cerebro.addobserver(variable_observer)
+    # cerebro.addobserver(variable_observer)
     if not optimize:
         cerebro_idx = cerebro.addstrategy(strategy, **kwargs)
         if writer:
@@ -306,18 +362,43 @@ def runtest(datas,
             alkwargs = analyzer[1]
             cerebro.addanalyzer(al, **alkwargs)
     else:
-        cerebro_idx = cerebro.optstrategy(strategy, **kwargs)
+        cerebro.addanalyzer(optimize_method)
+        cerebro_idx = cerebro.optstrategy(StFetcher, idx=[i for i, _ in enumerate(Strats)])
     cerebro.addsizer_byidx(cerebro_idx, bt.sizers.FixedSize)
     cerebro.broker.setcash(CASH)
     if analysis_portfolio:
         cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
+    
     results = cerebro.run()
+    
     if analysis_portfolio:
         from _2_bt_misc import analyze_portfolio
         analyze_portfolio(results, cfg)
-    if plot:
-        # plotstyle for OHLC bars: line/bar/candle (on close)
-        cerebro.plot(style='bar')
+    if not optimize:
+        if plot:
+            # plotstyle for OHLC bars: line/bar/candle (on close)
+            cerebro.plot(style='bar')
+    else:
+        strats = [x[0] for x in results]  # flatten the result
+        for i, strat in enumerate(strats):
+            # debug: print method/data of a class obj
+            # for attribute in dir(strat.analyzers):
+            #     if callable(getattr(obj, attribute)):
+            #         print(attribute)
+            #     else:
+            #         print(attribute)
+            rets = strat.analyzers.logreturnsrolling.get_analysis()
+            # print('Strat {} Name {}:\n  - analyzer: {}\n'.format(
+            #     i, strat.__class__.__name__, rets))
+            
+            if plot:
+                plt.plot(list(rets.keys()), list(rets.values()),label=f'{Strats[i]}')
+        if plot:
+            plt.xlabel('keys')
+            plt.ylabel('value')
+            plt.title('multi-strat')
+            plt.legend() # fontsize=10, ncol=3, prop=font)
+            plt.show()
     return [cerebro]
 
 def parse_args():
@@ -329,12 +410,14 @@ def parse_args():
     return parser.parse_args()
 
 def main():
-    from _2_bt_misc import data_feed_dummy, data_feed_SSE
-    if data_sel == 'SSE':
-        datas = data_feed_SSE(cfg)
-    elif data_sel == 'dummy':
+    from _2_bt_misc import data_feed_dummy, data_feed_SSE, data_feed_index
+    if data_sel == 'dummy':
         datas = data_feed_dummy(cfg)
-    runtest(datas=datas,strategy=Strategy,plot=plot)
-
+    elif data_sel == 'SSE':
+        datas = data_feed_SSE(cfg)
+    elif data_sel == 'index':
+        datas = data_feed_index(cfg)
+    runtest(datas=datas,strategy=Strategy,plot=plot) # param1=0,...
+    
 if __name__ == '__main__':
     main()

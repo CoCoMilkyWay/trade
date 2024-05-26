@@ -194,7 +194,7 @@ def parse_csv_tradedate():
                 business_days_not_present.append(date)
     return trade_days, non_business_days_present, business_days_not_present
 
-def parse_api_kline_d1(start_session, end_session):
+def parse_api_kline_d1(start_session, end_session, sids):
     '''
     分钟线: date,time,code,open,high,low,close,volume,amount,adjustflag
     日线:   date,code,open,high,low,close,preclose,volume,amount,adjustflag,turn,
@@ -205,7 +205,6 @@ def parse_api_kline_d1(start_session, end_session):
     '''
     if 'API' not in locals():
         api = auth()
-    sids = ['sh.000300']
     progress_bar = tqdm(sids)
     for sid in sids:
         start_date = start_session.strftime('%Y-%m-%d')
