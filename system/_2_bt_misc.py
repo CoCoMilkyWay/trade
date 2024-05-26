@@ -6,12 +6,13 @@ from datetime import datetime
 import pytz
 import numpy as np
 import pandas as pd
+import scipy.stats as st
 import random
 random.seed(datetime.now().timestamp())
 warnings.filterwarnings('ignore')
 import backtrader as bt
 
-from _2_csv_data_parse import parse_csv_tradedate, parse_csv_metadata, parse_csv_kline_d1
+from system._2_data_parse import parse_csv_tradedate, parse_csv_metadata, parse_csv_kline_d1, parse_api_kline_d1
 
 def data_feed_dummy(cfg):
     datas = []
@@ -29,7 +30,7 @@ def data_feed_dummy(cfg):
     return datas
 
 def data_feed_SSE(cfg):
-        # real SSE data
+    # real SSE data
     datas = []
     start_session = pytz.timezone(cfg.TZ).localize(datetime.strptime(cfg.START, '%Y-%m-%d'))
     end_session = pytz.timezone(cfg.TZ).localize(datetime.strptime(cfg.END, '%Y-%m-%d'))
@@ -41,13 +42,19 @@ def data_feed_SSE(cfg):
         # 用了后复权数据，不需要adjast factor
         # parse_csv_split_merge_dividend(symbol_map, start_session, end_session)
         # (Date) * (Open, High, Low, Close, Volume, OpenInterest)
-    sids = cfg.stock_pool()
-    for kline, pending_sids in parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sids):
-        data = cfg.DATAFEED(dataname=kline)
-        datas.append(data)
-    if pending_sids:
-        print('missing sids: ',pending_sids)
-        # exit()
+    if cfg.NO_SID!=0:
+        sids = cfg.stock_pool()
+        for kline_equity, pending_sids in parse_csv_kline_d1(symbol_map, index_info, start_session, end_session, sids):
+            data_equity = cfg.DATAFEED(dataname=kline_equity)
+            datas.append(data_equity)
+        if pending_sids:
+            print('missing sids: ',pending_sids)
+            # exit()
+    kline_index = parse_api_kline_d1(start_session, end_session)
+    print(kline_index)
+    data_index = cfg.DATAFEED(dataname=kline_index)
+    datas.append(data_index)
+    print(data_index)
     return datas
 
 def print_data_size(self):
@@ -58,6 +65,25 @@ def print_data_size(self):
         tdata = sum(len(line.array) for line in data.lines)
         cell_len += tdata
     print(f'Total data memory cells ({data_num}) used: {cell_len}') # not counting indicator/observer
+
+# Low-order statistical description 
+def stat_depict( df ,  pr = True ): 
+    # Calculate the statistic of the sum 
+    avgRet  =  np.mean (df)
+    medianRet  =  np.median (df)
+    stdRet  =  np.std (df)
+    skewRet  =  st.skew (df)
+    kurtRet  =  st.kurtosis (df)
+    if pr: 
+        print (f"\
+        Mean: {avgRet:.4f}\n\
+        Median: {medianRet:.4f}\n\
+        Standard Deviation: {stdRet:.4f}\n\
+        Skewness: {skewRet:.4f}\n\
+        Kurtosis: {kurtRet:.4f}\n\
+        +1 Standard Deviation: {(avgRet + stdRet):.4f}\n\
+        -1 Standard Deviation: {(avgRet - stdRet):.4f}"
+        )
 
 # analysis:===============================
 '''

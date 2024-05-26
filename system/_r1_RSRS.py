@@ -29,8 +29,12 @@ from indicators import *
 # 假装 UTC 就是 Asia/Shanghai (简化计算)，所有datetime默认 tz-naive -> tz-aware
 TZ = "UTC"
 date_now = datetime.now().strftime('%Y-%m-%d')
-START = '2020-07-09'
+START = '1999-01-01'
 END = date_now
+# start_day = datetime.strptime(START, '%Y-%m-%d')
+# end_day = datetime.strptime(END, '%Y-%m-%d')
+# days = (end_day-start_day).days
+
 # in/out sample partition
 oos = pd.Timestamp(END) - pd.Timedelta('30D') # out-of-sample datetime
 CASH = 500000.0
@@ -47,7 +51,7 @@ if data_sel == 'SSE':
         #'6上证股指期权',
         #'7深证股指期权',
     ]
-    NO_SID = 3
+    NO_SID = 0
     def stock_pool(): # this should only be init-ed once
         sids = random.sample(range(569+1), NO_SID)
         print(sids)
@@ -81,6 +85,7 @@ hist_plot = False
 num_bins = 50
 min_edge = 0.5
 max_edge = 1.5
+
 # =============================================================================================
 class variable_observer(bt.observer.Observer):
     alias = ('variables',)
@@ -90,7 +95,7 @@ class variable_observer(bt.observer.Observer):
     
     # when accessing other method, make sure they exist as time of access
     def next(self): # executed after 'next' method
-        self.lines.rsrs[0] = self._owner.slope_RSRS # self._owner = Strategy
+        self.lines.rsrs[0] = self._owner.rsrs # self._owner = Strategy
 class Strategy(bt.Strategy):
     def __init__(self):
         self.iter = 0
@@ -101,7 +106,11 @@ class Strategy(bt.Strategy):
         self.orderid = None
         self.days = 0
         self.dtlast = 0
-        self.slope_RSRS = 0
+        
+        # indicators
+        self.rsrs = 0
+        self.df_rsrs = [0]
+        
         # self.datas = [self.data.close,] #(self.data.close+self.data.open)/2
         if(hist_plot):
             self.bin_edges = np.linspace(min_edge, max_edge, num_bins + 1)
@@ -153,19 +162,20 @@ class Strategy(bt.Strategy):
         return model.params, adjusted_r_squared
     def operate(self):
         self._daycount()
-        size = 10 # n previous days = n+1 days in total
+        size = 10
         for data in self.datas:
             high = np.array(data.high.get(ago=0, size=size), dtype=float)
             low = np.array(data.low.get(ago=0, size=size), dtype=float)
             # high[1:]/high[:-1]
-            if(self.days<size):
+            if(self.days<size):# skip N days preparing indicator
                 break
-            [_, self.slope_RSRS], RSRS_r2 = self.OLS_fit(high,low)
+            [_, self.rsrs], rsrs_r2 = self.OLS_fit(high,low)
+            self.df_rsrs.append(self.rsrs)
             if(hist_plot):
                 for i in range(num_bins):
-                    if self.bin_edges[i] <= self.slope_RSRS < self.bin_edges[i + 1]:
+                    if self.bin_edges[i] <= self.rsrs < self.bin_edges[i + 1]:
                         self.bin_histo[i] += 1
-                        self.bin_colors[i] += RSRS_r2
+                        self.bin_colors[i] += rsrs_r2
                         break
         # portfolio_value = self.broker.get_value() # last close value (share only) when called
         # portfolio_cash = self.broker.get_cash() # cash at last close when called
@@ -187,8 +197,10 @@ class Strategy(bt.Strategy):
         #         # size=portfolio_cash,
         #         exectype=exectype)
     def stop(self):
-        from _2_bt_misc import print_data_size
         super(Strategy, self).stop()
+        from _2_bt_misc import stat_depict
+        stat_depict(self.df_rsrs)
+        from _2_bt_misc import print_data_size
         print(f'{self.days} days simulated')
         print_data_size(self)
         if(hist_plot):
