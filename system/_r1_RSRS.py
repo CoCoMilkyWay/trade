@@ -243,9 +243,9 @@ class Strategy(bt.Strategy):
             self.df_sma.append(self.sma)
             [_, self.rsrs], rsrs_r2 = self.OLS_fit(high,low)
             self.df_rsrs.append(self.rsrs)
+            
             self.buy_sig =  data.close[0] < self.sma
             self.sell_sig = data.close[0] > self.sma
-            
             
             # execution
             if self.reference:
