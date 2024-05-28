@@ -196,7 +196,7 @@ tutorial: https://github.com/quantopian/alphalens/blob/master/alphalens/examples
 factor metrics: https://github.com/quantopian/alphalens/blob/master/alphalens/examples/predictive_vs_non-predictive_factor.ipynb
 '''
 
-def analyze_portfolio(results, cfg):
+def analyze_portfolio(results, cfg): # plot cannot be suppressed
     strat = results[0]
     pyfoliozer = strat.analyzers.getbyname('pyfolio')
     pf_returns, pf_positions, pf_transactions, gross_lev = pyfoliozer.get_pf_items()
@@ -305,7 +305,34 @@ optimize_type = 'max_sharpe'
     'min_variance':         M.V.F.
 '''
 
-
+def print_autodict_data(data, title, indent=0):
+    print(title)
+    for key, value in data.items():
+        if isinstance(value, dict):
+            print('\t' * indent + f'{key}:')
+            print_autodict_data(value, indent + 1)
+        else:
+            print('\t' * indent + f'{key}: {value}')
+def print_multi_dict(datas, entry, cfg):
+    from collections import OrderedDict
+    dict_column_name = {}
+    for i, data in enumerate(datas):
+        obj = data
+        attributes = ['analyzers', f'{entry}', 'get_analysis']
+        for attr in attributes:
+            obj = getattr(obj, attr)
+        data = obj() # call on the final method to get the result dict
+        
+        dict_column_name[i] = cfg.Strats[i]
+        if i==0: # initialize dict
+            merged_data = data
+        for key in data:
+            if i==0: # initialize dict value as list
+                merged_data[key] = [data[key]]
+            else:
+                merged_data[key].append(data[key])
+    print(pd.DataFrame.from_dict(merged_data, orient='index').rename(columns=dict_column_name)) # .rename_axis('Year')
+    print()
 
 
 

@@ -29,16 +29,16 @@ from indicators import *
 # 假装 UTC 就是 Asia/Shanghai (简化计算)，所有datetime默认 tz-naive -> tz-aware
 TZ = "UTC"
 date_now = datetime.now().strftime('%Y-%m-%d')
-START = '1999-01-01'
-END = date_now
+START = '2005-01-01'
+END = '2017-01-01' # date_now
 # start_day = datetime.strptime(START, '%Y-%m-%d')
 # end_day = datetime.strptime(END, '%Y-%m-%d')
 # days = (end_day-start_day).days
 
 # in/out sample partition
 oos = pd.Timestamp(END) - pd.Timedelta('30D') # out-of-sample datetime
-CASH = 500000.0
-data_sel = 'dummy' # dummy/SSE/index
+CASH = 1000000.0
+data_sel = 'index' # dummy/SSE/index
 if data_sel == 'dummy':
     # fast dummy data
     modpath = os.path.dirname(os.path.abspath(__file__))
@@ -69,13 +69,9 @@ elif data_sel == 'index':
     index = ['sh.000300']
     DATAFEED = bt.feeds.PandasData
 
-class CFG:
-    def __init__(self, globals_dict):
-        self.__dict__.update(globals_dict)
-cfg = CFG(globals())
-
-plot_observer = False
+plot_observer = True # add a broker / default observers (cash/value; trades; orders)
 plot_assets = False
+plot_volume = False
 analysis_factor = False
 analysis_portfolio = False
 hist_plot = False
@@ -91,27 +87,44 @@ ind_stats = False
 # select among 'normal(single strat)', 'multi_strat(customer analyzer)' mode
 mode = 'multi_strat' # normal/multi_strat
 if mode=='normal': # run single strategy with analysis
-    plot = True
-    plot_observer = True # plot default observers (cash/value; trades; orders)
-    plot_assets = True # plot assets price/buy/sells
-    analysis_factor = False
-    analysis_portfolio = False
-    optimize = False
+    plot = False
+    plot_assets = False # plot assets price/buy/sells
+    plot_volume = False
     hist_plot = False
     num_bins = 50
     min_edge = 0.5
     max_edge = 1.5
+    analysis_factor = False
+    analysis_portfolio = False
+    analysis_backtrader = True
+    optimize = False
+    Strats = ['period=10']
 elif mode=='multi_strat': # use opt to run multiple strategies
     plot = True
+    analysis_backtrader = True
     optimize = True
-    optimize_method = bt.analyzers.LogReturnsRolling
+    optimize_method = bt.analyzers.Portfolio_Value
+    optimize_results = 'analyzers.portfolio_value.get_analysis'
     Strats = [
+        'reference=1', # buy at start and hold (for reference)
+        'period=2',
         'period=5',
+        'period=7',
         'period=10',
+        'period=13',
         'period=15',
+        'period=17',
         'period=20',
+        'period=30',
+        'period=60',
+        'period=100',
     ]
+    cpus = None # BT bug: canonical indicator is not supported in multi-strat mode
 
+class CFG:
+    def __init__(self, globals_dict):
+        self.__dict__.update(globals_dict)
+cfg = CFG(globals())
 # =============================================================================================
 class variable_observer(bt.observer.Observer):
     alias = ('variables',)
@@ -124,11 +137,15 @@ class variable_observer(bt.observer.Observer):
         self.lines.rsrs[0] = self._owner.rsrs # self._owner = Strategy
 class Strategy(bt.Strategy):
     def __init__(self, **kwargs):
-        # self.param = param
+        self.reference = False
+        self.period = 10
         for key, value in kwargs.items():
             #setattr(self, key, value)
-            period = value
             print(key, value)
+            if key == 'period':
+                self.period = value
+            elif key == 'reference':
+                self.reference = True
         self.iter = 0
         if cheat_on_open:
             self.cheating = self.cerebro.p.cheat_on_open
@@ -137,16 +154,19 @@ class Strategy(bt.Strategy):
         self.orderid = None
         self.days = 0
         self.dtlast = 0
-        
+
         # indicators (canonical)
-        for data in self.datas:
-            data.sma = bt.ind.SMA(period=period)
-            data.buy_sig = bt.And(data.close < data.sma)
-            data.sell_sig = bt.And(data.close > data.sma)
+        # for data in self.datas:
+        #     data.buy_sig =  bt.And(data.close < data.sma)
+        #     data.sell_sig = bt.And(data.close > data.sma)
         # custome indicators (non-canonical)
+        self.buy_sig = 0
+        self.sell_sig = 0
+        self.sma = 0
+        self.df_sma = [0]
         self.rsrs = 0
         self.df_rsrs = [0]
-        
+
         # self.datas = [self.data.close,] #(self.data.close+self.data.open)/2
         if(hist_plot):
             self.bin_edges = np.linspace(min_edge, max_edge, num_bins + 1)
@@ -208,29 +228,42 @@ class Strategy(bt.Strategy):
         for data in self.datas:
             total_value_now += self.getposition(data=data).size*current_price(data)
         
-        size = 10
+        size = self.period
         for data in self.datas:
             high = np.array(data.high.get(ago=0, size=size), dtype=float)
             low = np.array(data.low.get(ago=0, size=size), dtype=float)
+            close = np.array(data.close.get(ago=0, size=size), dtype=float)
+            # open = np.array(data.open.get(ago=0, size=size), dtype=float)
             # high[1:]/high[:-1]
             if(self.days<size):# skip N days preparing indicator
                 break
             
-            # indicators
+            # indicators(non-canonical)
+            self.sma = close.mean()
+            self.df_sma.append(self.sma)
             [_, self.rsrs], rsrs_r2 = self.OLS_fit(high,low)
             self.df_rsrs.append(self.rsrs)
+            self.buy_sig =  data.close[0] < self.sma
+            self.sell_sig = data.close[0] > self.sma
+            
             
             # execution
-            if data.buy_sig:
+            if self.reference:
                 self.orderid = self.buy(
                 data=data,
-                size=portfolio_cash/20,
+                size=math.floor(portfolio_cash/data.close),
                 exectype=exectype)
-            if data.sell_sig:
-                self.orderid = self.close(
-                data=data,
-                size=self.getposition(data=data).size,
-                exectype=exectype)
+            else:
+                if self.buy_sig:
+                    self.orderid = self.buy(
+                        data=data,
+                        size=math.floor(portfolio_cash/data.close),
+                        exectype=exectype)
+                if self.sell_sig:
+                    self.orderid = self.close(
+                        data=data,
+                        size=self.getposition(data=data).size,
+                        exectype=exectype)
             
             # analysis
             if(hist_plot):
@@ -248,30 +281,33 @@ class Strategy(bt.Strategy):
             from _2_bt_misc import print_data_size
             print(f'{self.days} days simulated')
             print_data_size(self)
-        if(hist_plot):
-            colors = []
-            upper_bound = 1
-            lower_bound = 0
-            bound_thd = 0.8
-            for i, center in enumerate(self.bin_centers):
-                if(self.bin_histo[i]==0):
-                    colors.append(mcolors.to_rgba('white'))
-                    continue
-                R_sqr = self.bin_colors[i]/self.bin_histo[i]
-                if R_sqr > bound_thd:
-                    alpha = min(1.0, (R_sqr - bound_thd) / (upper_bound-bound_thd))
-                    color = mcolors.to_rgba('red', alpha=alpha)
-                else:
-                    alpha = min(1.0, (bound_thd - R_sqr) / (bound_thd-lower_bound))
-                    color = mcolors.to_rgba('blue', alpha=alpha)
-                colors.append(color)
-            for i in range(num_bins):
-                plt.bar(self.bin_centers[i], self.bin_histo[i], width=self.bin_edges[i+1] - self.bin_edges[i], color=colors[i], edgecolor='black')
-            plt.xlabel('Bins(RSRS)')
-            plt.ylabel('Frequency')
-            plt.title('RSRS(Red=better fit)')
-            plt.grid(True)
-            plt.show()
+        if hist_plot:
+            self.hist_plot()
+
+    def hist_plot(self):
+        colors = []
+        upper_bound = 1
+        lower_bound = 0
+        bound_thd = 0.8
+        for i, center in enumerate(self.bin_centers):
+            if(self.bin_histo[i]==0):
+                colors.append(mcolors.to_rgba('white'))
+                continue
+            R_sqr = self.bin_colors[i]/self.bin_histo[i]
+            if R_sqr > bound_thd:
+                alpha = min(1.0, (R_sqr - bound_thd) / (upper_bound-bound_thd))
+                color = mcolors.to_rgba('red', alpha=alpha)
+            else:
+                alpha = min(1.0, (bound_thd - R_sqr) / (bound_thd-lower_bound))
+                color = mcolors.to_rgba('blue', alpha=alpha)
+            colors.append(color)
+        for i in range(num_bins):
+            plt.bar(self.bin_centers[i], self.bin_histo[i], width=self.bin_edges[i+1] - self.bin_edges[i], color=colors[i], edgecolor='black')
+        plt.xlabel('Bins(RSRS)')
+        plt.ylabel('Frequency')
+        plt.title('RSRS(Red=better fit)')
+        plt.grid(True)
+        plt.show()
 
     def log(self, txt, dt=None, nodate=False):
         if not enable_log:
@@ -317,8 +353,8 @@ class StFetcher(object):
         param_name, value = Strats[idx].split('=')
         value = int(value)
         param = {param_name: value}
-        obj = cls._STRATS[idx](*args, **kwargs, **param)
-        return obj
+        return cls._STRATS[idx](*args, **kwargs, **param)
+
 def runtest(datas,
             strategy,
             runonce=None,
@@ -326,7 +362,7 @@ def runtest(datas,
             exbar=0,
             plot=False,
             optimize=optimize,
-            maxcpus=None,
+            maxcpus=cpus,
             writer=None,
             analyzer=None,
             **kwargs):
@@ -349,56 +385,96 @@ def runtest(datas,
         data.plotinfo.plot = plot_assets
         cerebro.adddata(data)
         #cerebro.resampledata(data, timeframe=bt.TimeFrame.Weeks)
+
     # execution order: 'indicator' -> 'next' -> 'observer'
     # cerebro.addobserver(variable_observer)
-    if not optimize:
-        cerebro_idx = cerebro.addstrategy(strategy, **kwargs)
-        if writer:
-            wr = writer[0]
-            wrkwargs = writer[1]
-            cerebro.addwriter(wr, **wrkwargs)
-        if analyzer:
-            al = analyzer[0]
-            alkwargs = analyzer[1]
-            cerebro.addanalyzer(al, **alkwargs)
-    else:
-        cerebro.addanalyzer(optimize_method)
+    if optimize: # multi-strat
         cerebro_idx = cerebro.optstrategy(StFetcher, idx=[i for i, _ in enumerate(Strats)])
+    else:
+        cerebro_idx = cerebro.addstrategy(strategy, **kwargs)
+
     cerebro.addsizer_byidx(cerebro_idx, bt.sizers.FixedSize)
     cerebro.broker.setcash(CASH)
-    if analysis_portfolio:
+    # if writer:
+    #     wr = writer[0]
+    #     wrkwargs = writer[1]
+    #     cerebro.addwriter(wr, **wrkwargs)
+    # if analyzer:
+    #     al = analyzer[0]
+    #     alkwargs = analyzer[1]
+    #     cerebro.addanalyzer(al, **alkwargs)
+
+    if optimize: # multi-strat
+        cerebro.addanalyzer(optimize_method)
+    if analysis_portfolio: # single-strat
         cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
-    
+    if analysis_backtrader: # single-strat
+        cerebro.addanalyzer(bt.analyzers.AnnualReturn, _name='AnnualReturn')
+        cerebro.addanalyzer(bt.analyzers.Returns, _name='Returns')
+        # # cerebro.addanalyzer(bt.analyzers.LogReturnsRolling, _name='LogReturnsRolling')
+        cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='SharpeRatio')
+        cerebro.addanalyzer(bt.analyzers.VWR, _name='VWR') # https://www.crystalbull.com/sharpe-ratio-better-with-log-returns/
+        cerebro.addanalyzer(bt.analyzers.SQN, _name='SQN')
+        # # cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name='TradeAnalyzer') # show trade details
+        # # cerebro.addanalyzer(bt.analyzers.Transactions, _name='Transactions')
+        # # cerebro.addanalyzer(bt.analyzers.Calmar, _name='Calmar')
+        # # cerebro.addanalyzer(bt.analyzers.DrawDown, _name='DrawDown')
+        # # cerebro.addanalyzer(bt.analyzers.GrossLeverage, _name='GrossLeverage')
+
     results = cerebro.run()
+
+    results = [result[0] for result in results] if optimize else [results[0]] # flatten results
     
-    if analysis_portfolio:
+    if analysis_portfolio: # single-strat
         from _2_bt_misc import analyze_portfolio
         analyze_portfolio(results, cfg)
-    if not optimize:
+    if analysis_backtrader: # single-strat
+        from _2_bt_misc import print_autodict_data, print_multi_dict
+        print_multi_dict(results, 'AnnualReturn', cfg)
+        print_multi_dict(results, 'Returns', cfg)
+        # # print_multi_dict(results, 'LogReturnsRolling', cfg)
+        print_multi_dict(results, 'SharpeRatio', cfg)
+        print_multi_dict(results, 'VWR', cfg)
+        print_multi_dict(results, 'SQN', cfg)
+        # # print_autodict_data(results[0].analyzers.TradeAnalyzer.get_analysis()) # show trade details
+        # # print_multi_dict(results, 'Transactions', cfg)
+        # # print_multi_dict(results, 'Calmar', cfg)
+        # # print_autodict_data(results[0].analyzers.DrawDown.get_analysis(), 'DrawDown Analysis: ========= ')
+        # # print_multi_dict(results, 'GrossLeverage', cfg)
+        
+    if optimize: # multi-strat
         if plot:
-            # plotstyle for OHLC bars: line/bar/candle (on close)
-            cerebro.plot(style='bar')
-    else:
-        strats = [x[0] for x in results]  # flatten the result
-        for i, strat in enumerate(strats):
+            fig, axs = plt.subplots(2, figsize=(10, 10))
+        for i, strat in enumerate(results):
             # debug: print method/data of a class obj
             # for attribute in dir(strat.analyzers):
-            #     if callable(getattr(obj, attribute)):
+            #     if callable(getattr(strat.analyzers, attribute)):
             #         print(attribute)
             #     else:
             #         print(attribute)
-            rets = strat.analyzers.logreturnsrolling.get_analysis()
-            # print('Strat {} Name {}:\n  - analyzer: {}\n'.format(
-            #     i, strat.__class__.__name__, rets))
-            
+            attributes = optimize_results.split('.')
+            rets = strat
+            for attr in attributes:
+                rets = getattr(rets, attr)
+            rets = rets() # call on the final method
+            print(
+                f'Strat {i} Name {strat.__class__.__name__}:\n  - analyzer: {type(rets)}\n'
+            )
+
             if plot:
-                plt.plot(list(rets.keys()), list(rets.values()),label=f'{Strats[i]}')
+                axs[0].plot(list(rets[0].keys()), list(rets[0].values()),label=f'{Strats[i]}')
+                #axs[1].plot(list(rets[1].keys()), list(rets[1].values()),label=f'{Strats[i]}')
         if plot:
-            plt.xlabel('keys')
-            plt.ylabel('value')
-            plt.title('multi-strat')
-            plt.legend() # fontsize=10, ncol=3, prop=font)
+            axs[0].set_title('multi-strat')
+            #axs[1].set_title('daily-return')
+            for ax in axs.flat:
+                ax.set_xlabel('keys')
+                ax.set_ylabel('value')
+                ax.legend()
             plt.show()
+    elif plot:
+        # plotstyle for OHLC bars: line/bar/candle (on close)
+        cerebro.plot(style='bar', volume=plot_volume)
     return [cerebro]
 
 def parse_args():
