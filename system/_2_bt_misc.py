@@ -14,6 +14,10 @@ import backtrader as bt
 
 from system._2_data_parse import parse_csv_tradedate, parse_csv_metadata, parse_csv_kline_d1, parse_api_kline_d1
 
+import sqlite3
+# Database setup
+db_name = 'API_data.db'
+
 def data_feed_dummy(cfg):
     datas = []
     for datafile in cfg.datafiles:
@@ -52,14 +56,39 @@ def data_feed_SSE(cfg):
             # exit()
     return datas
 
+def setup_database():
+    conn = sqlite3.connect(db_name)
+    cursor = conn.cursor()
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS metadata (
+        index_name TEXT PRIMARY KEY
+    )
+    ''')
+    conn.commit()
+    return conn, cursor
+
 def data_feed_index(cfg):
     # real SSE data
     datas = []
     start_session = pytz.timezone(cfg.TZ).localize(datetime.strptime(cfg.START, '%Y-%m-%d'))
     end_session = pytz.timezone(cfg.TZ).localize(datetime.strptime(cfg.END, '%Y-%m-%d'))
-    kline_index = parse_api_kline_d1(start_session, end_session, cfg.index)
-    data_index = cfg.DATAFEED(dataname=kline_index)
-    datas.append(data_index)
+    # conn, cursor = setup_database()
+    for index in cfg.index:
+        # db_index = f'{index}_{cfg.START}_{cfg.END}'.replace('.', '_').replace('-', '_')
+        # query = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{db_index}';"
+        # df_exists = pd.read_sql_query(query, conn)
+        # if not df_exists.empty:
+        #     print(f"Fetching data for '{index}' from local storage.")
+        #     kline_index = pd.read_sql_query(f"SELECT * FROM {db_index}", conn)
+        # else:
+        #     print(f"Fetching data for '{index}' from API.")
+        kline_index = parse_api_kline_d1(start_session, end_session, [index])
+        #     kline_index.to_sql(db_index, conn, index=False)
+        #     cursor.execute('INSERT INTO metadata (index_name) VALUES (?)', (db_index,))
+        #     conn.commit()
+        # conn.close()
+        data_index = cfg.DATAFEED(dataname=kline_index)
+        datas.append(data_index)
     return datas
 
 def print_data_size(self):
