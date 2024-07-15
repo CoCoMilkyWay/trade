@@ -1,3 +1,4 @@
 {
-    "sqltools.useNodeRuntime": true
+    "sqltools.useNodeRuntime": true,
+    "DockerRun.DisableAutoGenerateConfig": true
 }
