@@ -4,3 +4,6 @@
 [submodule "vectorbt.pro"]
 	path = vectorbt.pro
 	url = ./vectorbt.pro/
+[submodule "chan.py"]
+	path = chan.py
+	url = https://github.com/CoCoMilkyWay/chan.py.git
